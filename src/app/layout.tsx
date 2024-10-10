@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import AppNavBar from "@/components/navbar/app-navbar";
 import Footer from "@/components/layout/footer";
+import ManagedDrawer from "@/components/ui/managed-drawer";
+import { Providers } from "@/contexts/providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,11 +21,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <AppNavBar />
-        {children}
-        <Footer />
+    <html lang="en" dir="ltr">
+      <body className={`${inter.className} overflow-x-hidden`}>
+        <Providers>
+          <AppNavBar />
+          {children}
+          <Footer />
+          <ManagedDrawer />
+        </Providers>
       </body>
     </html>
   );

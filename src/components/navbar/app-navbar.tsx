@@ -1,15 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useCallback } from "react";
 import { useState, useEffect } from "react";
 
 import Link from "next/link";
 import {
+  BuildingStorefrontIcon,
   ChevronRightIcon,
   MagnifyingGlassIcon,
+  MapPinIcon,
   ShoppingCartIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import TopBar from "./topbar";
+import HeaderMenu from "./header-menu";
+import { menu } from "@/lib/data/menu";
+import { Bars3BottomRightIcon } from "@heroicons/react/20/solid";
+import { useUI } from "@/contexts/ui.context";
 
 const Navbar = (props: any) => {
   const options = [
@@ -59,6 +66,7 @@ const Navbar = (props: any) => {
 
   const [selected, setSelected] = useState(options[0].value);
   var [isNavOpen, setIsNavOpen] = useState(false);
+  const { openSidebar } = useUI();
 
   const handleOnClickCategory = (e: any) => {
     setSelected(e.target.value);
@@ -66,12 +74,18 @@ const Navbar = (props: any) => {
 
   useEffect(() => {
     if (isNavOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.classList.add("overflow-hidden");
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.classList.remove("overflow-hidden");
     };
   }, [isNavOpen]);
+
+  const handleMobileMenu = useCallback(() => {
+    return openSidebar({
+      view: "DISPLAY_MOBILE_MENU",
+    });
+  }, []);
 
   return (
     <>
@@ -85,7 +99,7 @@ const Navbar = (props: any) => {
           <li className="nav-item flex items-center gap-4">
             <button
               className="hamburger cursor-pointer text-2xl md:hidden"
-              onClick={() => setIsNavOpen((initialValue) => !initialValue)}
+              // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
             >
               <i className="fa-solid fa-bars"></i>
             </button>
@@ -103,14 +117,14 @@ const Navbar = (props: any) => {
           <li className="flex-1 md:hidden"></li>
           <li className="md:order-5">
             <Link
-              href={"/sign-in"}
+              href={"https://eximso-seller.vercel.app/auth/login"}
               className="user cursor-pointer flex items-center text-xs gap-1 "
             >
-              <span>
+              <span className="flex items-center">
                 Sign in <ChevronRightIcon className="w-5 h-5" />
               </span>
               <span>
-                <i className="fa-regular fa-user text-xl"></i>
+                <UserCircleIcon className="w-7 h-7" />
               </span>
             </Link>
           </li>
@@ -158,17 +172,19 @@ const Navbar = (props: any) => {
             </div>
             <div className="space-y-0 leading-5">
               <div className="upper text-gray-400 text-xs">Select your</div>
-              <div className="lower font-medium">Location</div>
+              <div className="lower font-medium flex gap-1">
+                <MapPinIcon className="w-5" /> Location
+              </div>
             </div>
           </li>
           <li className="nav-item country cursor-pointer flex items-center gap-2 md:order-4">
-            <div className="w-5">
+            {/* <div className="w-5">
               <img
                 className="w-full h-full"
                 src={"indian_flag"}
                 alt="indian-flag"
               />
-            </div>
+            </div> */}
             <div className="flex items-center gap-1 font-medium">
               EN <i className="fa-solid fa-sort-down text-xs text-gray-400"></i>
             </div>
@@ -181,7 +197,7 @@ const Navbar = (props: any) => {
           </li>
         </ul>
         {/* lower part */}
-        <ul className="flex items-center gap-4 overflow-auto bg-eximblue-700 text-white px-4 py-2.5 text-sm whitespace-nowrap 2xl:justify-center 2xl:gap-16">
+        {/* <ul className="flex items-center gap-4 overflow-auto bg-eximblue-700 text-white px-4 py-2.5 text-sm whitespace-nowrap 2xl:justify-center 2xl:gap-16">
           <li className="hamburger-all cursor-pointer hidden md:block">
             <button
               className="hamburger cursor-pointer text-xl gap-2 flex items-center"
@@ -202,7 +218,25 @@ const Navbar = (props: any) => {
             Prime{" "}
             <i className="fa-solid fa-sort-down text-xs text-gray-400"></i>
           </li>
-        </ul>
+        </ul> */}
+        <div className="px-5 relative z-10 flex">
+          <button
+            className="hamburger cursor-pointer text-xl gap-2 flex items-center px-5 rounded-lg font-medium"
+            // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
+            onClick={openSidebar}
+          >
+            <Bars3BottomRightIcon className="w-5 h-5" />
+            <span className="text-sm whitespace-nowrap"> All Categories</span>
+          </button>
+          <HeaderMenu
+            data={menu}
+            className="hidden lg:flex ltr:md:ml-6 ltr:xl:ml-10 rtl:md:mr-6 rtl:xl:mr-10"
+          />
+          <button className="bg-eximblue-600 whitespace-nowrap px-5 py-3 font-medium text-white  gap-2 flex items-center">
+            <BuildingStorefrontIcon className="w-6 h-6" />
+            Become a Seller
+          </button>
+        </div>
       </nav>
     </>
   );
@@ -232,12 +266,11 @@ const HamburgerMenu = (props: any) => {
                 setIsNavOpen((initialValue: boolean) => !initialValue)
               }
             >
-              {" "}
-              <span>
-                Sign in <i className="fa-solid fa-chevron-right"></i>
+              <span className="flex whitespace-nowrap">
+                Sign in <ChevronRightIcon />
               </span>
               <span>
-                <i className="fa-regular fa-user text-xl"></i>
+                <UserCircleIcon className="w-8 h-8" />
               </span>
             </Link>
           </p>
@@ -301,6 +334,7 @@ const HamburgerMenu = (props: any) => {
           </ul>
         </section>
       </nav>
+
       <div
         className={
           isNavOpen

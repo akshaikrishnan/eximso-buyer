@@ -35,21 +35,26 @@ export default function TopBar({ className }: { className: string }) {
                     </span>
                   </Link>
                 </li>
+                <li>
+                  <Link href="/faq">
+                    <span className="text-xs leading-6 text-qblack font-500">
+                      Post Requirements
+                    </span>
+                  </Link>
+                </li>
               </ul>
             </div>
             <div className="topbar-dropdowns sm:block hidden">
               <div className="flex space-x-6">
                 <div className="country-select flex space-x-1 items-center">
                   <div>
-                    {/* <img
-                      src={`${
-                        import.meta.env.VITE_PUBLIC_URL
-                      }/assets/images/country-logo-16x16.png`}
+                    <img
+                      src="/images/country-logo-16x16.png"
                       width="16"
                       height="16"
                       alt="country logo"
                       className="overflow-hidden rounded-full"
-                    /> */}
+                    />
                   </div>
                   <Selectbox
                     className="w-fit"

@@ -23,6 +23,7 @@ const config: Config = {
         },
       },
       colors: {
+        body: "#5A5A5A",
         eximblue: {
           "50": "#eff0fe",
           "100": "#e1e4fe",
@@ -35,6 +36,12 @@ const config: Config = {
           "800": "#4a349f",
           "900": "#3f317e",
           "950": "#251d49",
+        },
+        gray: {
+          50: "#FBFBFB",
+          100: "#F1F1F1",
+          150: "#F4F4F4",
+          175: "#F9F9F9",
         },
       },
     },

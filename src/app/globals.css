@@ -1,3 +1,111 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .menuIcon {
+    width: 26px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    @apply space-y-1.5;
+  }
+  .bar {
+    width: 100%;
+    height: 2px;
+    transition: all 0.25s ease-in-out;
+    @apply flex bg-eximblue-500 rounded-2xl;
+  }
+  .bar:first-child {
+    width: 50%;
+  }
+  .bar:last-child {
+    width: 75%;
+  }
+  .menuBtn:hover .bar:first-child,
+  .menuBtn:hover .bar:last-child {
+    @apply w-full;
+  }
+  .menuBtn:hover .bar:nth-child(2) {
+    width: 60%;
+  }
+
+  /* Header Menu */
+  .headerMenu .menuItem > a::before {
+    @apply absolute w-0 bg-eximblue-500 -bottom-1;
+    content: "";
+    height: 3px;
+    transition: all 0.3s ease-in-out 0s;
+  }
+  .megaMenu,
+  .subMenu {
+    visibility: hidden;
+    transition: all 0.4s;
+    top: calc(100% + 25px);
+  }
+  .megaMenu {
+    width: 970px;
+  }
+  @media (min-width: 1280px) {
+    .megaMenu {
+      width: 1070px;
+    }
+  }
+  @media (min-width: 1500px) {
+    .megaMenu {
+      width: 1200px;
+    }
+  }
+  .megaMenu ul > li:last-of-type {
+    @apply pb-0 mb-0 border-0;
+  }
+  .subMenu {
+    width: 220px;
+  }
+  @media (min-width: 1280px) {
+    .subMenu {
+      width: 240px;
+    }
+  }
+  .subMenuChild {
+    transition: all 0.3s;
+  }
+  .subMenu li:hover > .subMenuChild {
+    @apply visible opacity-100 -top-3;
+  }
+  .megaMenu .subMenuGrid > li:last-of-type {
+    @apply pb-0 mb-0 border-b-0;
+  }
+
+  .headerMenu .menuItem:hover > a::before {
+    @apply w-full ltr:right-auto ltr:left-0 rtl:left-auto rtl:right-0;
+  }
+  .headerMenu .menuItem:hover > .megaMenu,
+  .headerMenu .menuItem:hover > .subMenu {
+    visibility: visible;
+    @apply top-full;
+  }
+
+  /* Mobile Drawer Menu */
+  .mobileMenu .menu-item.active {
+    @apply font-semibold text-black;
+  }
+  .mobileMenu .menu-item.active::before {
+    content: "";
+    width: 3px;
+    @apply absolute top-0 bottom-0 flex h-full bg-eximblue-500 ltr:left-0 rtl:right-0;
+  }
+  .mobileMenu li li {
+    @apply text-sm text-body;
+  }
+  .mobileMenu li li div > a {
+    @apply relative py-2.5 text-body;
+  }
+  .mobileMenu li > ul > li > div > a:before {
+    content: "";
+    height: 1px;
+    @apply flex absolute bg-body top-1/2 ltr:left-1.5 rtl:right-1.5 ltr:md:left-3 rtl:md:right-3 w-1.5 md:w-2;
+  }
+}
