@@ -5,6 +5,7 @@ import AppNavBar from "@/components/navbar/app-navbar";
 import Footer from "@/components/layout/footer";
 import ManagedDrawer from "@/components/ui/managed-drawer";
 import { Providers } from "@/contexts/providers";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,6 +29,7 @@ export default function RootLayout({
           {children}
           <Footer />
           <ManagedDrawer />
+          <ReactQueryDevtools initialIsOpen={false} />
         </Providers>
       </body>
     </html>
