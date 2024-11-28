@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useSearchParams } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const Navbar = (props: any) => {
   const options = [
@@ -76,7 +77,7 @@ const Navbar = (props: any) => {
   const name = searchParams.get("q");
   const selectedCategory = searchParams.get("category");
   const [search, setSearch] = useState(name || "");
-
+  const location = typeof window !== "undefined" ? window.location : null;
   const [selected, setSelected] = useState(
     selectedCategory || options[0].value
   );
@@ -101,6 +102,20 @@ const Navbar = (props: any) => {
       view: "DISPLAY_MOBILE_MENU",
     });
   }, []);
+
+  const {
+    data: user,
+    isLoading: userLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: () => api.get(endpoints.user).then((res) => res.data.result),
+  });
+
+  const { data: cart } = useQuery({
+    queryKey: ["cart"],
+    queryFn: () => api.get(endpoints.cart).then((res) => res.data.result),
+  });
 
   return (
     <>
@@ -132,19 +147,40 @@ const Navbar = (props: any) => {
           <li className="flex-1 md:hidden"></li>
           <li className="md:order-5">
             <Link
-              href={"https://eximso-seller.vercel.app/auth/login"}
+              href={
+                process.env.NEXT_PUBLIC_SELLER_URL +
+                "/auth/login" +
+                "?returnUrl=" +
+                location +
+                "&userType=Buyer"
+              }
               className="user cursor-pointer flex items-center text-xs gap-1 "
             >
-              <span className="flex items-center">
-                Sign in <ChevronRightIcon className="w-5 h-5" />
-              </span>
+              {!user && (
+                <span className="flex items-center">
+                  Sign in <ChevronRightIcon className="w-5 h-5" />
+                </span>
+              )}
               <span>
-                <UserCircleIcon className="w-7 h-7" />
+                {user && user?.logo ? (
+                  <Avatar>
+                    <AvatarImage src={user?.logo} alt={user?.name} />
+                    <AvatarFallback>
+                      user?.name?.split(" ")[0].charAt(0) + user?.name?.split("
+                      ")[1].charAt(0)
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <UserCircleIcon className="w-7 h-7" />
+                )}
               </span>
             </Link>
           </li>
           <li className="cart cursor-pointer text-xl md:order-7">
-            <Link href={"/cart-screen"}>
+            <Link href={"/cart"} className="relative">
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                {cart?.items?.length || 0}
+              </span>
               <ShoppingCartIcon className="w-8 h-8" />
             </Link>
           </li>

@@ -32,6 +32,7 @@ import { StarIcon } from "@heroicons/react/20/solid";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
+import AddToBagBtn from "./add-to-bag";
 
 const product = {
   name: "Zip Tote Basket",
@@ -277,7 +278,7 @@ export default function ProductDetail({ product }: any) {
                 />
               </div>
 
-              <form className="mt-6">
+              <div className="mt-6">
                 {/* Colors */}
                 <div>
                   {/* <h3 className="text-sm text-gray-600">Color</h3> */}
@@ -321,13 +322,7 @@ export default function ProductDetail({ product }: any) {
                 </div>
 
                 <div className="mt-10 flex">
-                  <button
-                    type="submit"
-                    className="flex max-w-xs flex-1 items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50 sm:w-full"
-                  >
-                    Add to bag
-                  </button>
-
+                  <AddToBagBtn product={product} />
                   <button
                     type="button"
                     className="ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
@@ -339,7 +334,7 @@ export default function ProductDetail({ product }: any) {
                     <span className="sr-only">Add to favorites</span>
                   </button>
                 </div>
-              </form>
+              </div>
 
               <section aria-labelledby="details-heading" className="mt-12">
                 <h2 id="details-heading" className="sr-only">

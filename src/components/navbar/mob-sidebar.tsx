@@ -52,7 +52,7 @@ export default function MobileMenu() {
               onClick={() => handleArrowClick(menuName)}
             >
               <ChevronDownIcon
-                className={`transition duration-200 ease-in-out transform text-heading ${
+                className={`transition duration-200 ease-in-out transform text-heading w-5 ${
                   activeMenus.includes(menuName) ? "-rotate-180" : "rotate-0"
                 }`}
               />

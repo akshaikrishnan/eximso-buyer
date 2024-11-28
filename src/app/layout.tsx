@@ -6,6 +6,7 @@ import Footer from "@/components/layout/footer";
 import ManagedDrawer from "@/components/ui/managed-drawer";
 import { Providers } from "@/contexts/providers";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
           {children}
           <Footer />
           <ManagedDrawer />
+          <Toaster />
           <ReactQueryDevtools initialIsOpen={false} />
         </Providers>
       </body>
