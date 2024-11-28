@@ -7,6 +7,7 @@ import ManagedDrawer from "@/components/ui/managed-drawer";
 import { Providers } from "@/contexts/providers";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "@/components/ui/toaster";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +28,7 @@ export default function RootLayout({
       <body className={`${inter.className} overflow-x-hidden`}>
         <Providers>
           <AppNavBar />
-          {children}
+          <Suspense>{children}</Suspense>
           <Footer />
           <ManagedDrawer />
           <Toaster />

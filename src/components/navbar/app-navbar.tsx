@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { Suspense, useCallback } from "react";
 import { useState, useEffect } from "react";
 
 import Link from "next/link";
@@ -22,71 +22,18 @@ import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import Searchbar from "./searchbar";
 
 const Navbar = (props: any) => {
-  const options = [
-    { value: "All Categories", text: "All Categories" },
-    { value: "Alexa Skills", text: "Alexa Skills" },
-    { value: "Eximso Devices", text: "Eximso Devices" },
-    { value: "Eximso Fashion", text: "Eximso Fashion" },
-    { value: "Eximso Fresh", text: "Eximso Fresh" },
-    { value: "Eximso Pharmacy", text: "Eximso Pharmacy" },
-    { value: "Appliances", text: "Appliances" },
-    { value: "Apps & Games", text: "Apps & Games" },
-    { value: "Baby", text: "Baby" },
-    { value: "Beauty", text: "Beauty" },
-    { value: "Books", text: "Books" },
-    { value: "Car & Motorbike", text: "Car & Motorbike" },
-    { value: "Clothing & Accessories", text: "Clothing & Accessories" },
-    { value: "Collectibles", text: "Collectibles" },
-    { value: "Computers & Accessories", text: "Computers & Accessories" },
-    { value: "Electronics", text: "Electronics" },
-    { value: "Furniture", text: "Furniture" },
-    { value: "Garden & Outdoors", text: "Garden & Outdoors" },
-    { value: "Gift Cards", text: "Gift Cards" },
-    { value: "Grocery & Gourmet Foods", text: "Grocery & Gourmet Foods" },
-    { value: "Health & Personal Care", text: "Health & Personal Care" },
-    { value: "Home & Kitchen", text: "Home & Kitchen" },
-    { value: "Industrial & Scientific", text: "Industrial & Scientific" },
-    { value: "Jewellery", text: "Jewellery" },
-    { value: "Kindle Store", text: "Kindle Store" },
-    { value: "Luggage & Bags", text: "Luggage & Bags" },
-    { value: "Luxury Beauty", text: "Luxury Beauty" },
-    { value: "Movies & TV Shows", text: "Movies & TV Shows" },
-    { value: "Music", text: "Music" },
-    { value: "Musical Instruments", text: "Musical Instruments" },
-    { value: "Office Products", text: "Office Products" },
-    { value: "Pet Supplies", text: "Pet Supplies" },
-    { value: "Prime Video", text: "Prime Video" },
-    { value: "Shoes & Handbags", text: "Shoes & Handbags" },
-    { value: "Software", text: "Software" },
-    { value: "Sports, Fitness & Outdoors", text: "Sports, Fitness & Outdoors" },
-    { value: "Subscribe & Save", text: "Subscribe & Save" },
-    { value: "Tools & Home Improvement", text: "Tools & Home Improvement" },
-    { value: "Toys & Games", text: "Toys & Games" },
-    { value: "Under ₹500", text: "Under ₹500" },
-    { value: "Video Games", text: "Video Games" },
-    { value: "Watches", text: "Watches" },
-  ];
-
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: () => api.get(endpoints.categories).then((res) => res.data.result),
   });
-  const searchParams = useSearchParams();
-  const name = searchParams.get("q");
-  const selectedCategory = searchParams.get("category");
-  const [search, setSearch] = useState(name || "");
+
   const location = typeof window !== "undefined" ? window.location : null;
-  const [selected, setSelected] = useState(
-    selectedCategory || options[0].value
-  );
+
   var [isNavOpen, setIsNavOpen] = useState(false);
   const { openSidebar } = useUI();
-
-  const handleOnClickCategory = (e: any) => {
-    setSelected(e.target.value);
-  };
 
   useEffect(() => {
     if (isNavOpen) {
@@ -166,8 +113,8 @@ const Navbar = (props: any) => {
                   <Avatar>
                     <AvatarImage src={user?.logo} alt={user?.name} />
                     <AvatarFallback>
-                      user?.name?.split(" ")[0].charAt(0) + user?.name?.split("
-                      ")[1].charAt(0)
+                      {user?.name?.split(" ")[0].charAt(0) +
+                        user?.name?.split(" ")[1].charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                 ) : (
@@ -185,48 +132,9 @@ const Navbar = (props: any) => {
             </Link>
           </li>
           <li className="nav-item mx-auto w-full">
-            <form
-              action="/search"
-              className="search flex items-center  text-black md:order-3 md:mx-3"
-            >
-              <select
-                onChange={(e) => setSelected(e.target.value)}
-                value={selected}
-                className="h-10 w-28 hidden lg:block border-2 text-xs rounded-l-md bg-gray-100 text-gray-700"
-                name="category"
-                id="main-dropdown"
-              >
-                <option value="All Categories" className="text-base">
-                  All Categories
-                </option>
-                {categories?.map((option: any) => {
-                  return (
-                    <option
-                      className="text-base"
-                      key={option._id}
-                      value={option._id}
-                      onClick={handleOnClickCategory}
-                    >
-                      {option.name}
-                    </option>
-                  );
-                })}
-              </select>
-              <input
-                className="w-full rounded-l-lg border-none outline-none px-2 py-2.5 lg:py-2 lg:rounded-none"
-                type="search"
-                name="q"
-                id="search"
-                placeholder="Search Eximso.com"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <div className="bg-white rounded-r-lg focus:outline-4 md:rounded-r-lg">
-                <button className="cursor-pointer rounded-r-lg outline-none border-none px-4 py-2 bg-eximblue-600 rounded-md hover:bg-eximblue-700 text-white md:py-[7px] lg:py-[5.5px] md:px-3.5 md:text-xl md:rounded-l-none">
-                  <MagnifyingGlassIcon className="h-7 w-7" />
-                </button>
-              </div>
-            </form>
+            <Suspense>
+              <Searchbar categories={categories} />
+            </Suspense>
           </li>
           <li className="nav-item location cursor-pointer flex items-end gap-2 md:order-2">
             <div className="text-xl">
@@ -387,7 +295,7 @@ const HamburgerMenu = (props: any) => {
             <li className="px-5 py-3.5 text-xl font-bold">
               Programs & Features
             </li>
-            <li className="px-5 py-3.5 cursor-pointer">Today's Deals</li>
+            <li className="px-5 py-3.5 cursor-pointer">Today&apos;s Deals</li>
             <li className="px-5 py-3.5 cursor-pointer">Eximso Pay</li>
             <li className="px-5 py-3.5 cursor-pointer">Eximso LaunchPad</li>
             <li className="px-5 py-3.5 cursor-pointer">Try Prime</li>
