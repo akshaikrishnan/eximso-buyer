@@ -19,13 +19,19 @@ export default function Cart() {
     queryFn: () => api.get(endpoints.cart).then((res) => res.data.result),
   });
   console.log(cart);
+  // Render loading state
+  if (isLoading) {
+    return <Loader fullScreen />;
+  }
+
+  // Render empty cart state
+  if (cart?.items?.length === 0) {
+    return <EmptyCart />;
+  }
   const subTotal = cart?.items?.reduce(
     (acc: number, item: any) => acc + item.product.price * item.quantity,
     0
   );
-  if (!isLoading && cart?.items?.length === 0) {
-    return <EmptyCart />;
-  }
   const removeMutation = useMutation({
     mutationFn: (id: string) =>
       api
@@ -53,7 +59,6 @@ export default function Cart() {
               role="list"
               className="divide-y divide-gray-200 border-b border-t border-gray-200"
             >
-              {isLoading && <Loader />}
               {!isLoading &&
                 cart?.items?.length > 0 &&
                 cart?.items?.map((product: any, productIdx: number) => (

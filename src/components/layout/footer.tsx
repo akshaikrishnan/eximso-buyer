@@ -10,8 +10,8 @@ const footerNavigation = {
     { name: "Accessories", href: "#" },
   ],
   customerService: [
-    { name: "Logistics and supply chain", href: "#" },
-    { name: "Cancellation and return policy", href: "#" },
+    { name: "Logistics and supply chain", href: "https://1shipping.in/" },
+    { name: "Cancellation & Return policy", href: "/policy/return-policy" },
     { name: "News and updates", href: "#" },
     { name: "Secure Payments", href: "#" },
     { name: "Procurement", href: "#" },
@@ -30,13 +30,11 @@ const footerNavigation = {
   legal: [
     { name: "Careers", href: "#" },
     { name: "FAQ", href: "#" },
-    // { name: "Incoterms ", href: "#" },
-    // { name: "Careers", href: "#" },
     { name: "SKU", href: "#" },
-    { name: "Terms & Conditions", href: "#" },
-    { name: "Privacy Policy", href: "#" },
-    { name: "Terms of Service", href: "#" },
-    { name: "Shipping Policy", href: "#" },
+    { name: "Terms & Conditions", href: "/policy/terms-and-conditions" },
+    { name: "Privacy Policy", href: "/policy/privacy-policy" },
+    { name: "Return Policy", href: "/policy/return-policy" },
+    { name: "Shipping Policy", href: "/policy/shipping-policy" },
   ],
   bottomLinks: [
     { name: "Accessibility", href: "#" },
