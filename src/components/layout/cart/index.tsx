@@ -18,6 +18,17 @@ export default function Cart() {
     queryKey: ["cart"],
     queryFn: () => api.get(endpoints.cart).then((res) => res.data.result),
   });
+  const removeMutation = useMutation({
+    mutationFn: (id: string) =>
+      api
+        .post(endpoints.cart + "/remove/", {
+          productId: id,
+        })
+        .then((res) => res.data.result),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
   console.log(cart);
   // Render loading state
   if (isLoading) {
@@ -32,17 +43,7 @@ export default function Cart() {
     (acc: number, item: any) => acc + item.product.price * item.quantity,
     0
   );
-  const removeMutation = useMutation({
-    mutationFn: (id: string) =>
-      api
-        .post(endpoints.cart + "/remove/", {
-          productId: id,
-        })
-        .then((res) => res.data.result),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-    },
-  });
+
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl px-4 pb-24 pt-16 sm:px-6 lg:max-w-7xl lg:px-8">
