@@ -1,0 +1,149 @@
+/* Base Styles for Policy Page */
+.policy-page {
+  font-family: 'Inter', sans-serif; /* Match with Tailwind's default font */
+  color: #1f2937; /* Tailwind's gray-800 */
+  line-height: 1.6;
+  padding: 2rem;
+  background-color: #ffffff; /* White background */
+}
+
+/* Headings */
+.policy-page h1,
+.policy-page h2,
+.policy-page h3,
+.policy-page h4,
+.policy-page h5,
+.policy-page h6 {
+  color: #111827; /* Tailwind's gray-900 */
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.policy-page h1 {
+  font-size: 2.25rem; /* Tailwind's text-3xl */
+}
+
+.policy-page h2 {
+  font-size: 1.875rem; /* Tailwind's text-2xl */
+}
+
+.policy-page h3 {
+  font-size: 1.5rem; /* Tailwind's text-xl */
+}
+
+.policy-page h4 {
+  font-size: 1.25rem; /* Tailwind's text-lg */
+}
+
+.policy-page h5 {
+  font-size: 1.125rem; /* Tailwind's text-base */
+}
+
+.policy-page h6 {
+  font-size: 1rem; /* Tailwind's text-sm */
+}
+
+/* Paragraphs */
+.policy-page p {
+  margin-bottom: 1rem;
+  color: #4b5563; /* Tailwind's gray-700 */
+}
+
+/* Links */
+.policy-page a {
+  color: #3b82f6; /* Tailwind's blue-500 */
+  text-decoration: none;
+}
+
+.policy-page a:hover {
+  text-decoration: underline;
+}
+
+/* Lists */
+.policy-page ul,
+.policy-page ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  color: #4b5563; /* Tailwind's gray-700 */
+}
+
+.policy-page li {
+  margin-bottom: 0.5rem;
+}
+
+/* Blockquotes */
+.policy-page blockquote {
+  border-left: 4px solid #d1d5db; /* Tailwind's gray-300 */
+  padding-left: 1rem;
+  color: #6b7280; /* Tailwind's gray-500 */
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+/* Code Snippets */
+.policy-page pre,
+.policy-page code {
+  background-color: #f3f4f6; /* Tailwind's gray-100 */
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.875rem; /* Tailwind's text-sm */
+}
+
+.policy-page pre {
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+/* Tables */
+.policy-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.policy-page th,
+.policy-page td {
+  border: 1px solid #e5e7eb; /* Tailwind's gray-200 */
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.policy-page th {
+  background-color: #f9fafb; /* Tailwind's gray-50 */
+  font-weight: 600;
+}
+
+/* Images */
+.policy-page img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+/* Horizontal Rules */
+.policy-page hr {
+  border: none;
+  border-top: 1px solid #e5e7eb; /* Tailwind's gray-200 */
+  margin: 2rem 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .policy-page {
+    padding: 1rem;
+  }
+
+  .policy-page h1 {
+    font-size: 2rem; /* Adjust heading sizes for smaller screens */
+  }
+
+  .policy-page h2 {
+    font-size: 1.5rem;
+  }
+
+  .policy-page h3 {
+    font-size: 1.25rem;
+  }
+}

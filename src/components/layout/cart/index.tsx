@@ -8,11 +8,12 @@ import {
   QuestionMarkCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/20/solid";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import EmptyCart from "./empty-cart";
 import CartBtn from "./cart-btn";
 
 export default function Cart() {
+  const queryClient = useQueryClient();
   const { data: cart, isLoading } = useQuery({
     queryKey: ["cart"],
     queryFn: () => api.get(endpoints.cart).then((res) => res.data.result),
@@ -25,6 +26,17 @@ export default function Cart() {
   if (!isLoading && cart?.items?.length === 0) {
     return <EmptyCart />;
   }
+  const removeMutation = useMutation({
+    mutationFn: (id: string) =>
+      api
+        .post(endpoints.cart + "/remove/", {
+          productId: id,
+        })
+        .then((res) => res.data.result),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl px-4 pb-24 pt-16 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -91,6 +103,9 @@ export default function Cart() {
 
                           <div className="absolute right-0 top-0">
                             <button
+                              onClick={() =>
+                                removeMutation.mutate(product.product._id)
+                              }
                               type="button"
                               className="-m-2 inline-flex p-2 text-gray-400 hover:text-gray-500"
                             >

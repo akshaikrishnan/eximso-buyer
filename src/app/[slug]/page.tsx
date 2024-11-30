@@ -1,14 +1,23 @@
 import ProductDetail from "@/components/products/product-detail";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
+import { notFound } from "next/navigation";
 import React from "react";
 
 export default async function page({ params }: any) {
-  if (params.slug) {
-    const res: any = await api.get(`${endpoints.products}/${params.slug}`);
-    const data = await res.data.result;
-    if (res.success === false) return <div className="">Product not found</div>;
-    return <ProductDetail product={data} />;
+  try {
+    if (params.slug) {
+      const res: any = await api.get(`${endpoints.products}/${params.slug}`);
+      const data = await res.data.result;
+      console.log(res);
+      if (res.success === false)
+        return <div className="">Product not found</div>;
+      return <ProductDetail product={data} />;
+    } else {
+      return <div className="">Product not found</div>;
+    }
+  } catch (err) {
+    console.log(err);
+    notFound();
   }
-  return <div className="">Product not found</div>;
 }
