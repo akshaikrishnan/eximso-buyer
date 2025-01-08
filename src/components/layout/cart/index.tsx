@@ -14,7 +14,11 @@ import CartBtn from "./cart-btn";
 
 export default function Cart() {
   const queryClient = useQueryClient();
-  const { data: cart, isLoading } = useQuery({
+  const {
+    data: cart,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["cart"],
     queryFn: () => api.get(endpoints.cart).then((res) => res.data.result),
   });
@@ -36,7 +40,7 @@ export default function Cart() {
   }
 
   // Render empty cart state
-  if (cart?.items?.length === 0) {
+  if (cart?.items?.length === 0 || isError) {
     return <EmptyCart />;
   }
   const subTotal = cart?.items?.reduce(

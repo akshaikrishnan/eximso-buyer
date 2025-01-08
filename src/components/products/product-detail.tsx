@@ -1,21 +1,4 @@
 "use client";
-
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-      require('@tailwindcss/typography'),
-      require('@tailwindcss/aspect-ratio'),
-    ],
-  }
-  ```
-*/
 import { Fragment, useState } from "react";
 import {
   Disclosure,
@@ -33,99 +16,14 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import AddToBagBtn from "./add-to-bag";
-
-const product = {
-  name: "Zip Tote Basket",
-  price: "$140",
-  rating: 4,
-  images: [
-    {
-      id: 1,
-      name: "Angled view",
-      src: "https://tailwindui.com/img/ecommerce-images/product-page-03-product-01.jpg",
-      alt: "Angled front view with bag zipped and handles upright.",
-    },
-    // More images...
-  ],
-  colors: [
-    {
-      name: "Washed Black",
-      bgColor: "bg-gray-700",
-      selectedColor: "ring-gray-700",
-    },
-    { name: "White", bgColor: "bg-white", selectedColor: "ring-gray-400" },
-    {
-      name: "Washed Gray",
-      bgColor: "bg-gray-500",
-      selectedColor: "ring-gray-500",
-    },
-  ],
-  description: `
-    <p>The Zip Tote Basket is the perfect midpoint between shopping tote and comfy backpack. With convertible straps, you can hand carry, should sling, or backpack this convenient and spacious bag. The zip top and durable canvas construction keeps your goods protected for all-day use.</p>
-  `,
-  details: [
-    {
-      name: "Features",
-      items: [
-        "Multiple strap configurations",
-        "Spacious interior with top zip",
-        "Leather handle and tabs",
-        "Interior dividers",
-        "Stainless strap loops",
-        "Double stitched construction",
-        "Water-resistant",
-      ],
-    },
-    // More sections...
-  ],
-};
-const relatedProducts = [
-  {
-    id: 1,
-    name: "Zip Tote Basket",
-    color: "White and black",
-    href: "#",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/product-page-03-related-product-01.jpg",
-    imageAlt:
-      "Front of zip tote bag with white canvas, black canvas straps and handle, and black zipper pulls.",
-    price: "$140",
-  },
-  // More products...
-];
-const footerNavigation = {
-  products: [
-    { name: "Bags", href: "#" },
-    { name: "Tees", href: "#" },
-    { name: "Objects", href: "#" },
-    { name: "Home Goods", href: "#" },
-    { name: "Accessories", href: "#" },
-  ],
-  company: [
-    { name: "Who we are", href: "#" },
-    { name: "Sustainability", href: "#" },
-    { name: "Press", href: "#" },
-    { name: "Careers", href: "#" },
-    { name: "Terms & Conditions", href: "#" },
-    { name: "Privacy", href: "#" },
-  ],
-  customerService: [
-    { name: "Contact", href: "#" },
-    { name: "Shipping", href: "#" },
-    { name: "Returns", href: "#" },
-    { name: "Warranty", href: "#" },
-    { name: "Secure Payments", href: "#" },
-    { name: "FAQ", href: "#" },
-    { name: "Find a store", href: "#" },
-  ],
-};
+import { RelatedProduct } from "./related-products";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function ProductDetail({ product }: any) {
-  console.log(product);
+  console.log("product", product);
   const productDetail = [
     {
       name: "Dimensions",
@@ -172,11 +70,15 @@ export default function ProductDetail({ product }: any) {
         .get(endpoints.products, {
           params: {
             category: product.category._id,
-            limit: 4,
+            limit: 5,
           },
         })
-        .then((res) => res.data.result),
+        .then((res) =>
+          res.data.result.data.filter((p: any) => p._id !== product._id)
+        )
+        .catch((err) => console.log(err)),
   });
+  console.log(related);
 
   return (
     <div className="bg-white">
@@ -243,8 +145,21 @@ export default function ProductDetail({ product }: any) {
               <div className="mt-3">
                 <h2 className="sr-only">Product information</h2>
                 <p className="text-3xl tracking-tight text-gray-900">
-                  ${product.price.toFixed(2)}
+                  <span className="text-red-600">
+                    {product?.discountPercentage > 0 &&
+                      product?.discountPercentage}
+                    %
+                  </span>{" "}
+                  $
+                  {product?.discountPercentage > 0
+                    ? product?.offerPrice.toFixed(2)
+                    : product.price.toFixed(2)}
                 </p>
+                {product?.discountPercentage > 0 && (
+                  <p className="text-sm">
+                    M.R.P : <del>{product.price.toFixed(2)}</del>
+                  </p>
+                )}
               </div>
 
               {/* Reviews */}
@@ -405,58 +320,27 @@ export default function ProductDetail({ product }: any) {
             </div>
           </div>
 
-          <section
-            aria-labelledby="related-heading"
-            className="mt-10 border-t border-gray-200 px-4 py-16 sm:px-0"
-          >
-            <h2
-              id="related-heading"
-              className="text-xl font-bold text-gray-900"
+          {related?.length > 0 && (
+            <section
+              aria-labelledby="related-heading"
+              className="mt-10 border-t border-gray-200 px-4 py-16 sm:px-0"
             >
-              Customers also bought
-            </h2>
+              <h2
+                id="related-heading"
+                className="text-xl font-bold text-gray-900"
+              >
+                Customers also bought
+              </h2>
 
-            {!isLoading && (
-              <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-                {related.data.map((product: any) => (
-                  <div key={product._id}>
-                    <div className="relative">
-                      <div className="relative h-72 w-full overflow-hidden rounded-lg">
-                        <img
-                          src={product.thumbnail}
-                          alt={product.name}
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                      <div className="relative mt-4">
-                        <h3 className="text-sm font-medium text-gray-900">
-                          {product.name}
-                        </h3>
-                      </div>
-                      <div className="absolute inset-x-0 top-0 flex h-72 items-end justify-end overflow-hidden rounded-lg p-4">
-                        <div
-                          aria-hidden="true"
-                          className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black opacity-50"
-                        />
-                        <p className="relative text-lg font-semibold text-white">
-                          ${product.price.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-6">
-                      <a
-                        href={product.href}
-                        className="relative flex items-center justify-center rounded-md border border-transparent bg-gray-100 px-8 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
-                      >
-                        Add to bag
-                        <span className="sr-only">, {product.name}</span>
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+              {!isLoading && (
+                <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
+                  {related.map((product: any) => (
+                    <RelatedProduct product={product} key={product._id} />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
         </div>
       </main>
     </div>
