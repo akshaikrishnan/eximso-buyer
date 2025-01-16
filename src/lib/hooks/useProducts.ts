@@ -33,9 +33,11 @@ export const useProducts = ({
     queryKey: ["products", { q: name }, filters, slug],
     queryFn: getProducts,
     getNextPageParam: (lastPage: any, allPages) => {
-      //console.log("lastPage", lastPage);
-      const nextPage = lastPage.nextPage;
-      return nextPage;
+      if (!lastPage || !lastPage.nextPage) {
+        // If lastPage is undefined or nextPage is missing, there are no more pages
+        return undefined;
+      }
+      return lastPage.nextPage;
     },
     initialPageParam: 1, // Add this line with an appropriate initial value
   });

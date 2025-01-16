@@ -56,7 +56,7 @@ export default function ProductCard({ product }: any) {
         alt={product.name}
         width={400}
         height={400}
-        className="object-cover w-full h-64"
+        className=" w-full h-64"
       />
       <div className="p-4 bg-background">
         <h3 className="text-md font-semibold">{product.name}</h3>
