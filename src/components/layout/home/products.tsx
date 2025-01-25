@@ -18,27 +18,8 @@ export default function ProductsGrid() {
 
   const products: any[] = data?.pages?.flatMap((page) => page?.data || []) || [];
 
-  // State for search query
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Filtered products based on search query
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
     <div className="p-6">
-      {/* Search Bar */}
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
       {/* Loading State */}
       {isLoading && (
         <div className="flex justify-center items-center h-48">
@@ -59,16 +40,16 @@ export default function ProductsGrid() {
       )}
 
       {/* Empty State */}
-      {!isLoading && !isError && filteredProducts.length === 0 && (
+      {!isLoading && !isError && products.length === 0 && (
         <div className="text-center">
-          <p className="text-gray-500">No products match your search.</p>
+          <p className="text-gray-500">No products available.</p>
         </div>
       )}
 
       {/* Products Grid */}
-      {!isLoading && !isError && filteredProducts.length > 0 && (
+      {!isLoading && !isError && products.length > 0 && (
         <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
+          {products.map((product) => (
             <div
               key={product._id}
               className="hover:shadow-lg hover:scale-105 transition-transform duration-300"
