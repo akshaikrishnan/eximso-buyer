@@ -8,34 +8,13 @@ import {
   HeartIcon,
 } from "@heroicons/react/20/solid";
 import { HistoryIcon, LogOutIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
 
 const tabs = [
-  { name: "My Account", href: "/profile", icon: UserIcon, current: false },
-  {
-    name: "My Addresses",
-    href: "/profile/my-addresses",
-    icon: BuildingOfficeIcon,
-    current: false,
-  },
-  {
-    name: "My Wishlist",
-    href: "/profile/my-wishlist",
-    icon: HeartIcon,
-    current: false,
-  },
-  {
-    name: "My Orders",
-    href: "/profile/my-orders",
-    icon: HistoryIcon,
-    current: true,
-  },
-  {
-    name: "Billing",
-    href: "/profile/billing",
-    icon: CreditCardIcon,
-    current: false,
-  },
+  { name: "My Account", href: "#", icon: UserIcon, current: false },
+  { name: "My Addresses", href: "#", icon: BuildingOfficeIcon, current: false },
+  { name: "My Wishlist", href: "#", icon: HeartIcon, current: false },
+  { name: "My Orders", href: "#", icon: HistoryIcon, current: true },
+  { name: "Billing", href: "#", icon: CreditCardIcon, current: false },
   {
     name: "Logout",
     href: "#",
@@ -49,12 +28,6 @@ function classNames(...classes: any) {
 }
 
 export default function ProfileNavbar() {
-  const pathName = usePathname();
-
-  const isActive = (href: string) => {
-    return pathName === href;
-  };
-
   return (
     <div>
       <div className="sm:hidden">
@@ -84,7 +57,7 @@ export default function ProfileNavbar() {
                 key={tab.name}
                 href={tab.href}
                 className={classNames(
-                  isActive(tab.href)
+                  tab.current
                     ? "border-indigo-500 text-indigo-600"
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
                   "group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
@@ -93,7 +66,7 @@ export default function ProfileNavbar() {
               >
                 <tab.icon
                   className={classNames(
-                    isActive(tab.href)
+                    tab.current
                       ? "text-indigo-500"
                       : "text-gray-400 group-hover:text-gray-500",
                     "-ml-0.5 mr-2 h-5 w-5"
