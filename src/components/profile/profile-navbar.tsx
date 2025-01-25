@@ -13,7 +13,7 @@ const tabs = [
   { name: "My Account", href: "#", icon: UserIcon, current: false },
   { name: "My Addresses", href: "#", icon: BuildingOfficeIcon, current: false },
   { name: "My Wishlist", href: "#", icon: HeartIcon, current: false },
-  { name: "My Orders", href: "/my-orders", icon: HistoryIcon, current: true },
+  { name: "My Orders", href: "#", icon: HistoryIcon, current: true },
   { name: "Billing", href: "#", icon: CreditCardIcon, current: false },
   {
     name: "Logout",
