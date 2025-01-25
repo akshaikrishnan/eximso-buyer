@@ -24,6 +24,7 @@ import { useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Searchbar from "./searchbar";
 
+
 const Navbar = (props: any) => {
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
@@ -63,6 +64,40 @@ const Navbar = (props: any) => {
     queryKey: ["cart"],
     queryFn: () => api.get(endpoints.cart).then((res) => res.data.result),
   });
+
+  const [currentLocation, setCurrentLocation] = useState("Fetching location...");
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+
+          // Use a reverse geocoding API to fetch the location name
+          fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              const locationName = data.address?.city || "Unknown location";
+              setCurrentLocation(locationName);
+            })
+            .catch(() => setCurrentLocation("Unable to fetch location"));
+        },
+        (error) => {
+          console.error("Error fetching location:", error);
+          setCurrentLocation("Location access denied");
+        }
+      );
+    } else {
+      setCurrentLocation("Geolocation not supported");
+    }
+    console.log(currentLocation);
+    
+  }, []);
+
+
+
 
   return (
     <>
@@ -141,9 +176,9 @@ const Navbar = (props: any) => {
               <i className="fa-solid fa-location-dot"></i>
             </div>
             <div className="space-y-0 leading-5">
-              <div className="upper text-gray-400 text-xs">Select your</div>
+              <div className="upper text-gray-800 text-xs">Select your location</div>
               <div className="lower font-medium flex gap-1">
-                <MapPinIcon className="w-5" /> Location
+                <MapPinIcon className="w-5" /> {currentLocation}
               </div>
             </div>
           </li>
@@ -202,7 +237,7 @@ const Navbar = (props: any) => {
             data={menu}
             className="hidden lg:flex ltr:md:ml-6 ltr:xl:ml-10 rtl:md:mr-6 rtl:xl:mr-10"
           />
-          <button className="bg-eximblue-600 whitespace-nowrap px-5 py-3 font-medium text-white  gap-2 flex items-center">
+          <button className="bg-eximblue-600 rounded-xl whitespace-nowrap px-5 py-3 font-medium text-white  gap-2 flex items-center">
             <BuildingStorefrontIcon className="w-6 h-6" />
             Become a Seller
           </button>

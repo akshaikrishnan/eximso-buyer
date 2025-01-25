@@ -37,10 +37,10 @@ export default function ProductCard({ product }: any) {
   return (
     <div
       key={product._id}
-      className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:shadow-xl hover:-translate-y-2"
+      className="w-full h-full relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:shadow-xl hover:-translate-y-2 flex flex-col justify-between"
     >
       {getLabel(product) && (
-        <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-primary text-white text-xs font-medium bg-gray-600/60">
+        <div className="absolute top-5 left-2 px-2 py-1 rounded-md bg-primary text-white text-xs font-medium ">
           {getLabel(product)}
         </div>
       )}
@@ -51,13 +51,15 @@ export default function ProductCard({ product }: any) {
       >
         <span className="sr-only">View {product.name}</span>
       </Link>
-      <Image
-        src={product.thumbnail}
-        alt={product.name}
-        width={400}
-        height={400}
-        className=" w-full h-64"
-      />
+      <div className="w-42 h-42 bg-gray-100 rounded-lg overflow-hidden flex justify-center items-center">
+        <Image
+          src={product.thumbnail}
+          alt={product.name}
+          width={240}
+          height={240}
+          className="object-contain"
+        />
+      </div>
       <div className="p-4 bg-background">
         <h3 className="text-md font-semibold">{product.name}</h3>
         <div className="flex items-center gap-2 text-sm">
