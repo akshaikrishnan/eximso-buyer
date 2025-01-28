@@ -6,6 +6,7 @@ import {
   UserIcon,
   UsersIcon,
   HeartIcon,
+  LockClosedIcon,
 } from "@heroicons/react/20/solid";
 import { HistoryIcon, LogOutIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -36,6 +37,13 @@ const tabs = [
     icon: CreditCardIcon,
     current: false,
   },
+  {
+    name: "Reset Password",
+    href: "/profile/reset-password",
+    icon: LockClosedIcon,
+    current: false,
+  },
+  
   {
     name: "Logout",
     href: "#",
