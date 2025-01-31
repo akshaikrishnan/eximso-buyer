@@ -35,7 +35,7 @@ export default function ExportInvoice() {
           <div className="grid grid-cols-2 gap-8 mb-6">
             <div>
               <p className="text-sm text-gray-700"><span className="font-bold">Invoice Number & Date:</span> [Details]</p>
-              <p className="text-sm text-gray-700"><span className="font-bold">Buyer Order No. & Date:</span> [Details]</p>
+              <p className="text-sm text-gray-700"><span className="font-bold">Buyer&apos;s Order No. & Date:</span> [Details]</p>
               <p className="text-sm text-gray-700"><span className="font-bold">GSTIN:</span> 32AAOPC2609R1ZW</p>
             </div>
             <div>
