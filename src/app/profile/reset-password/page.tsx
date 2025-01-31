@@ -1,5 +1,10 @@
-const ResetPassword = () => {
-    return <h1>Reset Password</h1>;
-};
+import ExportInvoice from '@/components/profile/profile-reset-password'
+import React from 'react'
 
-export default ResetPassword;
+function page() {
+  return (
+    <ExportInvoice/>
+  )
+}
+
+export default page
