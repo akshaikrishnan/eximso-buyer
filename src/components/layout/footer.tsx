@@ -26,6 +26,7 @@ const footerNavigation = {
     { name: "OEM Manufacturing & Conditions", href: "#" },
     { name: "Focus on both B2B & B2C", href: "#" },
     { name: "White label-Build your brand with us", href: "#" },
+    { name: "Contact Us", href: "/contact" },
   ],
   legal: [
     { name: "Careers", href: "#" },
