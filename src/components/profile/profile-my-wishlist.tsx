@@ -4,7 +4,8 @@ const WishlistPage = () => {
   const wishlistItems = [
     {
       id: 1,
-      image: "https://m.media-amazon.com/images/I/61FtjbjXX1L._AC_UF1000,1000_QL80_.jpg",
+      image:
+        "https://m.media-amazon.com/images/I/61FtjbjXX1L._AC_UF1000,1000_QL80_.jpg",
       name: "QXORE Solar Light Outdoor 77 Led Motion Sensor Security Camera Shaped Wall Lamp Solar Light Set",
       price: "₹449",
       originalPrice: "₹2,499",
@@ -13,7 +14,8 @@ const WishlistPage = () => {
     },
     {
       id: 2,
-      image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/shoe/f/p/f/-original-imahfk95gaahmwac.jpeg?q=20&crop=false",
+      image:
+        "https://rukminim2.flixcart.com/image/850/1000/xif0q/shoe/f/p/f/-original-imahfk95gaahmwac.jpeg?q=20&crop=false",
       name: "PUMA Icon Canvas Shoe For Men",
       price: "₹1,789",
       originalPrice: "₹3,299",
@@ -32,13 +34,15 @@ const WishlistPage = () => {
   ];
 
   return (
-    <div className="container mx-auto py-8  max-w-6xl">
-      <h1 className="text-2xl font-bold text-gray-800">My Wishlist ({wishlistItems.length})</h1>
-      <div className="mt-6 space-y-6">
+    <div className="container mx-auto py-8 ">
+      <h1 className="text-2xl font-bold text-gray-800">
+        My Wishlist ({wishlistItems.length})
+      </h1>
+      <div className="mt-6 space-y-4">
         {wishlistItems.map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between border-b border-gray-200 pb-4"
+            className="flex items-center justify-between p-5 shadow-sm ring-1 ring-gray-900/5 sm:rounded pb-4"
           >
             {/* Product Details */}
             <div className="flex items-center space-x-4">
@@ -48,7 +52,9 @@ const WishlistPage = () => {
                 className="h-20 w-20 rounded object-cover"
               />
               <div>
-                <h3 className="text-lg font-medium text-gray-800">{item.name}</h3>
+                <h3 className="text-lg font-medium text-gray-800">
+                  {item.name}
+                </h3>
                 <p className="mt-1 text-sm text-gray-500">
                   {item.availability === "Currently unavailable" ? (
                     <span className="text-red-500">{item.availability}</span>
@@ -57,8 +63,12 @@ const WishlistPage = () => {
                   )}
                 </p>
                 <div className="mt-2 flex items-center space-x-2 text-sm">
-                  <p className="text-lg font-semibold text-gray-900">{item.price}</p>
-                  <p className="text-gray-500 line-through">{item.originalPrice}</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {item.price}
+                  </p>
+                  <p className="text-gray-500 line-through">
+                    {item.originalPrice}
+                  </p>
                   <p className="text-green-500">{item.discount}</p>
                 </div>
               </div>

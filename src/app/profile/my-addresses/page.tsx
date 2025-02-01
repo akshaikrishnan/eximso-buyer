@@ -1,10 +1,8 @@
-import ShippingAddress from '@/components/profile/Profile-my-addresses'
-import React from 'react'
+import ShippingAddress from "@/components/profile/add-address";
+import React from "react";
 
 function Page() {
-  return (
-<ShippingAddress/>
-  )
+  return <ShippingAddress />;
 }
 
-export default Page
+export default Page;
