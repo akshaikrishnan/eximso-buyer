@@ -1,5 +1,10 @@
-import React from "react";
+import ShippingAddress from '@/components/profile/Profile-my-addresses'
+import React from 'react'
 
-export default function MyAddresses() {
-  return <div>MyAddresses</div>;
+function Page() {
+  return (
+<ShippingAddress/>
+  )
 }
+
+export default Page

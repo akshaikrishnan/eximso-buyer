@@ -1,5 +1,10 @@
-import React from "react";
+import MyOrders from '@/components/profile/profile-my-orders'
+import React from 'react'
 
-export default function MyOrders() {
-  return <div>page</div>;
+function page() {
+  return (
+    <MyOrders/>
+  )
 }
+
+export default page

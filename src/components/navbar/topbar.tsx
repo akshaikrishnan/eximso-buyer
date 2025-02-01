@@ -36,13 +36,13 @@ export default function TopBar({ className }: { className: string }) {
                     </span>
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link href="/faq">
                     <span className="text-xs leading-6 text-qblack font-500">
                       Post Requirements
                     </span>
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
             <div className="topbar-dropdowns sm:block hidden">
