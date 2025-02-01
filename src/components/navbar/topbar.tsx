@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import Selectbox from "../helpers/Selectbox";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
@@ -29,7 +30,7 @@ export default function TopBar({ className }: { className: string }) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/faq">
+                  <Link href="/contact">
                     <span className="text-xs leading-6 text-qblack font-500">
                       Support
                     </span>
