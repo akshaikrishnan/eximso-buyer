@@ -1,8 +1,19 @@
+"use client";
+
+import { ArrowBigLeft, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
 export default function AddAddress() {
+  const router = useRouter();
   return (
-    <div>
-      <div className="space-y-10 divide-y divide-gray-900/10 container mx-auto">
+    <div className="container mx-auto py-4">
+      <button
+        onClick={() => router.back()}
+        className="flex items-center gap-2 bg-gray-100 text-gray-800 px-3 py-2 rounded-md shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800"
+      >
+        <ArrowLeft /> Back
+      </button>
+      <div className="space-y-10 divide-y divide-gray-900/10 ">
         {/* Shipping Address */}
         <div className="grid grid-cols-1 gap-x-8 gap-y-8 pt-10 md:grid-cols-3">
           <div className="px-4 sm:px-0">
