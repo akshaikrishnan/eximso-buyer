@@ -48,7 +48,7 @@ function Contact() {
           </p>
           <p className="flex items-center gap-3">
             <HiPhone className="text-gray-600 text-xl" />
-            <span className="font-semibold">Phone :</span> +1 (555) 234-5678
+            <span className="font-semibold">Phone :</span> +1 (555) 234-4562
           </p>
           <p className="flex items-center gap-3">
             <HiMail className="text-gray-600 text-xl" />
