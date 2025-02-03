@@ -29,7 +29,7 @@ function Contact() {
   });
 
   const onSubmit = () => {
-    alert(`Thank you, Your message has been sent.`);
+    alert(`Thank you, Your message has been sent successfully`);
     reset(); // Clears the form after submission
   };
 
