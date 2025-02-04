@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React from "react";
-
+import OrderTracking from "./order-tracking";
+<OrderTracking/>
 export default function OrderDetails({ orderId }: { orderId: string }) {
   return (
     <div className="py-14 px-4 md:px-6 2xl:px-6 2xl:container 2xl:mx-auto">
@@ -14,7 +15,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
       </div>
       <div className="mt-10 flex flex-col xl:flex-row jusitfy-center items-stretch w-full xl:space-x-8 space-y-4 md:space-y-6 xl:space-y-0">
         <div className="flex flex-col justify-start items-start w-full space-y-4 md:space-y-6 xl:space-y-8">
-          <div className="flex flex-col justify-start items-start dark:bg-gray-800 bg-gray-50 px-4 py-4 md:py-6 md:p-6 xl:p-8 w-full">
+          <div className="flex flex-col justify-start items-start dark:bg-gray-800 bg-gray-50 px-4 py-0 md:py-0 md:p-0 xl:p-0 w-full">
             <p className="text-lg md:text-xl dark:text-white font-semibold leading-6 xl:leading-5 text-gray-800">
               Order Items
             </p>
@@ -72,8 +73,10 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
               </div>
             </div>
           </div>
-          <div className="flex justify-center flex-col md:flex-row flex-col items-stretch w-full space-y-4 md:space-y-0 md:space-x-6 xl:space-x-8">
+          <div className="flex justify-center flex-col md:flex-row  items-stretch w-full space-y-4 md:space-y-0 md:space-x-6 xl:space-x-8">
             <div className="flex flex-col px-4 py-6 md:p-6 xl:p-8 w-full bg-gray-50 dark:bg-gray-800 space-y-6">
+             
+              <OrderTracking/>
               <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800">
                 Summary
               </h3>
@@ -114,8 +117,9 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   $36.00
                 </p>
               </div>
+              {/* <OrderTracking/> */}
             </div>
-            <div className="flex flex-col justify-center px-4 py-6 md:p-6 xl:p-8 w-full bg-gray-50 dark:bg-gray-800 space-y-6">
+            <div className="flex flex-col  px-4 py-6 md:p-6 xl:p-8 w-full bg-gray-50 dark:bg-gray-800 space-y-6">
               <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800">
                 Shipping
               </h3>
@@ -147,11 +151,9 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                   View Carrier Details
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 w-full xl:w-96 flex justify-between items-center md:items-start px-4 py-6 md:p-6 xl:p-8 flex-col">
-          <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800 mb-5">
+              {/* <OrderTracking/> */}
+              <div>
+                 <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800 mb-5">
             Customer
           </h3>
           <div className="flex flex-col md:flex-row xl:flex-col justify-start items-stretch h-full w-full md:space-x-6 lg:space-x-8 xl:space-x-0">
@@ -205,14 +207,21 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
             <div className="flex w-full justify-center items-center md:justify-start md:items-start">
               <Link
                 href={`/profile/my-orders/${orderId}/invoice`}
-                className="mt-6 md:mt-0 text-center dark:border-white dark:hover:bg-gray-900 dark:bg-transparent dark:text-white py-5 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 border border-gray-800 font-medium w-96 2xl:w-full text-base font-medium leading-4 text-gray-800"
+                className="mt-6 md:mt-0 text-center dark:border-white dark:hover:bg-gray-900 dark:bg-transparent dark:text-white py-5 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 border border-gray-800 font-medium w-96 2xl:w-full text-base  leading-4 text-gray-800"
               >
                 Download Invoice
               </Link>
             </div>
+              </div>
+            </div>
           </div>
+          
+        </div>
+        {/* <div className="bg-gray-50 dark:bg-gray-800 w-full xl:w-96 flex justify-between items-center md:items-start px-4 py-6 md:p-6 xl:p-8 flex-col">
+            {/* <OrderTracking/> */}
+          {/* </div>  */}
         </div>
       </div>
-    </div>
+     </div>
   );
 }
