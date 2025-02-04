@@ -1,11 +1,12 @@
+import Link from "next/link";
 import React from "react";
 
-export default function OrderDetails() {
+export default function OrderDetails({ orderId }: { orderId: string }) {
   return (
     <div className="py-14 px-4 md:px-6 2xl:px-6 2xl:container 2xl:mx-auto">
       <div className="flex justify-start item-start space-y-2 flex-col">
         <h1 className="text-3xl dark:text-white lg:text-4xl font-semibold leading-7 lg:leading-9 text-gray-800">
-          Order #13432
+          Order #{orderId}
         </h1>
         <p className="text-base dark:text-gray-300 font-medium leading-6 text-gray-600">
           21st Mart 2021 at 10:34 PM
@@ -202,9 +203,12 @@ export default function OrderDetails() {
               </div>
             </div>
             <div className="flex w-full justify-center items-center md:justify-start md:items-start">
-              <button className="mt-6 md:mt-0 dark:border-white dark:hover:bg-gray-900 dark:bg-transparent dark:text-white py-5 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 border border-gray-800 font-medium w-96 2xl:w-full text-base font-medium leading-4 text-gray-800">
+              <Link
+                href={`/profile/my-orders/${orderId}/invoice`}
+                className="mt-6 md:mt-0 text-center dark:border-white dark:hover:bg-gray-900 dark:bg-transparent dark:text-white py-5 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 border border-gray-800 font-medium w-96 2xl:w-full text-base font-medium leading-4 text-gray-800"
+              >
                 Download Invoice
-              </button>
+              </Link>
             </div>
           </div>
         </div>
