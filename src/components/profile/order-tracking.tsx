@@ -35,7 +35,8 @@ function OrderTracking() {
                 </svg>
               </span>
               <h4 className="mb-0.5 font-semibold">23 Nov 2023, 15:15</h4>
-              <p className="text-sm">Products in the courier's warehouse</p>
+              <p className="text-sm">Products in the courier&apos;s warehouse</p>
+
             </li>
 
             <li className="mb-10 ms-6 text-primary-700 dark:text-primary-500">
