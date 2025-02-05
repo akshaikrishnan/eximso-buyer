@@ -31,18 +31,18 @@ const tabs = [
     icon: HistoryIcon,
     current: true,
   },
-  {
-    name: "Billing",
-    href: "/profile/billing",
-    icon: CreditCardIcon,
-    current: false,
-  },
-  {
-    name: "Reset Password",
-    href: "/profile/reset-password",
-    icon: LockClosedIcon,
-    current: false,
-  },
+  // {
+  //   name: "Billing",
+  //   href: "/profile/billing",
+  //   icon: CreditCardIcon,
+  //   current: false,
+  // },
+  // {
+  //   name: "Reset Password",
+  //   href: "/profile/reset-password",
+  //   icon: LockClosedIcon,
+  //   current: false,
+  // },
   
   {
     name: "Logout",

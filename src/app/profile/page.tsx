@@ -12,9 +12,15 @@
   }
   ```
 */
+"use client"
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
-
+import Select from 'react-select';
+import countries from '../data/countries.json';
 export default function Example() {
+  const countryOptions = countries.map(country => ({
+    value: country.code,
+    label: country.name,
+  }));
   return (
     <div className="container m-auto pt-6">
       {" "}
@@ -54,43 +60,25 @@ export default function Example() {
                   </div>
                 </div>
 
-                <div className="sm:col-span-3">
-                  <label
-                    htmlFor="first-name"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    First name
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      name="first-name"
-                      id="first-name"
-                      autoComplete="given-name"
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    />
-                  </div>
-                </div>
-
-                <div className="sm:col-span-3">
-                  <label
-                    htmlFor="last-name"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Last name
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      name="last-name"
-                      id="last-name"
-                      autoComplete="family-name"
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    />
-                  </div>
-                </div>
-
                 <div className="sm:col-span-4">
+                  <label
+                    htmlFor="full-name"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Full Name
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      name="full-name"
+                      id="full-name"
+                      autoComplete="name"
+                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-4 ">
                   <label
                     htmlFor="email"
                     className="block text-sm font-medium leading-6 text-gray-900"
@@ -125,47 +113,98 @@ export default function Example() {
                     />
                   </div>
                 </div>
-
                 <div className="sm:col-span-4">
                   <label
-                    htmlFor="country"
+                    htmlFor="gender"
                     className="block text-sm font-medium leading-6 text-gray-900"
                   >
-                    Country
+                    Gender
                   </label>
-                  <div className="mt-2">
-                    <select
-                      id="country"
-                      name="country"
-                      autoComplete="country-name"
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
-                    >
-                      <option>United States</option>
-                      <option>Canada</option>
-                      <option>Mexico</option>
-                    </select>
+                  <div className="mt-2 flex space-x-4">
+                    <div className="flex items-center">
+                      <input
+                        id="gender-male"
+                        name="gender"
+                        type="radio"
+                        value="male"
+                        className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-600"
+                      />
+                      <label
+                        htmlFor="gender-male"
+                        className="ml-2 block text-sm text-gray-900"
+                      >
+                        Male
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        id="gender-female"
+                        name="gender"
+                        type="radio"
+                        value="female"
+                        className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-600"
+                      />
+                      <label
+                        htmlFor="gender-female"
+                        className="ml-2 block text-sm text-gray-900"
+                      >
+                        Female
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        id="gender-other"
+                        name="gender"
+                        type="radio"
+                        value="other"
+                        className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-600"
+                      />
+                      <label
+                        htmlFor="gender-other"
+                        className="ml-2 block text-sm text-gray-900"
+                      >
+                        Other
+                      </label>
+                    </div>
                   </div>
                 </div>
-
-                <div className="col-span-full">
-                  <label
-                    htmlFor="street-address"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Address
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      name="street-address"
-                      id="street-address"
-                      autoComplete="street-address"
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    />
-                  </div>
+                <div className="sm:col-span-4">
+                <label htmlFor="country" className="block text-sm font-medium leading-6 text-gray-900">
+                  Country
+                </label>
+                <div className="mt-2">
+                  <Select
+                    id="country"
+                    name="country"
+                    options={countryOptions}
+                    className="basic-single "
+                    classNamePrefix="select"
+                    placeholder="Select a country"
+                    isSearchable
+                  />
                 </div>
+              </div>
 
-                <div className="sm:col-span-2 sm:col-start-1">
+              <div className="col-span-full">
+  <label
+    htmlFor="address"
+    className="block text-sm font-medium leading-6 text-gray-900"
+  >
+    Address
+  </label>
+  <div className="mt-2">
+    <textarea
+      name="address"
+      id="address"
+      rows={4} // You can adjust the number of rows as needed
+      autoComplete="address"
+      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+      placeholder="Enter your address here..."
+    />
+  </div>
+</div>
+
+                {/* <div className="sm:col-span-2 sm:col-start-1">
                   <label
                     htmlFor="city"
                     className="block text-sm font-medium leading-6 text-gray-900"
@@ -217,7 +256,7 @@ export default function Example() {
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     />
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8">
@@ -237,7 +276,7 @@ export default function Example() {
           </form>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-8 gap-y-8 pt-10 md:grid-cols-3">
+        {/* <div className="grid grid-cols-1 gap-x-8 gap-y-8 pt-10 md:grid-cols-3">
           <div className="px-4 sm:px-0">
             <h2 className="text-base font-semibold leading-7 text-gray-900">
               Notifications
@@ -392,7 +431,7 @@ export default function Example() {
               </button>
             </div>
           </form>
-        </div>
+        </div> */}
       </div>
     </div>
   );
