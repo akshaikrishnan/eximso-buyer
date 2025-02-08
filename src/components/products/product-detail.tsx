@@ -1,3 +1,4 @@
+// product details.tsx 
 "use client";
 import { Fragment, useState } from "react";
 import {
@@ -12,11 +13,13 @@ import {
 } from "@headlessui/react";
 import { HeartIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { StarIcon } from "@heroicons/react/20/solid";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import AddToBagBtn from "./add-to-bag";
+import AddToWishlistBtn from "./add-to-wishlist";
 import { RelatedProduct } from "./related-products";
+
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -28,10 +31,10 @@ export default function ProductDetail({ product }: any) {
     {
       name: "Dimensions",
       data: [
-        `length : ${product.dimensions.length} cm`,
-        `width : ${product.dimensions.width} cm`,
-        `height : ${product.dimensions.height} cm`,
-        `weight : ${product.dimensions.weight} kg`,
+        `Length: ${product.dimensions.length} cm`,
+        `Width: ${product.dimensions.width} cm`,
+        `Height: ${product.dimensions.height} cm`,
+        `Weight: ${product.dimensions.weight} kg`,
       ],
     },
     {
@@ -65,18 +68,16 @@ export default function ProductDetail({ product }: any) {
 
   const { data: related, isLoading } = useQuery({
     queryKey: ["products", product.category._id],
-    queryFn: () =>
-      api
-        .get(endpoints.products, {
-          params: {
-            category: product.category._id,
-            limit: 5,
-          },
-        })
-        .then((res) =>
-          res.data.result.data.filter((p: any) => p._id !== product._id)
-        )
-        .catch((err) => console.log(err)),
+    queryFn: () => api.get(endpoints.products, {
+      params: {
+        category: product.category._id,
+        limit: 5,
+      },
+    })
+      .then((res) =>
+        res.data.result.data.filter((p: any) => p._id !== product._id)
+      )
+      .catch((err) => console.log(err)),
   });
   console.log(related);
 
@@ -236,19 +237,18 @@ export default function ProductDetail({ product }: any) {
                   </RadioGroup> */}
                 </div>
 
-                <div className="mt-10 flex">
+                <div className="mt-10 flex ">
+
                   <AddToBagBtn product={product} />
                   <button
                     type="button"
                     className="ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
                   >
-                    <HeartIcon
-                      className="h-6 w-6 flex-shrink-0"
-                      aria-hidden="true"
-                    />
+                   <AddToWishlistBtn product={product} className="ml-4 w-12 h-12 flex items-center justify-center" />
                     <span className="sr-only">Add to favorites</span>
                   </button>
                 </div>
+
               </div>
 
               <section aria-labelledby="details-heading" className="mt-12">
