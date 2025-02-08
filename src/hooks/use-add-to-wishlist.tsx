@@ -30,7 +30,7 @@ export const useAddToWishlist = (product: any) => {
         description: error.response?.data?.message || "Something went wrong",
         action: (
           <ToastAction
-            onClick={() => router.push("/wishlist")}
+            onClick={() => router.push("/profile/my-wishlist")}
             altText="Go to Wishlist"
           >
             Show Wishlist
@@ -42,11 +42,11 @@ export const useAddToWishlist = (product: any) => {
       queryClient.invalidateQueries({ queryKey: ["wishlist"] }); // Invalidate wishlist data
 
       toast({
-        title: '${product.name} added to wishlist',
-        description:' You can view this item in your wishlist.',
+        title: `${product.name} added to wishlist`,
+        description:`You can view this item in your wishlist.`,
         action: (
           <ToastAction
-            onClick={() => router.push("/wishlist")}
+            onClick={() => router.push("/profile/my-wishlist")}
             altText="Go to Wishlist"
           >
             Show Wishlist
