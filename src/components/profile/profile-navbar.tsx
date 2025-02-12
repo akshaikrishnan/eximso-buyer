@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { HistoryIcon, LogOutIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const tabs = [
   { name: "My Account", href: "/profile", icon: UserIcon, current: false },
@@ -43,7 +44,7 @@ const tabs = [
   //   icon: LockClosedIcon,
   //   current: false,
   // },
-  
+
   {
     name: "Logout",
     href: "#",
@@ -88,7 +89,7 @@ export default function ProfileNavbar() {
             aria-label="Tabs"
           >
             {tabs.map((tab) => (
-              <a
+              <Link
                 key={tab.name}
                 href={tab.href}
                 className={classNames(
@@ -109,7 +110,7 @@ export default function ProfileNavbar() {
                   aria-hidden="true"
                 />
                 <span>{tab.name}</span>
-              </a>
+              </Link>
             ))}
           </nav>
         </div>

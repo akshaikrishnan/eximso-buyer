@@ -20,7 +20,7 @@ import { useUI } from "@/contexts/ui.context";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Searchbar from "./searchbar";
 
@@ -30,7 +30,7 @@ const Navbar = (props: any) => {
     queryFn: () => api.get(endpoints.categories).then((res) => res.data.result),
   });
 
-  const location = typeof window !== "undefined" ? window.location : null;
+  const path = usePathname();
 
   var [isNavOpen, setIsNavOpen] = useState(false);
   const { openSidebar } = useUI();
@@ -64,6 +64,19 @@ const Navbar = (props: any) => {
     queryFn: () => api.get(endpoints.cart).then((res) => res.data.result),
   });
 
+  const getProfileUrl = () => {
+    if (user) {
+      return "/profile";
+    }
+    return (
+      process.env.NEXT_PUBLIC_SELLER_URL +
+      "/auth/login" +
+      "?from=" +
+      path +
+      "&userType=Buyer"
+    );
+  };
+
   return (
     <>
       <TopBar className="px-5 container mx-auto" />
@@ -94,13 +107,7 @@ const Navbar = (props: any) => {
           <li className="flex-1 md:hidden"></li>
           <li className="md:order-5">
             <Link
-              href={
-                process.env.NEXT_PUBLIC_SELLER_URL +
-                "/auth/login" +
-                "?returnUrl=" +
-                location +
-                "&userType=Buyer"
-              }
+              href={getProfileUrl()}
               className="user cursor-pointer flex items-center text-xs gap-1 "
             >
               {!user && (

@@ -16,7 +16,7 @@ export default function TopBar({ className }: { className: string }) {
             <div className="topbar-nav">
               <ul className="flex space-x-6">
                 <li>
-                  <Link href="/">
+                  <Link href="/profile">
                     <span className="text-xs leading-6 text-qblack font-500">
                       Account
                     </span>
