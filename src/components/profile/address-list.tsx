@@ -42,6 +42,7 @@ export default function AddressList() {
             zip: "62701",
             country: "United States",
             phone: "555-555-5555",
+            type: "Home",
           }}
         />
         <AddressBlock
@@ -53,6 +54,7 @@ export default function AddressList() {
             zip: "62701",
             country: "United States",
             phone: "555-555-5555",
+            type: "Work",
           }}
         />
         <AddressBlock
@@ -65,6 +67,7 @@ export default function AddressList() {
             country: "United States",
             phone: "555-555-5555",
             isDefault: true,
+            type: "Home",
           }}
         />
       </div>
@@ -80,16 +83,20 @@ export function AddressBlock({ address }: { address: any }) {
         address.isDefault && "border-2 border-indigo-600"
       )}
     >
+      <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-2 py-1 rounded-full inline-block mb-3">
+        {address?.type}
+      </span>
       <button className="text-gray-500 hover:text-red-500 absolute top-2 right-2 p-3 rounded-full hover:bg-gray-100">
         <TrashIcon className="h-4 w-4" />
       </button>
-      <h5 className="font-bold">{address.name}</h5>
-      <p>{address.street}</p>
+      <h5 className="font-bold">{address?.name}</h5>
+      <p>{address?.street}</p>
       <p>
-        {address.city}, {address.state} {address.zip}
+        {address?.city}, {address?.state} {address?.zip}
       </p>
-      <p>{address.country}</p>
-      <p>{address.phone}</p>
+      <p>{address?.country}</p>
+      <p>{address?.phone}</p>
+
       <div className="mt-5 border-t border-gray-200 pt-5 flex items-center justify-between">
         {
           // Add a button to set the address as the default

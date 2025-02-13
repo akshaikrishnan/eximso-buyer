@@ -7,7 +7,9 @@ import React from "react";
 export default async function page({ params }: any) {
   try {
     if (params.slug) {
-      const res: any = await api.get(`${endpoints.products}/${params.slug}`);
+      const res: any = await api.get(
+        `${process.env.NEXT_PUBLIC_API_URL + endpoints.products}/${params.slug}`
+      );
       const data = await res.data.result;
       console.log(res);
       if (res.success === false)
