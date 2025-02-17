@@ -8,6 +8,7 @@ import { Providers } from "@/contexts/providers";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,6 +33,7 @@ export default function RootLayout({
           <Footer />
           <ManagedDrawer />
           <Toaster />
+          <Analytics />
           <ReactQueryDevtools initialIsOpen={false} />
         </Providers>
       </body>
