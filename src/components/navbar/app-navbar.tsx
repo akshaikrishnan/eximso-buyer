@@ -120,9 +120,12 @@ const Navbar = (props: any) => {
                   <Avatar>
                     <AvatarImage src={user?.logo} alt={user?.name} />
                     <AvatarFallback>
-                      {user?.name?.split(" ")[0].charAt(0) +
-                        user?.name?.split(" ")[1].charAt(0)}
-                    </AvatarFallback>
+  {user?.name
+    ? user?.name.split(" ").length > 1
+      ? user?.name.split(" ")[0].charAt(0) + user?.name.split(" ")[1].charAt(0)
+      : user?.name.charAt(0) // If there is only one word, take the first letter
+    : ""}  
+</AvatarFallback>
                   </Avatar>
                 ) : (
                   <UserCircleIcon className="w-7 h-7" />
