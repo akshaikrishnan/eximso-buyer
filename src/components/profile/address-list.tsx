@@ -7,19 +7,41 @@ import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import Loader from "../common/loader/loader";
+import { endpoints } from "@/lib/data/endpoints";
+
+// Define the Address type with additional fields
+interface Address {
+  addressLine1: string;
+  addressLine2?: string;
+  addressType: string;
+  altPhone?: string;
+  city: string;
+  country: string;
+  email: string;
+  name: string;
+  phone: string;
+  pincode: string;
+  state: string;
+  isDefault?: boolean;
+}
 
 export default function AddressList() {
   const {
-    data: addresses,
+    data: address,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["addresses"],
-    queryFn: () => api.get("/address").then((res) => res.data.result),
+    queryKey: ["AddAddress"],
+    queryFn: async () => {
+      const res = await api.get(endpoints.address);
+      return res.data.result;
+    },
   });
+
   if (isLoading) {
     return <Loader fullScreen />;
   }
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between">
@@ -33,49 +55,15 @@ export default function AddressList() {
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-8 pt-10 xl:grid-cols-2">
-        <AddressBlock
-          address={{
-            name: "John Doe",
-            street: "123 Main St",
-            city: "Springfield",
-            state: "IL",
-            zip: "62701",
-            country: "United States",
-            phone: "555-555-5555",
-            type: "Home",
-          }}
-        />
-        <AddressBlock
-          address={{
-            name: "John Doe",
-            street: "123 Main St",
-            city: "Springfield",
-            state: "IL",
-            zip: "62701",
-            country: "United States",
-            phone: "555-555-5555",
-            type: "Work",
-          }}
-        />
-        <AddressBlock
-          address={{
-            name: "Jane Doe",
-            street: "123 Main St",
-            city: "Springfield",
-            state: "IL",
-            zip: "62701",
-            country: "United States",
-            phone: "555-555-5555",
-            isDefault: true,
-            type: "Home",
-          }}
-        />
+        {address?.map((addr: Address, index: number) => (
+          <AddressBlock key={index} address={addr} />
+        ))}
       </div>
     </div>
   );
 }
 
-export function AddressBlock({ address }: { address: any }) {
+export function AddressBlock({ address }: { address: Address }) {
   return (
     <address
       className={clsx(
@@ -84,18 +72,21 @@ export function AddressBlock({ address }: { address: any }) {
       )}
     >
       <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-2 py-1 rounded-full inline-block mb-3">
-        {address?.type}
+        {address?.addressType}
       </span>
       <button className="text-gray-500 hover:text-red-500 absolute top-2 right-2 p-3 rounded-full hover:bg-gray-100">
         <TrashIcon className="h-4 w-4" />
       </button>
       <h5 className="font-bold">{address?.name}</h5>
-      <p>{address?.street}</p>
+      <p>{address?.addressLine1}</p>
+      {address?.addressLine2 && <p>{address?.addressLine2}</p>}
       <p>
-        {address?.city}, {address?.state} {address?.zip}
+        {address?.city}, {address?.state} {address?.pincode}
       </p>
       <p>{address?.country}</p>
       <p>{address?.phone}</p>
+      {address?.altPhone && <p>Alternate No: {address?.altPhone}</p>}
+      <p>Email: {address?.email}</p>
 
       <div className="mt-5 border-t border-gray-200 pt-5 flex items-center justify-between">
         {
