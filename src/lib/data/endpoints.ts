@@ -5,4 +5,5 @@ export const endpoints = {
   user: "user",
   cart: "cart",
   wishlist: "wishlist",
+   address:"address"
 };
