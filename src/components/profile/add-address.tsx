@@ -6,6 +6,7 @@ import React, { useState } from "react";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
 
 type Address = {
   name: string;
@@ -23,152 +24,72 @@ type Address = {
   isDelete: boolean;
 };
 
-type ValidationErrors = {
-  [key in keyof Address]?: string;
-};
-
 export default function AddAddress() {
   const router = useRouter();
   const { toast } = useToast();
-  
-  const [address, setAddress] = useState<Address>({
-    name: "",
-    phone: "",
-    email: "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    state: "",
-    pincode: "",
-    country: "",
-    addressType: "home",
-    isDefault: false,
-    altPhone: "",
-    isDelete: false,
-  });
-  
-  const [errors, setErrors] = useState<ValidationErrors>({});
-  const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
-
-  const validateField = (name: keyof Address, value: string): string => {
-    switch (name) {
-      case 'name':
-        return value.trim() === '' ? 'Name is required' :
-               value.length < 2 ? 'Name must be at least 2 characters' : '';
-      case 'phone':
-        return value.trim() === '' ? 'Phone number is required' :
-               !/^\d{10}$/.test(value) ? 'Phone number must be 10 digits' : '';
-      case 'email':
-        return value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Enter a valid email address' : '';
-      case 'addressLine1':
-        return value.trim() === '' ? 'Address Line 1 is required' :
-               value.length < 5 ? 'Enter a valid street address' : '';
-      case 'city':
-        return value.trim() === '' ? 'City is required' :
-               value.length < 2 ? 'Enter a valid city name' : '';
-      case 'state':
-        return value.trim() === '' ? 'State is required' :
-               value.length < 2 ? 'Enter a valid state name' : '';
-      case 'pincode':
-        return value.trim() === '' ? 'Postal code is required' :
-               !/^\d{5,6}$/.test(value) ? 'Enter a valid postal code (5-6 digits)' : '';
-      case 'country':
-        return value.trim() === '' ? 'Country is required' :
-               value.length < 2 ? 'Enter a valid country name' : '';
-      case 'altPhone':
-        return value && !/^\d{10}$/.test(value) ? 'Alternative phone must be 10 digits' : '';
-      default:
-        return '';
+  const [loading, setLoading] = useState(false);
+  
+  const { 
+    register, 
+    handleSubmit: validateAndSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+    reset
+  } = useForm<Address>({
+    defaultValues: {
+      name: "",
+      phone: "",
+      email: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      pincode: "",
+      country: "",
+      addressType: "home",
+      isDefault: false,
+      altPhone: "",
+      isDelete: false,
     }
-  };
+  });
 
-  const validateForm = (): boolean => {
-    const newErrors: ValidationErrors = {};
-    let isValid = true;
+  // Watch the addressType value to update it in real-time
+  const addressType = watch("addressType");
 
-    // Validate each field
-    Object.entries(address).forEach(([key, value]) => {
-      if (typeof value === 'string') {
-        const fieldError = validateField(key as keyof Address, value);
-        if (fieldError) {
-          newErrors[key as keyof Address] = fieldError;
-          isValid = false;
-        }
-      }
+ const onSubmit = async (data: Address) => {
+  setUpdating(true);
+  try {
+    const response = await api.post(endpoints.address, data);
+    console.log('address response', response);
+
+    if (response.data) {
+      toast({
+        title: "Success",
+        description: "Address added successfully!",
+      });
+      // Reset form after successful submission
+      reset(); // Use reset() from useForm hook
+    } else {
+      throw new Error("No data returned from the server");
+    }
+  } catch (error) {
+    console.error("Error adding address: ", error);
+    toast({
+      title: "Error",
+      description: "Failed to add address.",
+      variant: "destructive",
     });
+  } finally {
+    setUpdating(false);
+  }
+};
 
-    setErrors(newErrors);
-    return isValid;
-  };
+  
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setAddress((prevAddress) => ({
-      ...prevAddress,
-      [name]: value,
-    }));
-
-    // Real-time validation
-    const error = validateField(name as keyof Address, value);
-    setErrors(prev => ({
-      ...prev,
-      [name]: error
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate all fields before submission
-    if (!validateForm()) {
-      toast({
-        title: "Validation Error",
-        description: "Please correct the errors in the form.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setUpdating(true);
-    try {
-      const response = await api.post(endpoints.address, address);
-      console.log('address response',response);
-      
-      if (response.data) {
-        toast({
-          title: "Success",
-          description: "Address added successfully!",
-        });
-        setAddress({
-          name: "",
-          phone: "",
-          email: "",
-          addressLine1: "",
-          addressLine2: "",
-          city: "",
-          state: "",
-          pincode: "",
-          country: "",
-          addressType: "home",
-          isDefault: false,
-          altPhone: "",
-          isDelete: false,
-        });
-        setErrors({});
-      } else {
-        throw new Error("No data returned from the server");
-      }
-    } catch (error) {
-      console.error("Error adding address: ", error);
-      toast({
-        title: "Error",
-        description: "Failed to add address.",
-        variant: "destructive",
-      });
-    } finally {
-      setUpdating(false);
-    }
+  const handleAddressTypeChange = (type: "home" | "office" | "other") => {
+    setValue("addressType", type);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -192,123 +113,122 @@ export default function AddAddress() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+          <form onSubmit={validateAndSubmit(onSubmit)} className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
             <div className="px-4 py-6 sm:p-8">
               <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="sm:col-span-4">
-                  <label htmlFor="full-name" className="block text-sm font-medium leading-6 text-gray-900">
+                  <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
                     Full Name
                   </label>
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="name"
-                      id="full-name"
-                      value={address.name}
-                      onChange={handleChange}
-                      autoComplete="name"
+                      id="name"
                       placeholder="Name of the recipient"
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.name ? 'ring-red-500' : 'ring-gray-300'
                       }`}
-                      required
+                      {...register("name", { 
+                        required: "Name is required",
+                        minLength: { value: 2, message: "Name must be at least 2 characters" }
+                      })}
                     />
                     {errors.name && (
-                      <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label htmlFor="mobile-number" className="block text-sm font-medium leading-6 text-gray-900">
+                  <label htmlFor="phone" className="block text-sm font-medium leading-6 text-gray-900">
                     Mobile Number
                   </label>
                   <div className="mt-2">
                     <input
                       type="tel"
-                      name="phone"
-                      id="mobile-number"
-                      value={address.phone}
-                      onChange={handleChange}
-                      autoComplete="tel"
+                      id="phone"
                       placeholder="Contact number for delivery updates"
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.phone ? 'ring-red-500' : 'ring-gray-300'
                       }`}
-                      required
+                      {...register("phone", { 
+                        required: "Phone number is required",
+                        pattern: {
+                          value: /^\d{10}$/,
+                          message: "Phone number must be 10 digits"
+                        }
+                      })}
                     />
                     {errors.phone && (
-                      <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label htmlFor="email-address" className="block text-sm font-medium leading-6 text-gray-900">
+                  <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
                     Email Address
                   </label>
                   <div className="mt-2">
                     <input
                       type="email"
-                      name="email"
-                      id="email-address"
-                      value={address.email}
-                      onChange={handleChange}
-                      autoComplete="email"
+                      id="email"
                       placeholder="Enter your email address"
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.email ? 'ring-red-500' : 'ring-gray-300'
                       }`}
+                      {...register("email", { 
+                        pattern: {
+                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                          message: "Enter a valid email address"
+                        }
+                      })}
                     />
                     {errors.email && (
-                      <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="col-span-full">
-                  <label htmlFor="address-line-1" className="block text-sm font-medium leading-6 text-gray-900">
+                  <label htmlFor="addressLine1" className="block text-sm font-medium leading-6 text-gray-900">
                     Address Line 1
                   </label>
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="addressLine1"
-                      id="address-line-1"
-                      value={address.addressLine1}
-                      onChange={handleChange}
-                      autoComplete="address-line1"
+                      id="addressLine1"
                       placeholder="Street address, P.O. box, company name"
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.addressLine1 ? 'ring-red-500' : 'ring-gray-300'
                       }`}
-                      required
+                      {...register("addressLine1", { 
+                        required: "Address Line 1 is required",
+                        minLength: { value: 5, message: "Enter a valid street address" }
+                      })}
                     />
                     {errors.addressLine1 && (
-                      <p className="mt-1 text-sm text-red-600">{errors.addressLine1}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.addressLine1.message}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="col-span-full">
-                  <label htmlFor="address-line-2" className="block text-sm font-medium leading-6 text-gray-900">
+                  <label htmlFor="addressLine2" className="block text-sm font-medium leading-6 text-gray-900">
                     Address Line 2
                   </label>
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="addressLine2"
-                      id="address-line-2"
-                      value={address.addressLine2}
-                      onChange={handleChange}
-                      autoComplete="address-line2"
+                      id="addressLine2"
                       placeholder="Apartment, suite, unit, building, floor, etc."
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.addressLine2 ? 'ring-red-500' : 'ring-gray-300'
                       }`}
+                      {...register("addressLine2")}
                     />
                     {errors.addressLine2 && (
-                      <p className="mt-1 text-sm text-red-600">{errors.addressLine2}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.addressLine2.message}</p>
                     )}
                   </div>
                 </div>
@@ -320,19 +240,18 @@ export default function AddAddress() {
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="city"
                       id="city"
-                      value={address.city}
-                      onChange={handleChange}
-                      autoComplete="address-level2"
                       placeholder="City name"
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.city ? 'ring-red-500' : 'ring-gray-300'
                       }`}
-                      required
+                      {...register("city", { 
+                        required: "City is required",
+                        minLength: { value: 2, message: "Enter a valid city name" }
+                      })}
                     />
                     {errors.city && (
-                      <p className="mt-1 text-sm text-red-600">{errors.city}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
                     )}
                   </div>
                 </div>
@@ -344,43 +263,44 @@ export default function AddAddress() {
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="state"
                       id="state"
-                      value={address.state}
-                      onChange={handleChange}
-                      autoComplete="address-level1"
                       placeholder="State or Province"
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.state ? 'ring-red-500' : 'ring-gray-300'
                       }`}
-                      required
+                      {...register("state", { 
+                        required: "State is required",
+                        minLength: { value: 2, message: "Enter a valid state name" }
+                      })}
                     />
                     {errors.state && (
-                      <p className="mt-1 text-sm text-red-600">{errors.state}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.state.message}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label htmlFor="postal-code" className="block text-sm font-medium leading-6 text-gray-900">
+                  <label htmlFor="pincode" className="block text-sm font-medium leading-6 text-gray-900">
                     ZIP / Postal Code
                   </label>
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="pincode"
-                      id="postal-code"
-                      value={address.pincode}
-                      onChange={handleChange}
-                      autoComplete="postal-code"
+                      id="pincode"
                       placeholder="ZIP or Postal Code"
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.pincode ? 'ring-red-500' : 'ring-gray-300'
                       }`}
-                      required
+                      {...register("pincode", { 
+                        required: "Postal code is required",
+                        pattern: {
+                          value: /^\d{5,6}$/,
+                          message: "Enter a valid postal code (5-6 digits)"
+                        }
+                      })}
                     />
                     {errors.pincode && (
-                      <p className="mt-1 text-sm text-red-600">{errors.pincode}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.pincode.message}</p>
                     )}
                   </div>
                 </div>
@@ -392,17 +312,17 @@ export default function AddAddress() {
                   <div className="mt-2">
                     <input
                       type="text"
-                      name="country"
                       id="country"
-                      value={address.country}
-                      onChange={handleChange}
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.country ? 'ring-red-500' : 'ring-gray-300'
                       }`}
-                      required
+                      {...register("country", { 
+                        required: "Country is required",
+                        minLength: { value: 2, message: "Enter a valid country name" }
+                      })}
                     />
                     {errors.country && (
-                      <p className="mt-1 text-sm text-red-600">{errors.country}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.country.message}</p>
                     )}
                   </div>
                 </div>
@@ -416,11 +336,10 @@ export default function AddAddress() {
                       <div className="flex items-center" key={type}>
                         <input
                           type="radio"
-                          name="addressType"
                           id={type}
                           value={type}
-                          checked={address.addressType === type}
-                          onChange={handleChange}
+                          checked={addressType === type}
+                          onChange={() => handleAddressTypeChange(type as "home" | "office" | "other")}
                           className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                         />
                         <label htmlFor={type} className="ml-2 block text-sm text-gray-900">
@@ -438,17 +357,20 @@ export default function AddAddress() {
                   <div className="mt-2">
                     <input
                       type="tel"
-                      name="altPhone"
                       id="altPhone"
-                      value={address.altPhone}
-                      onChange={handleChange}
                       placeholder="Optional contact number"
                       className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
                         errors.altPhone ? 'ring-red-500' : 'ring-gray-300'
                       }`}
+                      {...register("altPhone", { 
+                        pattern: {
+                          value: /^\d{10}$/,
+                          message: "Alternative phone must be 10 digits"
+                        }
+                      })}
                     />
                     {errors.altPhone && (
-                      <p className="mt-1 text-sm text-red-600">{errors.altPhone}</p>
+                      <p className="mt-1 text-sm text-red-600">{errors.altPhone.message}</p>
                     )}
                   </div>
                 </div>
@@ -475,4 +397,8 @@ export default function AddAddress() {
       </div>
     </div>
   );
+}
+
+function resetForm() {
+  throw new Error("Function not implemented.");
 }
