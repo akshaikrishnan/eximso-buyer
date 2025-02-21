@@ -67,26 +67,28 @@ export function AddressBlock({ address }: { address: Address }) {
   return (
     <address
       className={clsx(
-        "bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl p-6 relative",
+        "bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl p-6 relative flex flex-col justify-between",
         address.isDefault && "border-2 border-indigo-600"
       )}
     >
-      <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-2 py-1 rounded-full inline-block mb-3">
-        {address?.addressType}
-      </span>
-      <button className="text-gray-500 hover:text-red-500 absolute top-2 right-2 p-3 rounded-full hover:bg-gray-100">
-        <TrashIcon className="h-4 w-4" />
-      </button>
-      <h5 className="font-bold">{address?.name}</h5>
-      <p>{address?.addressLine1}</p>
-      {address?.addressLine2 && <p>{address?.addressLine2}</p>}
-      <p>
-        {address?.city}, {address?.state} {address?.pincode}
-      </p>
-      <p>{address?.country}</p>
-      <p>{address?.phone}</p>
-      {address?.altPhone && <p>Alternate No: {address?.altPhone}</p>}
-      <p>Email: {address?.email}</p>
+      <div className="flex-grow">
+        <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-2 py-1 rounded-full inline-block mb-3">
+          {address?.addressType}
+        </span>
+        <button className="text-gray-500 hover:text-red-500 absolute top-2 right-2 p-3 rounded-full hover:bg-gray-100">
+          <TrashIcon className="h-4 w-4" />
+        </button>
+        <h5 className="font-bold">{address?.name}</h5>
+        <p>{address?.addressLine1}</p>
+        {address?.addressLine2 && <p>{address?.addressLine2}</p>}
+        <p>
+          {address?.city}, {address?.state} {address?.pincode}
+        </p>
+        <p>{address?.country}</p>
+        <p>{address?.phone}</p>
+        {address?.altPhone && <p>Alternate No: {address?.altPhone}</p>}
+        <p>Email: {address?.email}</p>
+      </div>
 
       <div className="mt-5 border-t border-gray-200 pt-5 flex items-center justify-between">
         {
