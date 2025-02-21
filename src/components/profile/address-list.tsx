@@ -11,7 +11,7 @@ import React, { useState } from "react";
 import Loader from "../common/loader/loader";
 import { endpoints } from "@/lib/data/endpoints";
 import { useToast } from "@/hooks/use-toast";
-import EditAddressModal from "@/app/profile/edit-address-modal/address-modal"; 
+import EditAddressModal from "@/app/profile/edit-address-modal/address-modal";
 
 // Define the Address type with additional fields
 interface Address {
@@ -34,10 +34,10 @@ interface Address {
 export default function AddressList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
+
   // delete address
   const deleteAddressMutation = useMutation({
     mutationFn: async (addressId: string) => {
@@ -45,12 +45,20 @@ export default function AddressList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["AddAddress"] });
-      toast({ title: "Success", description: "Address deleted successfully!", variant: "default" });
+      toast({
+        title: "Success",
+        description: "Address deleted successfully!",
+        variant: "default",
+      });
     },
     onError: (error) => {
       console.error(error);
-      toast({ title: "Error", description: "Failed to delete address. Please try again.", variant: "default" });
-    }
+      toast({
+        title: "Error",
+        description: "Failed to delete address. Please try again.",
+        variant: "default",
+      });
+    },
   });
 
   const {
@@ -62,14 +70,14 @@ export default function AddressList() {
     queryFn: async () => {
       const res = await api.get(endpoints.address);
       return res.data.result;
-    }
+    },
   });
-  
+
   const handleEditClick = (address: Address) => {
     setSelectedAddress(address);
     setIsModalOpen(true);
   };
-  
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedAddress(null);
@@ -93,18 +101,20 @@ export default function AddressList() {
       </div>
       <div className="grid grid-cols-1 gap-8 pt-10 xl:grid-cols-2">
         {addresses?.map((addr: Address, index: number) => (
-          <AddressBlock 
-            key={index} 
-            address={addr} 
+          <AddressBlock
+            key={index}
+            address={addr}
             onEditClick={handleEditClick}
-            onDeleteClick={(addressId) => deleteAddressMutation.mutate(addressId)} // Pass delete function
+            onDeleteClick={(addressId) =>
+              deleteAddressMutation.mutate(addressId)
+            } // Pass delete function
           />
         ))}
       </div>
-      
+
       {isModalOpen && selectedAddress && (
-        <EditAddressModal 
-          address={selectedAddress} 
+        <EditAddressModal
+          address={selectedAddress}
           onClose={handleCloseModal}
           onSave={() => {
             queryClient.invalidateQueries({ queryKey: ["AddAddress"] });
@@ -116,54 +126,55 @@ export default function AddressList() {
   );
 }
 
-export function AddressBlock({ 
-  address, 
+export function AddressBlock({
+  address,
   onEditClick,
-  onDeleteClick 
-}: { 
+  onDeleteClick,
+}: {
   address: Address;
   onEditClick: (address: Address) => void;
-  onDeleteClick: (addressId: string) => void; 
+  onDeleteClick: (addressId: string) => void;
 }) {
   return (
     <address
       className={clsx(
-        "bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl p-6 relative",
+        "bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl p-6 relative flex flex-col justify-between",
         address.isDefault && "border-2 border-indigo-600"
       )}
     >
-      <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-2 py-1 rounded-full inline-block mb-3">
-        {address?.addressType}
-      </span>
-      <button className="text-gray-500 hover:text-red-600 absolute top-2 right-2 p-3 rounded-full hover:bg-gray-100"
-       onClick={() => onDeleteClick(address._id)} // Call delete function
-       >
-        <TrashIcon className="h-5 w-5" />
-      </button>
-      <h5 className="font-bold">{address?.name}</h5>
-      <p>{address?.addressLine1}</p>
-      {address?.addressLine2 && <p>{address?.addressLine2}</p>}
-      <p>
-        {address?.city}, {address?.state} {address?.pincode}
-      </p>
-      <p>{address?.country}</p>
-      <p>{address?.phone}</p>
-      {address?.altPhone && <p>Alternate No: {address?.altPhone}</p>}
-      <p>Email: {address?.email}</p>
+      <div className="flex-grow">
+        <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-2 py-1 rounded-full inline-block mb-3">
+          {address?.addressType}
+        </span>
+        <button
+          className="text-gray-500 hover:text-red-600 absolute top-2 right-2 p-3 rounded-full hover:bg-gray-100"
+          onClick={() => onDeleteClick(address._id)} // Call delete function
+        >
+          <TrashIcon className="h-5 w-5" />
+        </button>
+        <h5 className="font-bold">{address?.name}</h5>
+        <p>{address?.addressLine1}</p>
+        {address?.addressLine2 && <p>{address?.addressLine2}</p>}
+        <p>
+          {address?.city}, {address?.state} {address?.pincode}
+        </p>
+        <p>{address?.country}</p>
+        <p>{address?.phone}</p>
+        {address?.altPhone && <p>Alternate No: {address?.altPhone}</p>}
+        <p>Email: {address?.email}</p>
+      </div>
 
       <div className="mt-5 border-t border-gray-200 pt-5 flex items-center justify-between">
-        {
-          address.isDefault ? (
-            <span className="bg-indigo-600 text-white text-xs font-semibold px-2 py-1 rounded-full ">
-              Default
-            </span>
-          ) : (
-            <button className="text-indigo-600 text-xs font-semibold">
-              Set as Default
-            </button>
-          )
-        }
-        <button 
+        {address.isDefault ? (
+          <span className="bg-indigo-600 text-white text-xs font-semibold px-2 py-1 rounded-full ">
+            Default
+          </span>
+        ) : (
+          <button className="text-indigo-600 text-xs font-semibold">
+            Set as Default
+          </button>
+        )}
+        <button
           className="text-indigo-600 text-xs font-semibold"
           onClick={() => onEditClick(address)}
         >
