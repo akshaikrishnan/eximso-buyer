@@ -7,6 +7,8 @@ import { endpoints } from "@/lib/data/endpoints";
 import api from "@/lib/api/axios.interceptor";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
+import Image from 'next/image';
+
 
 // Define the type for the country option
 type CountryOption = {
@@ -154,13 +156,14 @@ export default function UserProfile() {
             <div className="px-4 py-6 sm:p-8">
               <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="col-span-full">
-                  <label className="block text-sm font-medium leading-6 text-gray-900">Photo</label>
+                 
                   <div className="mt-2 flex items-center gap-x-3">
                     <img
-                      src={formData.logo || "/path/to/default-avatar.png"}
+                      src={formData.logo || "/images/common/user.png"}
                       alt="Profile"
                       className="h-25 w-20 rounded-full text-gray-300"
                     />
+                     <label className="block text-sm font-medium leading-6 text-gray-900">Photo</label>
                     <button
                       type="button"
                       onClick={handleLogoChangeButtonClick} // Trigger file input click
