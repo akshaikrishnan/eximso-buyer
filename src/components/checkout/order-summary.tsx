@@ -1,13 +1,20 @@
 import { CartItem, useCart } from "@/hooks/use-cart";
 import React from "react";
 import CartBtn from "../layout/cart/cart-btn";
+import { OrderSummary } from "../layout/cart";
+import Loader from "../common/loader/loader";
 
-export default function OrderSummary() {
+export default function OrderSummaryDetails() {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
+  if (isLoading)
+    return (
+      <div>
+        <Loader />
+      </div>
+    );
   return (
-    <div className="mx-auto w-full max-w-lg order-1 xl:order-2">
+    <>
       <h2 className="sr-only">Order summary</h2>
-
       <div className="flow-root">
         <ul role="list" className="-my-6 divide-y divide-gray-200">
           {cart?.items.map((item: CartItem) => (
@@ -30,16 +37,11 @@ export default function OrderSummary() {
                     </p>
                   </div>
                   <div className="flex flex-none space-x-4">
-                    <button
-                      type="button"
-                      className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                    >
-                      Edit
-                    </button>
-                    <div className="flex border-l border-gray-300 pl-4">
+                    <div className="flex pl-4">
                       <button
                         type="button"
                         className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                        onClick={() => removeMutation.mutate(item.product._id)}
                       >
                         Remove
                       </button>
@@ -51,25 +53,9 @@ export default function OrderSummary() {
           ))}
         </ul>
       </div>
-
-      <dl className="mt-10 space-y-6 text-sm font-medium text-gray-500">
-        <div className="flex justify-between">
-          <dt>Subtotal</dt>
-          <dd className="text-gray-900">$104.00</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt>Taxes</dt>
-          <dd className="text-gray-900">$8.32</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt>Shipping</dt>
-          <dd className="text-gray-900">$14.00</dd>
-        </div>
-        <div className="flex justify-between border-t border-gray-200 pt-6 text-gray-900">
-          <dt className="text-base">Total</dt>
-          <dd className="text-base">$126.32</dd>
-        </div>
-      </dl>
-    </div>
+      <div className="xl:mt-4">
+        <OrderSummary subTotal={subTotal} />
+      </div>
+    </>
   );
 }

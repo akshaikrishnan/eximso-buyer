@@ -44,7 +44,7 @@ export default function AddressList() {
       await api.delete(`${endpoints.address}/${addressId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["AddAddress"] });
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
       toast({
         title: "Success",
         description: "Address deleted successfully!",
@@ -66,7 +66,7 @@ export default function AddressList() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["AddAddress"],
+    queryKey: ["addresses"],
     queryFn: async () => {
       const res = await api.get(endpoints.address);
       return res.data.result;
@@ -116,10 +116,6 @@ export default function AddressList() {
         <EditAddressModal
           address={selectedAddress}
           onClose={handleCloseModal}
-          onSave={() => {
-            queryClient.invalidateQueries({ queryKey: ["AddAddress"] });
-            handleCloseModal();
-          }}
         />
       )}
     </div>
