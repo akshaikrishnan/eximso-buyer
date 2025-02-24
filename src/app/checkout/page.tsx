@@ -1,31 +1,36 @@
 "use client";
+import AddressBlock from "@/components/checkout/address-block";
 import OrderSummary from "@/components/checkout/order-summary";
 import React from "react";
 
-const products = [
-  {
-    id: 1,
-    name: "Women's Basic Tee",
-    href: "#",
-    price: "$32.00",
-    color: "Gray",
-    size: "S",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/checkout-page-05-product-01.jpg",
-    imageAlt: "Front of women's basic tee in heather gray.",
-  },
-  // More products...
-];
+interface CheckoutData {
+  address: string;
+  paymentMode: string;
+}
 
 export default function CheckoutPage() {
+  const [checkOutData, setCheckOutData] = React.useState({
+    shippingAddress: "",
+    billingAdddress: "",
+    paymentMode: "",
+  });
+  const handleCheckoutData = (data: CheckoutData) => {
+    setCheckOutData({ ...checkOutData, ...data });
+  };
   return (
     <div className="bg-white">
-      <div className="mx-auto container px-4 pb-16 pt-4 sm:px-6 sm:pb-24 sm:pt-8 lg:px-8 xl:px-2 xl:pt-14">
+      <div className="mx-auto container px-4 pb-16 pt-4 sm:px-6 sm:pb-24 sm:pt-8 lg:px-8 xl:px-2 xl:pt-14 relative overflow-auto">
         <h1 className="sr-only">Checkout</h1>
 
         <div className="mx-auto grid max-w-lg grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
-          <OrderSummary />
-          <div className="mx-auto w-full max-w-lg order-2 xl:order-1">
+          <div className="mx-auto w-full max-w-lg order-1 xl:order-2 xl:sticky top-2">
+            <OrderSummary />
+          </div>
+          <div className="mx-auto w-full order-2 xl:order-1">
+            <AddressBlock
+              checkoutData={checkOutData}
+              handleCheckoutData={handleCheckoutData}
+            />
             <button
               type="button"
               className="flex w-full items-center justify-center rounded-md border border-transparent bg-black py-2 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
