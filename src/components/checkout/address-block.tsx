@@ -45,7 +45,7 @@ export default function AddressBlock({
       {isLoading ? (
         <Loader />
       ) : checkoutData?.shippingAddress ? (
-        selectedAddressCard(checkoutData?.address)
+        selectedAddressCard(checkoutData?.shippingAddress)
       ) : (
         <div className="flex flex-col gap-4">
           {addresses?.map((address: any) => (
@@ -72,6 +72,7 @@ export default function AddressBlock({
 }
 
 function selectedAddressCard(address: any) {
+  console.log(address);
   return (
     <div className="flex items-center gap-4">
       <div className="flex flex-col gap-1">
