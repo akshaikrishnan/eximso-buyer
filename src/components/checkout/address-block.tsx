@@ -4,12 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import Loader from "../common/loader/loader";
 import { useState } from "react";
 
-interface AddressBlockProps {
-  handleCheckoutData: (data: any) => void;
-  checkoutData: any;
-}
-
+type AddressType = "shipping" | "billing";
 type Address = {
+  _id: string;
   name: string;
   phone: string;
   email?: string;
@@ -24,6 +21,13 @@ type Address = {
   altPhone?: string;
   isDelete: boolean;
 };
+
+interface AddressBlockProps {
+  type: AddressType;
+  checkoutData: any;
+  handleCheckoutData: (data: any) => void;
+}
+
 const getFormattedAddress = (address: Address) => {
   const parts = [
     address.email,
@@ -40,85 +44,108 @@ const getFormattedAddress = (address: Address) => {
 };
 
 export default function AddressBlock({
-  handleCheckoutData,
+  type,
   checkoutData,
+  handleCheckoutData,
 }: AddressBlockProps) {
-  const {
-    data: addresses,
-    isLoading,
-    isError,
-  } = useQuery({
+  const [isEdit, setIsEdit] = useState(false);
+  const addressKey = `${type}Address` as const;
+
+  const { data: addresses, isLoading } = useQuery<Address[]>({
     queryKey: ["addresses"],
     queryFn: async () => {
       const res = await api.get(endpoints.address);
       const defaultAddress = res.data.result.find(
-        (address: any) => address.isDefault
+        (address: Address) => address.isDefault
       );
+
       if (defaultAddress) {
-        handleCheckoutData({
-          shippingAddress: defaultAddress,
-          billingAddress: defaultAddress,
-        });
+        if (type === "shipping")
+          handleCheckoutData({ [addressKey]: defaultAddress });
       }
       return res.data.result;
     },
   });
 
-  const [isEdit, setIsEdit] = useState(false);
+  const handleAddressSelect = (selectedAddress: Address) => {
+    handleCheckoutData({ [addressKey]: selectedAddress });
+  };
+
+  const selectedAddress = checkoutData?.[addressKey];
+
   return (
-    <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl px-4 py-6 sm:p-8">
-      <div className="flex items-center justify-between">
-        <h4 className="w-full text-left text-lg font-medium text-gray-500 mb-3">
-          Delivering To
+    <div className="">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-lg font-medium text-gray-500">
+          {type === "shipping" ? "Delivering To" : "Billing Address"}
         </h4>
-        <button
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-          onClick={() => setIsEdit(true)}
-        >
-          Change
-        </button>
+        {selectedAddress && (
+          <button
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+            onClick={() => setIsEdit(!isEdit)}
+          >
+            {isEdit ? "Cancel" : "Change"}
+          </button>
+        )}
       </div>
+
       {isLoading ? (
         <Loader />
-      ) : isEdit ? (
+      ) : isEdit || !selectedAddress ? (
         <div className="flex flex-col gap-4">
-          {addresses?.map((address: any) => (
+          {addresses?.map((address) => (
             <AddressCard
-              key={address?._id}
+              key={address._id}
               address={address}
-              onChange={handleCheckoutData}
+              selected={address._id === selectedAddress?._id}
+              onSelect={handleAddressSelect}
+              name={`address-${type}`}
             />
           ))}
         </div>
-      ) : checkoutData?.shippingAddress ? (
-        selectedAddressCard(checkoutData?.shippingAddress)
       ) : (
-        addresses?.map((address: any) => (
-          <AddressCard
-            key={address?._id}
-            address={address}
-            onChange={handleCheckoutData}
+        <SelectedAddress address={selectedAddress} />
+      )}
+      {type === "shipping" && (
+        <div className="mt-4 text-sm">
+          <input
+            type="checkbox"
+            id="isSameAddress"
+            name="isSameAddress"
+            className="cursor-pointer"
+            checked={checkoutData.isSameAddress}
+            onChange={(e) => {
+              const addressValue = e.target.checked
+                ? checkoutData.shippingAddress
+                : null;
+              handleCheckoutData({
+                billingAddress: addressValue,
+                isSameAddress: !checkoutData.isSameAddress,
+              });
+              console.log(checkoutData);
+            }}
           />
-        ))
+          <label htmlFor="isSameAddress" className="cursor-pointer ml-2">
+            Billing address is same as shipping address
+          </label>
+        </div>
       )}
     </div>
   );
 }
 
-function selectedAddressCard(address: any) {
-  console.log(address);
+function SelectedAddress({ address }: { address: Address }) {
   return (
     <div className="flex items-center gap-4">
       <div className="flex flex-col gap-1">
         <h4 className="text-md font-medium text-gray-900">
-          {address?.name}
+          {address.name}
           <span className="text-sm font-normal text-gray-900 ml-3">
-            {address?.phone}
+            {address.phone}
           </span>
         </h4>
         <p className="text-sm font-normal text-gray-900">
-          {address?.addressLine1}, {address?.city}, {address?.state},{" "}
-          {address?.pincode}
+          {getFormattedAddress(address)}
         </p>
       </div>
     </div>
@@ -127,32 +154,38 @@ function selectedAddressCard(address: any) {
 
 function AddressCard({
   address,
-  onChange,
+  selected,
+  onSelect,
+  name,
 }: {
-  address: any;
-  onChange: (data: any) => void;
+  address: Address;
+  selected: boolean;
+  onSelect: (address: Address) => void;
+  name: string;
 }) {
   return (
     <div className="flex items-center gap-4">
       <input
         type="radio"
-        name="address"
-        id={address?._id}
+        name={name}
+        id={`${name}-${address._id}`}
+        checked={selected}
+        onChange={() => onSelect(address)}
         className="cursor-pointer"
-        onChange={() => onChange({ shippingAddress: address })}
       />
-      <label htmlFor={address?._id} className="cursor-pointer">
-        <h5 className="text-sm font-medium">
-          <div>
-            {address?.name}, {address?.phone}{" "}
-            <span className="italic capitalize font-semibold text-slate-600 text-xs px-1 border border-slate-300 rounded-full">
-              {address?.addressType}
-            </span>
-          </div>
-        </h5>
-        <h5 className="text-sm font-normal text-gray-500">
+      <label
+        htmlFor={`${name}-${address._id}`}
+        className="cursor-pointer flex-1"
+      >
+        <div className="text-sm font-medium">
+          {address.name}, {address.phone}
+          <span className="ml-2 italic capitalize font-semibold text-slate-600 text-xs px-2 border border-slate-300 rounded-full">
+            {address.addressType}
+          </span>
+        </div>
+        <p className="text-sm font-normal text-gray-500">
           {getFormattedAddress(address)}
-        </h5>
+        </p>
       </label>
     </div>
   );

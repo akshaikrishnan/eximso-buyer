@@ -1,5 +1,6 @@
 "use client";
 import AddressBlock from "@/components/checkout/address-block";
+import CheckoutBlock from "@/components/checkout/block";
 import OrderSummary from "@/components/checkout/order-summary";
 import React from "react";
 
@@ -10,8 +11,9 @@ interface CheckoutData {
 
 export default function CheckoutPage() {
   const [checkOutData, setCheckOutData] = React.useState({
-    shippingAddress: "",
-    billingAdddress: "",
+    shippingAddress: null,
+    billingAddress: null,
+    isSameAddress: false,
     paymentMode: "",
   });
   const handleCheckoutData = (data: CheckoutData) => {
@@ -27,10 +29,23 @@ export default function CheckoutPage() {
             <OrderSummary />
           </div>
           <div className="mx-auto w-full order-2 xl:order-1">
-            <AddressBlock
-              checkoutData={checkOutData}
-              handleCheckoutData={handleCheckoutData}
-            />
+            <CheckoutBlock>
+              <AddressBlock
+                type="shipping"
+                checkoutData={checkOutData}
+                handleCheckoutData={handleCheckoutData}
+              />
+            </CheckoutBlock>
+
+            {!checkOutData.isSameAddress && (
+              <CheckoutBlock>
+                <AddressBlock
+                  type="billing"
+                  checkoutData={checkOutData}
+                  handleCheckoutData={handleCheckoutData}
+                />
+              </CheckoutBlock>
+            )}
             <button
               type="button"
               className="flex w-full items-center justify-center rounded-md border border-transparent bg-black py-2 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
