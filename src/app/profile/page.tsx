@@ -2,13 +2,12 @@
 import { useEffect, useState, useRef } from "react";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import Select from "react-select";
-import countries from "../data/countries.json";
+import countries from "@/lib/data/db/countries.json";
 import { endpoints } from "@/lib/data/endpoints";
 import api from "@/lib/api/axios.interceptor";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
-import Image from 'next/image';
-
+import Image from "next/image";
 
 // Define the type for the country option
 type CountryOption = {
@@ -38,10 +37,12 @@ export default function UserProfile() {
   });
 
   // Fix: Explicitly type the countries array
-  const countryOptions: CountryOption[] = (countries as Country[]).map((country) => ({
-    value: country.code,
-    label: country.name,
-  }));
+  const countryOptions: CountryOption[] = (countries as Country[]).map(
+    (country) => ({
+      value: country.code,
+      label: country.name,
+    })
+  );
 
   // Add this ref for the file input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -73,7 +74,9 @@ export default function UserProfile() {
   }, []);
 
   // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -116,7 +119,7 @@ export default function UserProfile() {
           title: "Profile Updated!",
           description: "Your profile has been updated successfully.",
         });
-        
+
         getUserDetails();
       } else {
         throw new Error("No data returned from the server");
@@ -156,14 +159,15 @@ export default function UserProfile() {
             <div className="px-4 py-6 sm:p-8">
               <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="col-span-full">
-                 
                   <div className="mt-2 flex items-center gap-x-3">
                     <img
                       src={formData.logo || "/images/common/user.png"}
                       alt="Profile"
                       className="h-25 w-20 rounded-full text-gray-300"
                     />
-                     <label className="block text-sm font-medium leading-6 text-gray-900">Photo</label>
+                    <label className="block text-sm font-medium leading-6 text-gray-900">
+                      Photo
+                    </label>
                     <button
                       type="button"
                       onClick={handleLogoChangeButtonClick} // Trigger file input click
@@ -182,7 +186,9 @@ export default function UserProfile() {
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label className="block text-sm font-medium leading-6 text-gray-900">Full Name</label>
+                  <label className="block text-sm font-medium leading-6 text-gray-900">
+                    Full Name
+                  </label>
                   <input
                     type="text"
                     name="name"
@@ -193,7 +199,9 @@ export default function UserProfile() {
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label className="block text-sm font-medium leading-6 text-gray-900">Email address</label>
+                  <label className="block text-sm font-medium leading-6 text-gray-900">
+                    Email address
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -204,7 +212,9 @@ export default function UserProfile() {
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label className="block text-sm font-medium leading-6 text-gray-900">Phone number</label>
+                  <label className="block text-sm font-medium leading-6 text-gray-900">
+                    Phone number
+                  </label>
                   <input
                     type="tel"
                     name="phone"
@@ -215,7 +225,9 @@ export default function UserProfile() {
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label className="block text-sm font-medium leading-6 text-gray-900">Gender</label>
+                  <label className="block text-sm font-medium leading-6 text-gray-900">
+                    Gender
+                  </label>
                   <div className="mt-2 flex space-x-4">
                     {["male", "female", "other"].map((g) => (
                       <label key={g} className="flex items-center">
@@ -227,27 +239,35 @@ export default function UserProfile() {
                           onChange={handleChange}
                           className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-600"
                         />
-                        <span className="ml-2 text-sm text-gray-900 capitalize">{g}</span>
+                        <span className="ml-2 text-sm text-gray-900 capitalize">
+                          {g}
+                        </span>
                       </label>
                     ))}
                   </div>
                 </div>
 
                 <div className="sm:col-span-4">
-                  <label className="block text-sm font-medium leading-6 text-gray-900">Country</label>
+                  <label className="block text-sm font-medium leading-6 text-gray-900">
+                    Country
+                  </label>
                   <Select
                     options={countryOptions}
                     className="basic-single"
                     classNamePrefix="select"
                     placeholder="Select a country"
                     isSearchable
-                    value={countryOptions.find((option) => option.value === formData.country)}
+                    value={countryOptions.find(
+                      (option) => option.value === formData.country
+                    )}
                     onChange={handleCountryChange}
                   />
                 </div>
 
                 <div className="col-span-full">
-                  <label className="block text-sm font-medium leading-6 text-gray-900">Address</label>
+                  <label className="block text-sm font-medium leading-6 text-gray-900">
+                    Address
+                  </label>
                   <textarea
                     name="address"
                     rows={4}
@@ -261,10 +281,16 @@ export default function UserProfile() {
             </div>
 
             <div className="flex items-center justify-end gap-x-6 border-t px-4 py-4 sm:px-8">
-              <button type="button" className="text-sm font-semibold text-gray-900">
+              <button
+                type="button"
+                className="text-sm font-semibold text-gray-900"
+              >
                 Cancel
               </button>
-              <button type="submit" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+              <button
+                type="submit"
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+              >
                 {updating ? "Saving..." : "Save"}
               </button>
             </div>

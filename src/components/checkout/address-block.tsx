@@ -3,6 +3,13 @@ import { endpoints } from "@/lib/data/endpoints";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "../common/loader/loader";
 import { useState } from "react";
+import dynamic from "next/dynamic";
+import clsx from "clsx";
+
+const DynamicAddressForm = dynamic(() => import("../profile/address-form"), {
+  loading: () => <Loader />,
+  ssr: false,
+});
 
 type AddressType = "shipping" | "billing";
 type Address = {
@@ -51,7 +58,11 @@ export default function AddressBlock({
   const [isEdit, setIsEdit] = useState(false);
   const addressKey = `${type}Address` as const;
 
-  const { data: addresses, isLoading } = useQuery<Address[]>({
+  const {
+    data: addresses,
+    isLoading,
+    refetch,
+  } = useQuery<Address[]>({
     queryKey: ["addresses"],
     queryFn: async () => {
       const res = await api.get(endpoints.address);
@@ -79,18 +90,33 @@ export default function AddressBlock({
         <h4 className="text-lg font-medium text-gray-500">
           {type === "shipping" ? "Delivering To" : "Billing Address"}
         </h4>
-        {selectedAddress && (
-          <button
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-            onClick={() => setIsEdit(!isEdit)}
-          >
-            {isEdit ? "Cancel" : "Change"}
-          </button>
+        {!isLoading && selectedAddress && addresses && addresses.length > 0 && (
+          <div>
+            {isEdit && (
+              <button
+                className="text-sm font-medium text-slate-600 hover:text-indigo-500 pr-2"
+                onClick={() => setIsEdit(!isEdit)}
+              >
+                Add Address
+              </button>
+            )}
+            <button
+              className={clsx(
+                "text-sm font-medium text-indigo-600 hover:text-indigo-500 pl-2",
+                isEdit && "border-slate-300  border-l "
+              )}
+              onClick={() => setIsEdit(!isEdit)}
+            >
+              {isEdit ? "Cancel" : "Change"}
+            </button>
+          </div>
         )}
       </div>
 
       {isLoading ? (
         <Loader />
+      ) : addresses && addresses.length === 0 ? (
+        <DynamicAddressForm onSave={refetch} />
       ) : isEdit || !selectedAddress ? (
         <div className="flex flex-col gap-4">
           {addresses?.map((address) => (

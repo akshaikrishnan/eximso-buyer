@@ -13,7 +13,7 @@ export default function CheckoutPage() {
   const [checkOutData, setCheckOutData] = React.useState({
     shippingAddress: null,
     billingAddress: null,
-    isSameAddress: false,
+    isSameAddress: true,
     paymentMode: "",
   });
   const handleCheckoutData = (data: CheckoutData) => {
