@@ -26,14 +26,14 @@ export default function AddAddress() {
               Please provide accurate details to ensure timely delivery.
             </p>
           </div>
-
-          <AddressForm />
+          <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+            <AddressForm
+              onCancel={() => router.back()}
+              onSave={() => router.back()}
+            />
+          </div>
         </div>
       </div>
     </div>
   );
-}
-
-function resetForm() {
-  throw new Error("Function not implemented.");
 }
