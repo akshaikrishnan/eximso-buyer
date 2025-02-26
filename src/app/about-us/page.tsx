@@ -447,7 +447,7 @@ export default function About() {
                   a lot more money if we kinda stopped caring about that. Our
                   new strategy is to write a bunch of things that look really
                   good in the headlines, then clarify in the small print but
-                  hope people don't actually read it.
+                  hope people don&apos;t actually read it.
                 </p>
               </div>
               <div className="aspect-w-3 aspect-h-2 bg-gray-100 rounded-lg overflow-hidden">
