@@ -1,0 +1,30 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink" class="">
+    <rect id="r4" width="512" height="512" x="0" y="0" rx="0" fill="#3395FF" stroke="#FFFFFF" stroke-width="0"
+          stroke-opacity="100%" paint-order="stroke"></rect>
+    <clipPath id="clip">
+        <use xlink:href="#r4"></use>
+    </clipPath>
+    <defs>
+        <linearGradient id="r5" gradientUnits="userSpaceOnUse" gradientTransform="rotate(45)"
+                        style="transform-origin: center center;">
+            <stop stop-color="#3395FF"></stop>
+            <stop offset="1" stop-color="#3E5151"></stop>
+        </linearGradient>
+        <radialGradient id="r6" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+                        gradientTransform="translate(256) rotate(90) scale(512)">
+            <stop stop-color="white"></stop>
+            <stop offset="1" stop-color="white" stop-opacity="0"></stop>
+        </radialGradient>
+    </defs>
+
+    <svg version="1.1" id="Layer_1" focusable="false" xmlns="http://www.w3.org/2000/svg"
+         xmlns:xlink="http://www.w3.org/1999/xlink" x="80" y="80" viewBox="0 0 285 325.4" xml:space="preserve"
+         width="352" height="352" alignment-baseline="middle" style="color: rgb(255, 255, 255);">
+
+<g>
+	<polygon fill="black" points="25.6,232.9 0.8,325.4 123.5,325.4 173.8,137.3 	"></polygon>
+    <polygon fill="white" points="122.6,105.7 106.9,163.7 197,105.4 138.1,325.3 198,325.4 285,0.5 	"></polygon>
+</g>
+</svg>
+</svg>

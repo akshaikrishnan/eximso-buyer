@@ -1,10 +1,14 @@
 import { CartItem, useCart } from "@/hooks/use-cart";
-import React from "react";
+import React, { ReactNode } from "react";
 import CartBtn from "../layout/cart/cart-btn";
 import { OrderSummary } from "../layout/cart";
 import Loader from "../common/loader/loader";
 
-export default function OrderSummaryDetails() {
+export default function OrderSummaryDetails({
+  children,
+}: {
+  children?: ReactNode;
+}) {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
   if (isLoading)
     return (
@@ -54,7 +58,7 @@ export default function OrderSummaryDetails() {
         </ul>
       </div>
       <div className="xl:mt-4">
-        <OrderSummary subTotal={subTotal} />
+        <OrderSummary subTotal={subTotal}>{children}</OrderSummary>
       </div>
     </>
   );
