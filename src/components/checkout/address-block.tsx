@@ -11,6 +11,8 @@ const DynamicAddressForm = dynamic(() => import("../profile/address-form"), {
   ssr: false,
 });
 
+const DynamicModal = dynamic(() => import("../ui/modal"));
+
 type AddressType = "shipping" | "billing";
 type Address = {
   _id: string;
@@ -92,14 +94,7 @@ export default function AddressBlock({
         </h4>
         {!isLoading && selectedAddress && addresses && addresses.length > 0 && (
           <div>
-            {isEdit && (
-              <button
-                className="text-sm font-medium text-slate-600 hover:text-indigo-500 pr-2"
-                onClick={() => setIsEdit(!isEdit)}
-              >
-                Add Address
-              </button>
-            )}
+            {isEdit && <AddAddress />}
             <button
               className={clsx(
                 "text-sm font-medium text-indigo-600 hover:text-indigo-500 pl-2",
@@ -214,5 +209,35 @@ function AddressCard({
         </p>
       </label>
     </div>
+  );
+}
+
+function AddAddress() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        className="text-sm font-medium text-slate-600 hover:text-indigo-500 pr-2"
+        onClick={() => setIsOpen(true)}
+      >
+        Add Address
+      </button>
+
+      <DynamicModal
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+        title="Add Address"
+        modalClassName="!max-w-7xl"
+        hideButton
+      >
+        <DynamicAddressForm
+          onCancel={() => setIsOpen(false)}
+          onSave={() => setIsOpen(false)}
+        />
+      </DynamicModal>
+    </>
   );
 }

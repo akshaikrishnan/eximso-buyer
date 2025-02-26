@@ -131,13 +131,14 @@ export default function AddressForm({
       return api.post(endpoints.address, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["addressess"] });
-      toast({
-        title: "Success",
-        description: address?.id ? "Address updated!" : "Address added!",
+      queryClient.invalidateQueries({ queryKey: ["addresses"] }).then(() => {
+        toast({
+          title: "Success",
+          description: address?.id ? "Address updated!" : "Address added!",
+        });
+        reset();
+        onSave?.();
       });
-      reset();
-      onSave?.();
     },
     onError: () => {
       toast({
