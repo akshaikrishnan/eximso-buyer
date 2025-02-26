@@ -21,7 +21,7 @@ export default function Searchbar({ categories }: any) {
       <select
         onChange={(e) => setSelected(e.target.value)}
         value={selected}
-        className="h-10 w-28 hidden lg:block border-2 text-xs rounded-l-md bg-gray-100 text-gray-700"
+        className="h-10 w-28 hidden lg:block text-xs rounded-l-md bg-gray-100 text-gray- border-gray-300"
         name="category"
         id="main-dropdown"
       >
