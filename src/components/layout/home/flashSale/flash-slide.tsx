@@ -1,3 +1,4 @@
+import { Price } from "@/components/common/price";
 import Image from "next/image";
 import React from "react";
 
@@ -13,8 +14,8 @@ export default function FlashSlide({
   title: string;
   description: string;
   link: string;
-  price: string;
-  offerPrice?: string;
+  price: number;
+  offerPrice?: number;
 }) {
   return (
     <div className="h-full flex flex-col justify-between py-10">
@@ -38,9 +39,11 @@ export default function FlashSlide({
            text-heading"
           >
             <span className="inline-block false">
-              {offerPrice ? offerPrice : price}
+              <Price amount={offerPrice ? offerPrice : price} />
             </span>
-            <del className="text-gray-500">{price}</del>
+            <del className="text-gray-500">
+              <Price amount={price} />
+            </del>
           </div>
         </div>
       </div>

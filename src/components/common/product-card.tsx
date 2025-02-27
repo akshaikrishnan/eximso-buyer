@@ -2,6 +2,7 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { Price } from "./price";
 
 const getLabel = (product: any) => {
   if (product.label) return product.label;
@@ -66,13 +67,17 @@ export default function ProductCard({ product }: any) {
             <span>{product.rating}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground line-through text-xs text-gray-500">
-              ${product.price.toFixed(2)}
-            </span>
+            {product.offerPrice && (
+              <span className="text-muted-foreground line-through text-xs text-gray-500">
+                <Price amount={product.price} />
+              </span>
+            )}
           </div>
         </div>
         <span className="font-semibold">
-          ${product?.offerPrice?.toFixed(2)}
+          <Price
+            amount={product.offerPrice ? product.offerPrice : product.price}
+          />
         </span>
       </div>
     </div>

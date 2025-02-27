@@ -1,11 +1,8 @@
-// product details.tsx 
+// product details.tsx
 "use client";
-import { Fragment, useState } from "react";
+
 import {
   Disclosure,
-  RadioGroup,
-  RadioGroupLabel,
-  RadioGroupOption,
   Tab,
   TabList,
   TabPanel,
@@ -13,13 +10,13 @@ import {
 } from "@headlessui/react";
 import { HeartIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { StarIcon } from "@heroicons/react/20/solid";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import AddToBagBtn from "./add-to-bag";
 import AddToWishlistBtn from "./add-to-wishlist";
 import { RelatedProduct } from "./related-products";
-
+import { Price } from "../common/price";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -68,16 +65,18 @@ export default function ProductDetail({ product }: any) {
 
   const { data: related, isLoading } = useQuery({
     queryKey: ["products", product.category._id],
-    queryFn: () => api.get(endpoints.products, {
-      params: {
-        category: product.category._id,
-        limit: 5,
-      },
-    })
-      .then((res) =>
-        res.data.result.data.filter((p: any) => p._id !== product._id)
-      )
-      .catch((err) => console.log(err)),
+    queryFn: () =>
+      api
+        .get(endpoints.products, {
+          params: {
+            category: product.category._id,
+            limit: 5,
+          },
+        })
+        .then((res) =>
+          res.data.result.data.filter((p: any) => p._id !== product._id)
+        )
+        .catch((err) => console.log(err)),
   });
   console.log(related);
 
@@ -148,17 +147,22 @@ export default function ProductDetail({ product }: any) {
                 <p className="text-3xl tracking-tight text-gray-900">
                   <span className="text-red-600">
                     {product?.discountPercentage > 0 &&
-                      product?.discountPercentage}
-                    %
+                      product?.discountPercentage + "%"}
                   </span>{" "}
-                  $
-                  {product?.discountPercentage > 0
-                    ? product?.offerPrice.toFixed(2)
-                    : product.price.toFixed(2)}
+                  <Price
+                    amount={
+                      product?.discountPercentage > 0
+                        ? product?.offerPrice
+                        : product.price
+                    }
+                  />
                 </p>
                 {product?.discountPercentage > 0 && (
                   <p className="text-sm">
-                    M.R.P : <del>{product.price.toFixed(2)}</del>
+                    M.R.P :{" "}
+                    <del>
+                      <Price amount={product.price} />
+                    </del>
                   </p>
                 )}
               </div>
@@ -238,17 +242,18 @@ export default function ProductDetail({ product }: any) {
                 </div>
 
                 <div className="mt-10 flex ">
-
                   <AddToBagBtn product={product} />
                   <button
                     type="button"
                     className="ml-4 flex items-center justify-center rounded-md px-3 py-3 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
                   >
-                   <AddToWishlistBtn product={product} className="ml-4 w-12 h-12 flex items-center justify-center" />
+                    <AddToWishlistBtn
+                      product={product}
+                      className="ml-4 w-12 h-12 flex items-center justify-center"
+                    />
                     <span className="sr-only">Add to favorites</span>
                   </button>
                 </div>
-
               </div>
 
               <section aria-labelledby="details-heading" className="mt-12">

@@ -1,6 +1,7 @@
 import { XMarkIcon, CheckIcon, ClockIcon } from "@heroicons/react/20/solid";
 import CartBtn from "./cart-btn";
 import { CartItem as CartItemType } from "@/hooks/use-cart";
+import { Price } from "@/components/common/price";
 
 interface CartItemProps {
   item: CartItemType;
@@ -40,7 +41,7 @@ export function CartItem({ item, onRemove }: CartItemProps) {
               )}
             </div>
             <p className="mt-1 text-sm font-medium text-gray-900">
-              ${item.product.price.toFixed(2)}
+              <Price amount={item.product.price} />
             </p>
             <CartBtn product={item} />
           </div>

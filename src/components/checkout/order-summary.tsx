@@ -3,6 +3,7 @@ import React, { ReactNode } from "react";
 import CartBtn from "../layout/cart/cart-btn";
 import { OrderSummary } from "../layout/cart";
 import Loader from "../common/loader/loader";
+import { Price } from "../common/price";
 
 export default function OrderSummaryDetails({
   children,
@@ -34,7 +35,9 @@ export default function OrderSummaryDetails({
                     <h3 className="text-gray-900">
                       <a href={item.product.slug}>{item.product.name}</a>
                     </h3>
-                    <p className="text-gray-900">{item.product.price}</p>
+                    <p className="text-gray-900">
+                      <Price amount={item.product.price} />
+                    </p>
 
                     <p className="hidden text-gray-500 sm:block">
                       <CartBtn product={item} />

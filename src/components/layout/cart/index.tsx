@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { Price } from "@/components/common/price";
 
 export default function Cart() {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
@@ -60,15 +61,15 @@ export function OrderSummary({
         <div className="flex items-center justify-between">
           <dt className="text-sm text-gray-600">Subtotal</dt>
           <dd className="text-sm font-medium text-gray-900">
-            ${subTotal.toFixed(2)}
+            <Price amount={subTotal} />
           </dd>
         </div>
         <ShippingEstimate />
-        <TaxEstimate />
+        <TaxEstimate subTotal={subTotal} />
         <div className="flex items-center justify-between border-t border-gray-200 pt-4">
           <dt className="text-base font-medium text-gray-900">Order total</dt>
           <dd className="text-base font-medium text-gray-900">
-            ${Math.ceil(subTotal + 8.32 + 5).toFixed(2)}
+            <Price amount={Math.ceil(subTotal + subTotal * 0.05 + 5)} />
           </dd>
         </div>
       </dl>
@@ -89,12 +90,14 @@ function ShippingEstimate() {
           <QuestionMarkCircleIcon className="h-5 w-5" aria-hidden="true" />
         </a>
       </dt>
-      <dd className="text-sm font-medium text-gray-900">$3.00</dd>
+      <dd className="text-sm font-medium text-gray-900">
+        <Price amount={40} />
+      </dd>
     </div>
   );
 }
 
-function TaxEstimate() {
+function TaxEstimate({ subTotal }: { subTotal: number }) {
   return (
     <div className="flex items-center justify-between border-t border-gray-200 pt-4">
       <dt className="flex text-sm text-gray-600">
@@ -106,7 +109,9 @@ function TaxEstimate() {
           <QuestionMarkCircleIcon className="h-5 w-5" aria-hidden="true" />
         </a>
       </dt>
-      <dd className="text-sm font-medium text-gray-900">$8.32</dd>
+      <dd className="text-sm font-medium text-gray-900">
+        <Price amount={subTotal * 0.05} />
+      </dd>
     </div>
   );
 }
