@@ -3,6 +3,7 @@ import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import Image from "next/image";
 import { ReactNode } from "react";
+import { Price } from "../common/price";
 
 export interface RadioItem {
   _id: string | number;
@@ -90,6 +91,15 @@ export default function RadioSelector<T extends RadioItem>({
                         className="mt-6 text-sm font-medium text-gray-900"
                       >
                         {item.subtitle}
+                      </Description>
+                    )}
+                    {item.price && (
+                      <Description
+                        as="span"
+                        className="mt-6 text-sm font-medium text-gray-900"
+                      >
+                        <Price amount={item.price} />
+                        
                       </Description>
                     )}
                   </div>
