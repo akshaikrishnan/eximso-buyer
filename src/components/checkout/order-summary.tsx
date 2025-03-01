@@ -4,6 +4,7 @@ import CartBtn from "../layout/cart/cart-btn";
 import { OrderSummary } from "../layout/cart";
 import Loader from "../common/loader/loader";
 import { Price } from "../common/price";
+import { useRouter } from "next/navigation";
 
 export default function OrderSummaryDetails({
   children,
@@ -17,6 +18,9 @@ export default function OrderSummaryDetails({
         <Loader />
       </div>
     );
+  if (cart?.items?.length === 0) {
+    useRouter().push("/cart");
+  }
   return (
     <>
       <h2 className="sr-only">Order summary</h2>

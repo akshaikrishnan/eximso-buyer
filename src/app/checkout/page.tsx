@@ -10,6 +10,7 @@ import { razorPay } from "@/lib/razorpay";
 import { LockClosedIcon } from "@heroicons/react/20/solid";
 import { useMutation } from "@tanstack/react-query";
 import clsx from "clsx";
+import { Loader2Icon } from "lucide-react";
 import React from "react";
 
 interface CheckoutData {
@@ -77,6 +78,7 @@ export default function CheckoutPage() {
                     action={initiatePayment}
                     isValid={isValid()}
                     className="mt-4"
+                    isLoading={paymentMutation.isPending}
                   />
                 </div>
               </OrderSummary>
@@ -123,7 +125,11 @@ export default function CheckoutPage() {
                   isGrid
                 />
               </CheckoutBlock>
-              <PlaceOrderButton action={initiatePayment} isValid={isValid()} />
+              <PlaceOrderButton
+                action={initiatePayment}
+                isValid={isValid()}
+                isLoading={paymentMutation.isPending}
+              />
             </div>
           </div>
         </div>
@@ -136,14 +142,16 @@ const PlaceOrderButton = ({
   isValid,
   className,
   action,
+  isLoading,
 }: {
   isValid: boolean;
   action: () => void;
   className?: string;
+  isLoading: boolean;
 }) => {
   return (
     <button
-      disabled={!isValid}
+      disabled={!isValid || isLoading}
       title="Secured Checkout"
       type="submit"
       onClick={action}
@@ -152,7 +160,11 @@ const PlaceOrderButton = ({
         className
       )}
     >
-      <LockClosedIcon className="h-6 w-6 text-white" aria-hidden="true" />
+      {isLoading ? (
+        <Loader2Icon className="animate-spin" />
+      ) : (
+        <LockClosedIcon className="h-6 w-6 text-white" aria-hidden="true" />
+      )}
       <span className="ml-1">Place Order</span>
     </button>
   );
