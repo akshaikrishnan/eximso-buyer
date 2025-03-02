@@ -31,9 +31,7 @@ export default function RootLayout({
         <Providers>
           <AppNavBar />
           <Suspense>{children}</Suspense>
-          <Suspense>
-            <Footer />
-          </Suspense>
+          <Footer />
           <ManagedDrawer />
           <Toaster />
           <Analytics />

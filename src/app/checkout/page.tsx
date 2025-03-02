@@ -3,6 +3,7 @@ import AddressBlock from "@/components/checkout/address-block";
 import CheckoutBlock from "@/components/checkout/block";
 import OrderSummary from "@/components/checkout/order-summary";
 import RadioSelector from "@/components/checkout/radio-button";
+import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api/axios.interceptor";
 import { sample } from "@/lib/data/checkoutdata";
 import { endpoints } from "@/lib/data/endpoints";
@@ -36,8 +37,14 @@ export default function CheckoutPage() {
     onSuccess: (data) => {
       razorPay(data);
     },
-    onError: (data) => {
+    onError: (data: any) => {
       console.error(data);
+      toast({
+        title: "Error",
+        description:
+          data.response.data?.error?.description || "Something went wrong",
+        variant: "destructive",
+      });
     },
   });
   const handleCheckoutData = (data: Partial<CheckoutData>) => {
