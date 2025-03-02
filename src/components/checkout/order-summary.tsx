@@ -12,6 +12,7 @@ export default function OrderSummaryDetails({
   children?: ReactNode;
 }) {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
+  const router = useRouter();
   if (isLoading)
     return (
       <div>
@@ -19,7 +20,7 @@ export default function OrderSummaryDetails({
       </div>
     );
   if (cart?.items?.length === 0) {
-    useRouter().push("/cart");
+    router.push("/cart");
   }
   return (
     <>
