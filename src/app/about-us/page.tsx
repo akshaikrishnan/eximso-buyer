@@ -67,42 +67,42 @@ const howItWorks = [
   {
     name: "Connecting Businesses & Customers",
     icon: BuildingStorefrontIcon,
-    description: "We bridge the gap between businesses and customers across borders, enabling sellers to reach new markets and buyers to access unique global products."
+    description: "We connect businesses with customers across borders, creating opportunities for sellers to expand their reach and buyers to access unique products from around the world. Whether you're a business looking to go global or a customer exploring international brands, our platform makes the process simple and straightforward."
   },
   {
     name: "User -Friendly Platform",
     icon: CubeIcon,
-    description: "Our intuitive platform ensures smooth navigation. Sellers can effortlessly list products, and buyers enjoy a seamless shopping experience."
+    description: "Our platform is designed with simplicity in mind, enabling businesses and customers to interact effortlessly. Sellers can list their products easily, while buyers can browse and shop through an intuitive interface. We prioritize a hassle-free experience for everyone."
   },
   {
     name: "End-to-End Logistics",
     icon: TruckIcon,
-    description: "From product sourcing to final delivery, we handle every step of the logistics chain with robust shipping solutions and customs management."
+    description: "From product sourcing to final delivery, we handle every step of the logistics chain. Our robust shipping solutions, powered by 1shipping.in, ensure timely and cost-effective transportation of goods. We manage customs, duties, and compliance so you can focus on growing your business."
   },
   {
     name: "Secure Payments",
     icon: CreditCardIcon,
-    description: "We offer secure, multi-currency payment gateways, ensuring encrypted transactions for a trusted shopping experience."
+    description: "We offer secure payment gateways for both businesses and customers. Our system supports multiple currencies and ensures that all transactions are encrypted and protected, fostering trust and reliability."
   },
   {
     name: "Advanced Analytics",
     icon: ChartBarIcon,
-    description: "Our AI-driven platform provides insights into market trends and customer preferences, helping businesses make data-driven decisions."
+    description: "Our technology-driven platform leverages AI and data analytics to provide insights into market trends, customer preferences, and more. This helps businesses optimize their offerings and improve customer satisfaction."
   },
   {
     name: "Comprehensive Support",
     icon: LifebuoyIcon,
-    description: "Our expert team assists sellers in setting up online stores and navigating international trade regulations."
+    description: "Our team is dedicated to supporting you at every step. From setting up your online store to navigating international trade regulations, our experts provide guidance and assistance tailored to your needs. "
   },
   {
     name: "Sustainability",
     icon: HeartIcon,
-    description: "We are committed to ethical and sustainable trade practices, optimizing operations to minimize environmental impact."
+    description: "We are committed to promoting sustainable and ethical trade practices. By optimizing our operations and encouraging eco-friendly practices, we aim to minimize our impact on the environment."
   },
   {
     name: "Seamless Integration",
     icon: ArrowPathIcon,
-    description: "Our platform integrates with popular marketplaces and social media channels to maximize visibility and sales potential."
+    description: " Our platform integrates with popular marketplaces and social media channels for maximum exposure."
   },
 ];
 
@@ -231,7 +231,7 @@ export default function AboutUs() {
       </div>
 
       {/* How EXIMSO Works Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <div className="max-w-[84rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center mb-16">
           <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
             Our Process
@@ -254,7 +254,7 @@ export default function AboutUs() {
                 </div>
               </div>
               <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-              <p className="mt-2 text-gray-500">{item.description}</p>
+              <p className="mt-2 text-gray-500 text-justify ">{item.description}</p>
             </div>
           ))}
         </div>
@@ -502,71 +502,6 @@ export default function AboutUs() {
                   <p className="text-gray-500 text-sm">Customer</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Contact Section */}
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="text-center mb-16">
-          <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-            Get in Touch
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Ready to go global?</h2>
-          <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
-            Contact our expert team to discover how EXIMSO can help you expand your business globally or enhance your shopping experience.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600 mb-4">
-                  <PhoneIcon className="h-6 w-6" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">Call Us</h3>
-                <p className="mt-2 text-gray-500">Our team is available 24/7</p>
-                <p className="mt-2 text-indigo-600 font-medium">+1 (800) 123-4567</p>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600 mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">Email Us</h3>
-                <p className="mt-2 text-gray-500">We&apos;ll respond within 24 hours</p>
-                <p className="mt-2 text-indigo-600 font-medium">support@eximso.com</p>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600 mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">Live Chat</h3>
-                <p className="mt-2 text-gray-500">Instant support from our team</p>
-                <p className="mt-2 text-indigo-600 font-medium">Chat with us</p>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600 mb-4">
-                  <CurrencyDollarIcon className="h-6 w-6" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">Sales</h3>
-                <p className="mt-2 text-gray-500">For business inquiries</ p>
-                <p className="mt-2 text-indigo-600 font-medium">sales@eximso.com</p>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="bg-white p-4 rounded-xl shadow-lg">
-              <Contact />
             </div>
           </div>
         </div>
