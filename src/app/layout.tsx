@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import MobileDoc from "@/components/navbar/MobileDoc";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +38,7 @@ export default function RootLayout({
           <Analytics />
           <SpeedInsights />
           <ReactQueryDevtools initialIsOpen={false} />
+          <MobileDoc /> 
         </Providers>
       </body>
     </html>
