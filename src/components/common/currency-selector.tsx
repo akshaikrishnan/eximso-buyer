@@ -39,8 +39,6 @@ export function CurrencySelector() {
     flag: curr.flag ?? "",
   }));
 
-  console.log(currencies);
-
   const handleChange = (selectedOption: SingleValue<CurrencyOption>) => {
     if (selectedOption) {
       setCurrency(selectedOption.value);

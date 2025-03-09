@@ -45,6 +45,7 @@ export default function TopBar({ className }: { className: string }) {
                 </li> */}
               </ul>
             </div>
+
             <div className="topbar-dropdowns sm:block hidden">
               <CurrencySelector />
             </div>

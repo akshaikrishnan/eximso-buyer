@@ -43,87 +43,88 @@ export default function RadioSelector<T extends RadioItem>({
           isGrid ? "sm:grid-cols-3" : ""
         )}
       >
-        {items.map((item) => (
-          <Radio
-            key={item._id}
-            value={item}
-            disabled={!item.isActive}
-            className={({ checked, disabled }) =>
-              clsx(
-                checked
-                  ? "border-transparent ring-2 ring-indigo-500"
-                  : "border-gray-300",
-                disabled ? "opacity-50" : "",
-                "relative bg-white border rounded-lg shadow-sm p-4 flex cursor-pointer focus:outline-none"
-              )
-            }
-          >
-            {({ checked, disabled }) => (
-              <>
-                <div className="flex-1 flex">
-                  <div className="flex flex-col">
-                    {item.icon && (
-                      <Image
-                        src={item.icon}
-                        alt={item.title}
-                        width={50}
-                        height={50}
-                        className="w-12 h-12 rounded-full"
-                      />
-                    )}
-                    <Label
-                      as="span"
-                      className="block text-sm font-medium text-gray-900 mt-3"
-                    >
-                      {item.title}
-                    </Label>
-                    {item.description && (
-                      <Description
+        {items
+          .sort((item) => (item.isActive ? -1 : 1))
+          .map((item) => (
+            <Radio
+              key={item._id}
+              value={item}
+              disabled={!item.isActive}
+              className={({ checked, disabled }) =>
+                clsx(
+                  checked
+                    ? "border-transparent ring-2 ring-indigo-500"
+                    : "border-gray-300",
+                  disabled ? "opacity-50" : "",
+                  "relative bg-white border rounded-lg shadow-sm p-4 flex cursor-pointer focus:outline-none"
+                )
+              }
+            >
+              {({ checked, disabled }) => (
+                <>
+                  <div className="flex-1 flex">
+                    <div className="flex flex-col">
+                      {(item.icon || item.image) && (
+                        <Image
+                          src={item.icon || item.image}
+                          alt={item.title}
+                          width={50}
+                          height={50}
+                          className="w-12 h-12 rounded-full"
+                        />
+                      )}
+                      <Label
                         as="span"
-                        className="mt-1 flex items-center text-sm text-gray-500"
+                        className="block text-sm font-medium text-gray-900 mt-3"
                       >
-                        {item.description}
-                      </Description>
-                    )}
-                    {item.subtitle && (
-                      <Description
-                        as="span"
-                        className="mt-6 text-sm font-medium text-gray-900"
-                      >
-                        {item.subtitle}
-                      </Description>
-                    )}
-                    {item.price && (
-                      <Description
-                        as="span"
-                        className="mt-6 text-sm font-medium text-gray-900"
-                      >
-                        <Price amount={item.price} />
-                        
-                      </Description>
-                    )}
+                        {item.title}
+                      </Label>
+                      {item.description && (
+                        <Description
+                          as="span"
+                          className="mt-1 flex items-center text-sm text-gray-500"
+                        >
+                          {item.description}
+                        </Description>
+                      )}
+                      {item.subtitle && (
+                        <Description
+                          as="span"
+                          className="mt-6 text-sm font-medium text-gray-900"
+                        >
+                          {item.subtitle}
+                        </Description>
+                      )}
+                      {item.price && (
+                        <Description
+                          as="span"
+                          className="mt-6 text-sm font-medium text-gray-900"
+                        >
+                          <Price amount={item.price} />
+                        </Description>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <CheckCircleIcon
-                  className={clsx(
-                    !checked ? "invisible" : "",
-                    "h-5 w-5 text-indigo-600"
-                  )}
-                  aria-hidden="true"
-                />
-                <div
-                  className={clsx(
-                    checked
-                      ? "border-indigo-500 border"
-                      : "border-transparent border-2",
-                    "absolute -inset-px rounded-lg pointer-events-none"
-                  )}
-                  aria-hidden="true"
-                />
-              </>
-            )}
-          </Radio>
-        ))}
+                  <CheckCircleIcon
+                    className={clsx(
+                      !checked ? "invisible" : "",
+                      "h-5 w-5 text-indigo-600"
+                    )}
+                    aria-hidden="true"
+                  />
+                  <div
+                    className={clsx(
+                      checked
+                        ? "border-indigo-500 border"
+                        : "border-transparent border-2",
+                      "absolute -inset-px rounded-lg pointer-events-none"
+                    )}
+                    aria-hidden="true"
+                  />
+                </>
+              )}
+            </Radio>
+          ))}
       </div>
     </RadioGroup>
   );

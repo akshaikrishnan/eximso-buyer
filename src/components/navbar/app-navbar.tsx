@@ -20,9 +20,10 @@ import { useUI } from "@/contexts/ui.context";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Searchbar from "./searchbar";
+import { toast } from "@/hooks/use-toast";
 
 const Navbar = (props: any) => {
   const { data: categories, isLoading } = useQuery({
@@ -31,6 +32,8 @@ const Navbar = (props: any) => {
   });
 
   const path = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   var [isNavOpen, setIsNavOpen] = useState(false);
   const { openSidebar } = useUI();
@@ -77,6 +80,20 @@ const Navbar = (props: any) => {
     );
   };
 
+  useEffect(() => {
+    console.log(searchParams.get("from"));
+    setTimeout(() => {
+      if (searchParams.get("from") === "logout") {
+        toast({
+          title: "Logged out",
+          description: "You have been logged out",
+          variant: "default",
+        });
+        router.replace(path);
+      }
+    }, 1000);
+  }, [searchParams]);
+
   return (
     <>
       <TopBar className="px-5 container mx-auto" />
@@ -120,12 +137,13 @@ const Navbar = (props: any) => {
                   <Avatar>
                     <AvatarImage src={user?.logo} alt={user?.name} />
                     <AvatarFallback>
-  {user?.name
-    ? user?.name.split(" ").length > 1
-      ? user?.name.split(" ")[0].charAt(0) + user?.name.split(" ")[1].charAt(0)
-      : user?.name.charAt(0) // If there is only one word, take the first letter
-    : ""}  
-</AvatarFallback>
+                      {user?.name
+                        ? user?.name.split(" ").length > 1
+                          ? user?.name.split(" ")[0].charAt(0) +
+                            user?.name.split(" ")[1].charAt(0)
+                          : user?.name.charAt(0) // If there is only one word, take the first letter
+                        : ""}
+                    </AvatarFallback>
                   </Avatar>
                 ) : (
                   <UserCircleIcon className="w-7 h-7" />
