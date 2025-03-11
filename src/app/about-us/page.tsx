@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   ShieldCheckIcon,
@@ -16,8 +15,11 @@ import {
   CurrencyDollarIcon,
   PhoneIcon,
   StarIcon,
+  LinkIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import Contact from "@/components/navbar/contact/contact-page";
+import { LeafIcon, DollarSignIcon } from "lucide-react";
 
 const coreValues = [
   {
@@ -41,28 +43,6 @@ const coreValues = [
     description: "We're constantly pushing the boundaries of what's possible in e-commerce, from AI-powered recommendations to next-day delivery."
   },
 ];
-
-const teamMembers = [
-  {
-    name: "Sarah Johnson",
-    role: "CEO & Founder",
-    image: "/images/peoples/pexels-bubi-2709563.jpg",
-    bio: "With 15+ years in global commerce, Sarah founded our platform with a vision to make cross-border shopping as simple as local shopping."
-  },
-  {
-    name: "Michael Chen",
-    role: "CTO",
-    image: "/images/peoples/ai-generated-9009341_1280.jpg",
-    bio: "Michael leads our engineering team, bringing expertise from his previous roles at leading tech companies to build our cutting-edge platform."
-  },
-  {
-    name: "Priya Patel",
-    role: "Head of Global Operations",
-    image: "/images/peoples/pexels-divinetechygirl-1181327.jpg",
-    bio: "Priya oversees our complex network of logistics partnerships, ensuring smooth operations across borders and continents."
-  },
-];
-
 const howItWorks = [
   {
     name: "Connecting Businesses & Customers",
@@ -70,7 +50,7 @@ const howItWorks = [
     description: "We connect businesses with customers across borders, creating opportunities for sellers to expand their reach and buyers to access unique products from around the world. Whether you're a business looking to go global or a customer exploring international brands, our platform makes the process simple and straightforward."
   },
   {
-    name: "User -Friendly Platform",
+    name: "User-Friendly Platform",
     icon: CubeIcon,
     description: "Our platform is designed with simplicity in mind, enabling businesses and customers to interact effortlessly. Sellers can list their products easily, while buyers can browse and shop through an intuitive interface. We prioritize a hassle-free experience for everyone."
   },
@@ -92,20 +72,29 @@ const howItWorks = [
   {
     name: "Comprehensive Support",
     icon: LifebuoyIcon,
-    description: "Our team is dedicated to supporting you at every step. From setting up your online store to navigating international trade regulations, our experts provide guidance and assistance tailored to your needs. "
+    description: "Our team is dedicated to supporting you at every step. From setting up your online store to navigating international trade regulations, our experts provide guidance and assistance tailored to your needs."
   },
   {
     name: "Sustainability",
-    icon: HeartIcon,
+    icon: LeafIcon,
     description: "We are committed to promoting sustainable and ethical trade practices. By optimizing our operations and encouraging eco-friendly practices, we aim to minimize our impact on the environment."
   },
   {
     name: "Seamless Integration",
-    icon: ArrowPathIcon,
-    description: " Our platform integrates with popular marketplaces and social media channels for maximum exposure."
+    icon: LinkIcon,
+    description: "Our platform integrates with popular marketplaces and social media channels for maximum exposure."
   },
+  {
+    name: "Cost-Effective Solutions",
+    icon: DollarSignIcon,
+    description: "We support multiple languages, enabling businesses to reach a broader audience and customers to shop."
+  },
+  {
+    name: "Customer-Centric Approach",
+    icon: UserIcon,
+    description: "We prioritize customer satisfaction with responsive service and easy returns."
+  }
 ];
-
 const brandOnDemandSteps = [
   "Market Research: Identify high-demand products and add your brand name.",
   "Product Sourcing: Share details with us; we connect with manufacturers and provide quotes and samples.",
@@ -218,7 +207,7 @@ export default function AboutUs() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreValues.map((value) => (
-              <div key={value.name} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                 <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600">
                   <value.icon className="h-6 w-6" />
                 </div>
@@ -230,10 +219,10 @@ export default function AboutUs() {
         </div>
       </div>
 
-      {/* How EXIMSO Works Section */}
-      <div className="max-w-[84rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="text-center mb-16">
-          <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+      {/* How EXIMSO Works Section  */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="text-center mb-12">
+          <div className="inline-block bg-indigo-100 px-4 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
             Our Process
           </div>
           <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">How EXIMSO Works</h2>
@@ -242,51 +231,19 @@ export default function AboutUs() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {howItWorks.map((item, index) => (
-            <div key={item.name} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3">
-                  {index + 1}
-                </div>
-                <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
+          {howItWorks.slice(0, 9).map((item) => (
+            <div
+              key={item.name}
+              className="bg-indigo-100 p-6  rounded-xl border border-indigo-100 shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
+            >
+              <div className="flex items-center mb-4 ">
+                <div className="p-3 bg-indigo-100 rounded-lg text-indigo-600 flex items-center justify-center mr-3">
                   <item.icon className="h-6 w-6" />
                 </div>
+                <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
               </div>
-              <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-              <p className="mt-2 text-gray-500 text-justify ">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Leadership Team Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="text-center mb-16">
-          <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-            Our Team
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Meet the leaders building the future</h2>
-          <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
-            Our diverse team brings experience from top technology and retail companies worldwide.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {teamMembers.map((member) => (
-            <div key={member.name} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <div className="relative h-64 w-full">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="object-cover object-center w-full h-full"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-lg font-medium text-gray-900">{member.name}</h3>
-                <p className="text-indigo-600">{member.role}</p>
-                <p className="mt-3 text-gray-500">{member.bio}</p>
-              </div>
+              <p className="text-gray-600 flex-grow">{item.description}</p>
             </div>
           ))}
         </div>
@@ -444,7 +401,7 @@ export default function AboutUs() {
                   ))}
                 </div>
               </div>
-              <p className="text-gray-600 italic mb-6">
+              <p className="text-gray-600 italic mb-6 text-justify">
                 &ldquo;EXIMSO helped us expand our handcrafted goods to 12 new countries in just 6 months. Their platform handles everything from translation to payments, allowing us to focus on creating our products.&ldquo;
               </p>
               <div className="flex items-center">
@@ -467,7 +424,7 @@ export default function AboutUs() {
                   ))}
                 </div>
               </div>
-              <p className="text-gray-600 italic mb-6">
+              <p className="text-gray-600 italic mb-6  text-justify">
                 &ldquo;As a mid-sized electronics manufacturer, we used to struggle with international logistics. EXIMSO&apos;s end-to-end solution has streamlined our operations and doubled our export volume.&ldquo;
               </p>
               <div className="flex items-center">
@@ -490,7 +447,7 @@ export default function AboutUs() {
                   ))}
                 </div>
               </div>
-              <p className="text-gray-600 italic mb-6">
+              <p className="text-gray-600 italic mb-6  text-justify">
                 I&apos;ve been able to source unique products from around the world without worrying about currency conversion or shipping complications. EXIMSO makes global shopping feel local.
               </p>
               <div className="flex items-center">
@@ -500,52 +457,6 @@ export default function AboutUs() {
                 <div>
                   <h4 className="font-medium text-gray-900">James Rodriguez</h4>
                   <p className="text-gray-500 text-sm">Customer</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Global Presence Map Section */}
-      <div className="bg-indigo-50 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-              Global Presence
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Serving 190+ Countries</h2>
-            <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
-              Our global network of warehouses, logistics partners, and customer service centers ensures a seamless experience worldwide.
-            </p>
-          </div>
-
-          <div className="relative rounded-xl overflow-hidden shadow-lg">
-            <div className="relative aspect-[16/9]">
-              <img
-                src="/images/common/map.jpg"
-                alt="EXIMSO Global Presence Map"
-                className="object-cover w-full h-full"
-              />
-              <div className="absolute inset-0 bg-indigo-900 bg-opacity-30"></div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-indigo-900 to-transparent p-6">
-              <div className="flex justify-between text-white">
-                <div className="text-center">
-                  <div className="text-3xl font-bold">190+</div>
-                  <div className="text-sm">Countries</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold">24</div>
-                  <div className="text-sm">Warehouses</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold">15+</div>
-                  <div className="text-sm">Languages</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold">100+</div>
-                  <div className="text-sm">Currencies</div>
                 </div>
               </div>
             </div>
