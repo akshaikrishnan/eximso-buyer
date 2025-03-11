@@ -1,505 +1,579 @@
-import {
-  ChevronRightIcon,
-  CloudArrowUpIcon,
-  InboxIcon,
-  LockClosedIcon,
-  ServerIcon,
-  SparklesIcon,
-  StarIcon,
-} from "@heroicons/react/20/solid";
-import React from "react";
 
-const incentives = [
+import React from "react";
+import {
+  ShieldCheckIcon,
+  GlobeAltIcon,
+  UserGroupIcon,
+  SparklesIcon,
+  BuildingStorefrontIcon,
+  CubeIcon,
+  TruckIcon,
+  CreditCardIcon,
+  ChartBarIcon,
+  LifebuoyIcon,
+  HeartIcon,
+  ArrowPathIcon,
+  CurrencyDollarIcon,
+  PhoneIcon,
+  StarIcon,
+} from "@heroicons/react/24/outline";
+import Contact from "@/components/navbar/contact/contact-page";
+
+const coreValues = [
   {
-    name: "Free shipping",
-    imageSrc: "/images/common/icon-shipping-simple.svg",
-    description:
-      "It's not actually free we just price it into the products. Someone's paying for it, and it's not us.",
+    name: "Global Reach",
+    icon: GlobeAltIcon,
+    description: "Connect with sellers and buyers from over 190 countries with our localized experiences and logistics solutions."
   },
   {
-    name: "10-year warranty",
-    imageSrc: "/images/common/icon-warranty-simple.svg",
-    description:
-      "If it breaks in the first 10 years we'll replace it. After that you're on your own though.",
+    name: "Customer-First",
+    icon: UserGroupIcon,
+    description: "Every decision we make starts with our customers. We're committed to delivering exceptional experiences at every touchpoint."
   },
   {
-    name: "Exchanges",
-    imageSrc: "/images/common/icon-exchange-simple.svg",
-    description:
-      "If you don't like it, trade it to one of your friends for something of theirs. Don't send it here though.",
+    name: "Reliability",
+    icon: ShieldCheckIcon,
+    description: "Our secure payment systems and buyer protection policies ensure every transaction is protected and worry-free."
+  },
+  {
+    name: "Innovation",
+    icon: SparklesIcon,
+    description: "We're constantly pushing the boundaries of what's possible in e-commerce, from AI-powered recommendations to next-day delivery."
   },
 ];
 
-export default function About() {
+const teamMembers = [
+  {
+    name: "Sarah Johnson",
+    role: "CEO & Founder",
+    image: "/images/peoples/pexels-bubi-2709563.jpg",
+    bio: "With 15+ years in global commerce, Sarah founded our platform with a vision to make cross-border shopping as simple as local shopping."
+  },
+  {
+    name: "Michael Chen",
+    role: "CTO",
+    image: "/images/peoples/ai-generated-9009341_1280.jpg",
+    bio: "Michael leads our engineering team, bringing expertise from his previous roles at leading tech companies to build our cutting-edge platform."
+  },
+  {
+    name: "Priya Patel",
+    role: "Head of Global Operations",
+    image: "/images/peoples/pexels-divinetechygirl-1181327.jpg",
+    bio: "Priya oversees our complex network of logistics partnerships, ensuring smooth operations across borders and continents."
+  },
+];
+
+const howItWorks = [
+  {
+    name: "Connecting Businesses & Customers",
+    icon: BuildingStorefrontIcon,
+    description: "We connect businesses with customers across borders, creating opportunities for sellers to expand their reach and buyers to access unique products from around the world. Whether you're a business looking to go global or a customer exploring international brands, our platform makes the process simple and straightforward."
+  },
+  {
+    name: "User -Friendly Platform",
+    icon: CubeIcon,
+    description: "Our platform is designed with simplicity in mind, enabling businesses and customers to interact effortlessly. Sellers can list their products easily, while buyers can browse and shop through an intuitive interface. We prioritize a hassle-free experience for everyone."
+  },
+  {
+    name: "End-to-End Logistics",
+    icon: TruckIcon,
+    description: "From product sourcing to final delivery, we handle every step of the logistics chain. Our robust shipping solutions, powered by 1shipping.in, ensure timely and cost-effective transportation of goods. We manage customs, duties, and compliance so you can focus on growing your business."
+  },
+  {
+    name: "Secure Payments",
+    icon: CreditCardIcon,
+    description: "We offer secure payment gateways for both businesses and customers. Our system supports multiple currencies and ensures that all transactions are encrypted and protected, fostering trust and reliability."
+  },
+  {
+    name: "Advanced Analytics",
+    icon: ChartBarIcon,
+    description: "Our technology-driven platform leverages AI and data analytics to provide insights into market trends, customer preferences, and more. This helps businesses optimize their offerings and improve customer satisfaction."
+  },
+  {
+    name: "Comprehensive Support",
+    icon: LifebuoyIcon,
+    description: "Our team is dedicated to supporting you at every step. From setting up your online store to navigating international trade regulations, our experts provide guidance and assistance tailored to your needs. "
+  },
+  {
+    name: "Sustainability",
+    icon: HeartIcon,
+    description: "We are committed to promoting sustainable and ethical trade practices. By optimizing our operations and encouraging eco-friendly practices, we aim to minimize our impact on the environment."
+  },
+  {
+    name: "Seamless Integration",
+    icon: ArrowPathIcon,
+    description: " Our platform integrates with popular marketplaces and social media channels for maximum exposure."
+  },
+];
+
+const brandOnDemandSteps = [
+  "Market Research: Identify high-demand products and add your brand name.",
+  "Product Sourcing: Share details with us; we connect with manufacturers and provide quotes and samples.",
+  "Order Confirmation: Approve production by making full or partial payments.",
+  "Manufacturing & Storage: We coordinate with manufacturers and offer warehouse storage.",
+  "Product Listing: Upload your inventory on EXIMSO and set your pricing.",
+  "Order Fulfillment: Upon sale, we handle shipping and transfer your earnings."
+];
+
+export default function AboutUs() {
   return (
-    <>
-      <section>
-        <div className="bg-white pb-8 sm:pb-12 lg:pb-12">
-          <div className="pt-8 overflow-hidden sm:pt-12 lg:relative lg:py-48 xl:px-20">
-            <div className="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:px-8 lg:max-w-full lg:grid lg:grid-cols-2 lg:gap-24">
-              <div>
-                <div>
-                  <img
-                    className="h-11 w-auto"
-                    src="/images/common/logo.png"
-                    alt="Logo"
-                  />
-                </div>
-                <div className="mt-20">
-                  <div>
-                    <a href="#" className="inline-flex space-x-4">
-                      <span className="rounded bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-600 tracking-wide uppercase">
-                        What&apos;s new
-                      </span>
-                      <span className="inline-flex items-center text-sm font-medium text-indigo-600 space-x-1">
-                        <span>Just shipped version 0.1.0</span>
-                        <ChevronRightIcon
-                          className="h-5 w-5"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </a>
-                  </div>
-                  <div className="mt-6 sm:max-w-xl">
-                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
-                      Server management for growing teams
-                    </h1>
-                    <p className="mt-6 text-xl text-gray-500">
-                      Anim aute id magna aliqua ad ad non deserunt sunt. Qui
-                      irure qui lorem cupidatat commodo.
-                    </p>
-                  </div>
-                  <form
-                    action="#"
-                    className="mt-12 sm:max-w-lg sm:w-full sm:flex"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <label htmlFor="hero-email" className="sr-only">
-                        Email address
-                      </label>
-                      <input
-                        id="hero-email"
-                        type="email"
-                        className="block w-full border border-gray-300 rounded-md px-5 py-3 text-base text-gray-900 placeholder-gray-500 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                    <div className="mt-4 sm:mt-0 sm:ml-3">
-                      <button
-                        type="submit"
-                        className="block w-full rounded-md border border-transparent px-5 py-3 bg-indigo-600 text-base font-medium text-white shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:px-10"
-                      >
-                        Notify me
-                      </button>
-                    </div>
-                  </form>
-                  <div className="mt-6">
-                    <div className="inline-flex items-center divide-x divide-gray-300">
-                      <div className="flex-shrink-0 flex pr-5">
-                        <StarIcon
-                          className="h-5 w-5 text-yellow-400"
-                          aria-hidden="true"
-                        />
-                        <StarIcon
-                          className="h-5 w-5 text-yellow-400"
-                          aria-hidden="true"
-                        />
-                        <StarIcon
-                          className="h-5 w-5 text-yellow-400"
-                          aria-hidden="true"
-                        />
-                        <StarIcon
-                          className="h-5 w-5 text-yellow-400"
-                          aria-hidden="true"
-                        />
-                        <StarIcon
-                          className="h-5 w-5 text-yellow-400"
-                          aria-hidden="true"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1 pl-5 py-1 text-sm text-gray-500 sm:py-3">
-                        <span className="font-medium text-gray-900">
-                          Rated 5 stars
-                        </span>{" "}
-                        by over{" "}
-                        <span className="font-medium text-indigo-600">
-                          500 beta users
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div className="bg-white scroll-smooth md:scroll-auto">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-r from-indigo-500 via-indigo-500 to-purple-500 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+          <div className="md:w-1/2">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
+              We&apos;re on a mission to <span className="text-indigo-200">connect the world</span>
+            </h1>
+            <p className="mt-6 text-xl text-indigo-100 max-w-3xl">
+              We&apos;re building the future of global commerce—where distance and borders no longer limit what you can buy or where you can sell.
+            </p>
+          </div>
+        </div>
+      </div>
 
-            <div className="sm:mx-auto sm:max-w-3xl sm:px-6">
-              <div className="py-12 sm:relative sm:mt-12 sm:py-16 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-                <div className="hidden sm:block">
-                  <div className="absolute inset-y-0 left-1/2 w-screen bg-gray-50 rounded-l-3xl lg:left-80 lg:right-0 lg:w-full" />
-                  <svg
-                    className="absolute top-8 right-1/2 -mr-3 lg:m-0 lg:left-0"
-                    width={404}
-                    height={392}
-                    fill="none"
-                    viewBox="0 0 404 392"
-                  >
-                    <defs>
-                      <pattern
-                        id="837c3e70-6c3a-44e6-8854-cc48c737b659"
-                        x={0}
-                        y={0}
-                        width={20}
-                        height={20}
-                        patternUnits="userSpaceOnUse"
-                      >
-                        <rect
-                          x={0}
-                          y={0}
-                          width={4}
-                          height={4}
-                          className="text-gray-200"
-                          fill="currentColor"
-                        />
-                      </pattern>
-                    </defs>
-                    <rect
-                      width={404}
-                      height={392}
-                      fill="url(#837c3e70-6c3a-44e6-8854-cc48c737b659)"
-                    />
-                  </svg>
-                </div>
-                <div className="relative pl-4 -mr-40 sm:mx-auto sm:max-w-3xl sm:px-0 lg:max-w-none lg:h-full lg:pl-12">
-                  <img
-                    className="w-full rounded-md shadow-xl ring-1 ring-black ring-opacity-5 lg:h-full lg:w-auto lg:max-w-none"
-                    src="/images/common/ss.png"
-                    alt=""
-                  />
-                </div>
+      {/* Mission & Vision Section */}
+      <div className="bg-indigo-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+              EXIMSO
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl mb-8">Revolutionizing Cross-Border E-Commerce</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
+              <div className="bg-white p-6 rounded-xl shadow-sm">
+                <h3 className="text-xl font-semibold text-indigo-600 mb-3">Our Mission</h3>
+                <p className="text-gray-700">
+                  &ldquo;Enabling a hassle-free global shopping experience by leveraging technology.&rdquo;
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-sm">
+                <h3 className="text-xl font-semibold text-indigo-600 mb-3">Our Vision</h3>
+                <p className="text-gray-700">
+                  &ldquo;To be the most trusted cross-border e-commerce platform, making global trade and shopping easy for businesses and consumers everywhere.&ldquo;
+                </p>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="relative bg-white pt-16 pb-32 overflow-hidden">
-        <div className="mt-24">
-          <div className="lg:mx-auto lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-2 lg:grid-flow-col-dense lg:gap-24">
-            <div className="px-4 max-w-xl mx-auto sm:px-6 lg:py-32 lg:max-w-none lg:mx-0 lg:px-0 lg:col-start-2">
-              <div>
-                <div>
-                  <span className="h-12 w-12 rounded-md flex items-center justify-center bg-indigo-600">
-                    <SparklesIcon
-                      className="h-6 w-6 text-white"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </div>
-                <div className="mt-6">
-                  <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
-                    Better understand your customers
-                  </h2>
-                  <p className="mt-4 text-lg text-gray-500">
-                    Semper curabitur ullamcorper posuere nunc sed. Ornare
-                    iaculis bibendum malesuada faucibus lacinia porttitor.
-                    Pulvinar laoreet sagittis viverra duis. In venenatis sem
-                    arcu pretium pharetra at. Lectus viverra dui tellus ornare
-                    pharetra.
-                  </p>
-                  <div className="mt-6">
-                    <a
-                      href="#"
-                      className="inline-flex px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      Get started
-                    </a>
-                  </div>
-                </div>
-              </div>
+      {/* Our Story Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+              Our Story
             </div>
-            <div className="mt-12 sm:mt-16 lg:mt-0 lg:col-start-1">
-              <div className="pr-4 -ml-48 sm:pr-6 md:-ml-16 lg:px-0 lg:m-0 lg:relative lg:h-full">
-                <img
-                  className="w-full rounded-xl shadow-xl ring-1 ring-black ring-opacity-5 lg:absolute lg:right-0 lg:h-full lg:w-auto lg:max-w-none"
-                  src="https://tailwindui.com/img/component-images/inbox-app-screenshot-2.jpg"
-                  alt="Customer profile user interface"
-                />
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">From a simple idea to global impact</h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Founded in 2018, we started with a simple question: why is buying from another country still so difficult? Our founders, having experienced the frustrations of cross-border shopping firsthand, decided to build a solution that would make global commerce as seamless as local shopping.
+            </p>
+            <p className="mt-4 text-lg text-gray-600">
+              Today, we connect millions of buyers and sellers across 190+ countries, processing over 10 million transactions daily. But our mission remains the same: to break down barriers and build bridges in global commerce.
+            </p>
+            <div className="mt-8 flex gap-4">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-indigo-600">190+</div>
+                <div className="text-gray-600">Countries</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-indigo-600">50M+</div>
+                <div className="text-gray-600">Customers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-indigo-600">$10B+</div>
+                <div className="text-gray-600">GMV</div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="relative mt-24">
-          <div className="lg:mx-auto lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-2 lg:grid-flow-col-dense lg:gap-24">
-            <div className="px-4 max-w-xl mx-auto sm:px-6 lg:py-16 lg:max-w-none lg:mx-0 lg:px-0">
-              <div>
-                <div>
-                  <span className="h-12 w-12 rounded-md flex items-center justify-center bg-indigo-600">
-                    <InboxIcon
-                      className="h-6 w-6 text-white"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </div>
-                <div className="mt-6">
-                  <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
-                    Stay on top of customer support
-                  </h2>
-                  <p className="mt-4 text-lg text-gray-500">
-                    Semper curabitur ullamcorper posuere nunc sed. Ornare
-                    iaculis bibendum malesuada faucibus lacinia porttitor.
-                    Pulvinar laoreet sagittis viverra duis. In venenatis sem
-                    arcu pretium pharetra at. Lectus viverra dui tellus ornare
-                    pharetra.
-                  </p>
-                  <div className="mt-6">
-                    <a
-                      href="#"
-                      className="inline-flex px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      Get started
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-8 border-t border-gray-200 pt-6">
-                <blockquote>
-                  <div>
-                    <p className="text-base text-gray-500">
-                      &ldquo;Cras velit quis eros eget rhoncus lacus ultrices
-                      sed diam. Sit orci risus aenean curabitur donec aliquet.
-                      Mi venenatis in euismod ut.&rdquo;
-                    </p>
-                  </div>
-                  <footer className="mt-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex-shrink-0">
-                        <img
-                          className="h-6 w-6 rounded-full"
-                          src="https://images.unsplash.com/photo-1509783236416-c9ad59bae472?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80"
-                          alt=""
-                        />
-                      </div>
-                      <div className="text-base font-medium text-gray-700">
-                        Marcia Hill, Digital Marketing Manager
-                      </div>
-                    </div>
-                  </footer>
-                </blockquote>
-              </div>
-            </div>
-            <div className="mt-12 sm:mt-16 lg:mt-0">
-              <div className="pl-4 -mr-48 sm:pl-6 md:-mr-16 lg:px-0 lg:m-0 lg:relative lg:h-full">
-                <img
-                  className="w-full rounded-xl shadow-xl ring-1 ring-black ring-opacity-5 lg:absolute lg:left-0 lg:h-full lg:w-auto lg:max-w-none"
-                  src="https://tailwindui.com/img/component-images/inbox-app-screenshot-1.jpg"
-                  alt="Inbox user interface"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative isolate overflow-hidden bg-white px-6 py-24 sm:py-32 lg:overflow-visible lg:px-0">
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <svg
-            aria-hidden="true"
-            className="absolute top-0 left-[max(50%,25rem)] h-[64rem] w-[128rem] -translate-x-1/2 stroke-gray-200 [mask-image:radial-gradient(64rem_64rem_at_top,white,transparent)]"
-          >
-            <defs>
-              <pattern
-                x="50%"
-                y={-1}
-                id="e813992c-7d03-4cc4-a2bd-151760b470a0"
-                width={200}
-                height={200}
-                patternUnits="userSpaceOnUse"
-              >
-                <path d="M100 200V.5M.5 .5H200" fill="none" />
-              </pattern>
-            </defs>
-            <svg x="50%" y={-1} className="overflow-visible fill-gray-50">
-              <path
-                d="M-100.5 0h201v201h-201Z M699.5 0h201v201h-201Z M499.5 400h201v201h-201Z M-300.5 600h201v201h-201Z"
-                strokeWidth={0}
+          <div className="relative">
+            <div className="relative z-10">
+              <img
+                src="/images/common/working.jpg"
+                width={600}
+                height={400}
+                className="rounded-lg shadow-lg w-full h-auto"
+                alt="Working environment"
               />
-            </svg>
-            <rect
-              fill="url(#e813992c-7d03-4cc4-a2bd-151760b470a0)"
-              width="100%"
-              height="100%"
-              strokeWidth={0}
-            />
-          </svg>
-        </div>
-        <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
-          <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-            <div className="lg:pr-4">
-              <div className="lg:max-w-lg">
-                <p className="text-base/7 font-semibold text-indigo-600">
-                  Deploy faster
-                </p>
-                <h1 className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
-                  A better workflow
-                </h1>
-                <p className="mt-6 text-xl/8 text-gray-700">
-                  Aliquet nec orci mattis amet quisque ullamcorper neque, nibh
-                  sem. At arcu, sit dui mi, nibh dui, diam eget aliquam. Quisque
-                  id at vitae feugiat egestas.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="-mt-12 -ml-12 p-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
-            <img
-              alt=""
-              src="/images/common/ss.png"
-              className="w-[48rem] max-w-none rounded-xl bg-gray-900 ring-1 shadow-xl ring-gray-400/10 sm:w-[57rem]"
-            />
-          </div>
-          <div className="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-            <div className="lg:pr-4">
-              <div className="max-w-xl text-base/7 text-gray-700 lg:max-w-lg">
-                <p>
-                  Faucibus commodo massa rhoncus, volutpat. Dignissim sed eget
-                  risus enim. Mattis mauris semper sed amet vitae sed turpis id.
-                  Id dolor praesent donec est. Odio penatibus risus viverra
-                  tellus varius sit neque erat velit. Faucibus commodo massa
-                  rhoncus, volutpat. Dignissim sed eget risus enim. Mattis
-                  mauris semper sed amet vitae sed turpis id.
-                </p>
-                <ul role="list" className="mt-8 space-y-8 text-gray-600">
-                  <li className="flex gap-x-3">
-                    <CloudArrowUpIcon
-                      aria-hidden="true"
-                      className="mt-1 size-5 flex-none text-indigo-600"
-                    />
-                    <span>
-                      <strong className="font-semibold text-gray-900">
-                        Push to deploy.
-                      </strong>{" "}
-                      Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-                      Maiores impedit perferendis suscipit eaque, iste dolor
-                      cupiditate blanditiis ratione.
-                    </span>
-                  </li>
-                  <li className="flex gap-x-3">
-                    <LockClosedIcon
-                      aria-hidden="true"
-                      className="mt-1 size-5 flex-none text-indigo-600"
-                    />
-                    <span>
-                      <strong className="font-semibold text-gray-900">
-                        SSL certificates.
-                      </strong>{" "}
-                      Anim aute id magna aliqua ad ad non deserunt sunt. Qui
-                      irure qui lorem cupidatat commodo.
-                    </span>
-                  </li>
-                  <li className="flex gap-x-3">
-                    <ServerIcon
-                      aria-hidden="true"
-                      className="mt-1 size-5 flex-none text-indigo-600"
-                    />
-                    <span>
-                      <strong className="font-semibold text-gray-900">
-                        Database backups.
-                      </strong>{" "}
-                      Ac tincidunt sapien vehicula erat auctor pellentesque
-                      rhoncus. Et magna sit morbi lobortis.
-                    </span>
-                  </li>
-                </ul>
-                <p className="mt-8">
-                  Et vitae blandit facilisi magna lacus commodo. Vitae sapien
-                  duis odio id et. Id blandit molestie auctor fermentum
-                  dignissim. Lacus diam tincidunt ac cursus in vel. Mauris
-                  varius vulputate et ultrices hac adipiscing egestas. Iaculis
-                  convallis ac tempor et ut. Ac lorem vel integer orci.
-                </p>
-                <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">
-                  No server? No problem.
-                </h2>
-                <p className="mt-6">
-                  Id orci tellus laoreet id ac. Dolor, aenean leo, ac etiam
-                  consequat in. Convallis arcu ipsum urna nibh. Pharetra,
-                  euismod vitae interdum mauris enim, consequat vulputate nibh.
-                  Maecenas pellentesque id sed tellus mauris, ultrices mauris.
-                  Tincidunt enim cursus ridiculus mi. Pellentesque nam sed
-                  nullam sed diam turpis ipsum eu a sed convallis diam.
-                </p>
-              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="bg-gray-50">
-        <div className="max-w-7xl mx-auto py-24 sm:px-2 sm:py-32 lg:px-4">
-          <div className="max-w-2xl mx-auto px-4 lg:max-w-none">
-            <div className="grid grid-cols-1 items-center gap-y-10 gap-x-16 lg:grid-cols-2">
-              <div>
-                <h2 className="text-4xl font-extrabold tracking-tight text-gray-900">
-                  We built our business on great customer service
-                </h2>
-                <p className="mt-4 text-gray-500">
-                  At the beginning at least, but then we realized we could make
-                  a lot more money if we kinda stopped caring about that. Our
-                  new strategy is to write a bunch of things that look really
-                  good in the headlines, then clarify in the small print but
-                  hope people don&apos;t actually read it.
-                </p>
+      {/* Core Values Section */}
+      <div className="bg-gray-50 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+              Our Values
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">What drives us every day</h2>
+            <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
+              These core principles guide our decisions, shape our culture, and help us deliver exceptional experiences.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {coreValues.map((value) => (
+              <div key={value.name} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                  <value.icon className="h-6 w-6" />
+                </div>
+                <h3 className="mt-4 text-lg font-medium text-gray-900">{value.name}</h3>
+                <p className="mt-2 text-gray-500">{value.description}</p>
               </div>
-              <div className="aspect-w-3 aspect-h-2 bg-gray-100 rounded-lg overflow-hidden">
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* How EXIMSO Works Section */}
+      <div className="max-w-[84rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="text-center mb-16">
+          <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+            Our Process
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">How EXIMSO Works</h2>
+          <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
+            We make global commerce simple, reliable, and efficient with our comprehensive platform.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {howItWorks.map((item, index) => (
+            <div key={item.name} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center mb-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3">
+                  {index + 1}
+                </div>
+                <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                  <item.icon className="h-6 w-6" />
+                </div>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
+              <p className="mt-2 text-gray-500 text-justify ">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Leadership Team Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="text-center mb-16">
+          <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+            Our Team
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Meet the leaders building the future</h2>
+          <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
+            Our diverse team brings experience from top technology and retail companies worldwide.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {teamMembers.map((member) => (
+            <div key={member.name} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div className="relative h-64 w-full">
                 <img
-                  src="/images/common/incentives.jpg"
-                  alt=""
-                  className="object-center object-cover"
+                  src={member.image}
+                  alt={member.name}
+                  className="object-cover object-center w-full h-full"
                 />
               </div>
+              <div className="p-6">
+                <h3 className="text-lg font-medium text-gray-900">{member.name}</h3>
+                <p className="text-indigo-600">{member.role}</p>
+                <p className="mt-3 text-gray-500">{member.bio}</p>
+              </div>
             </div>
-            <div className="mt-16 grid grid-cols-1 gap-y-10 gap-x-8 lg:grid-cols-3">
-              {incentives.map((incentive) => (
-                <div key={incentive.name} className="sm:flex lg:block">
-                  <div className="sm:flex-shrink-0">
-                    <img
-                      className="w-16 h-16"
-                      src={incentive.imageSrc}
-                      alt=""
-                    />
+          ))}
+        </div>
+      </div>
+
+      {/* BrandOnDemand Section */}
+      <div className="bg-indigo-50 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+                Innovative Solution
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">BrandOnDemand: Sell Without Inventory</h2>
+              <p className="mt-4 text-lg text-gray-600">
+                Our innovative dropshipping program enables businesses to sell globally without holding inventory. Start your global e-commerce journey with minimal upfront investment.
+              </p>
+
+              <div className="mt-8">
+                <a href="#" className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700">
+                  Join BrandOnDemand
+                </a>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h3 className="text-xl font-semibold text-indigo-600 mb-6">How It Works</h3>
+              <div>
+                {brandOnDemandSteps.map((step, index) => (
+                  <div key={index} className="flex mb-4 pb-4 border-b border-gray-100 last:border-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 flex-shrink-0">
+                      {index + 1}
+                    </div>
+                    <p className="text-gray-700">{step}</p>
                   </div>
-                  <div className="mt-4 sm:mt-0 sm:ml-6 lg:mt-6 lg:ml-0">
-                    <h3 className="text-sm font-medium text-gray-900">
-                      {incentive.name}
-                    </h3>
-                    <p className="mt-2 text-sm text-gray-500">
-                      {incentive.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+              <p className="mt-4 text-indigo-600 font-medium">Minimal Costs: Pay a small storage fee for goods in our warehouse.</p>
             </div>
           </div>
         </div>
-      </section>
-      <section className="bg-indigo-700">
-        <div className="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            <span className="block">Boost your productivity.</span>
-            <span className="block">Start using Workflow today.</span>
-          </h2>
-          <p className="mt-4 text-lg leading-6 text-indigo-200">
-            Ac euismod vel sit maecenas id pellentesque eu sed consectetur.
-            Malesuada adipiscing sagittis vel nulla nec.
+      </div>
+
+      {/* B2B & B2C Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="text-center mb-12">
+          <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+            Comprehensive Solutions
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">B2B & B2C: Transforming Global E-Commerce</h2>
+          <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
+            EXIMSO bridges the gap between B2B and B2C transactions, offering a versatile and efficient platform for all your needs.
           </p>
-          <a
-            href="#"
-            className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto"
-          >
-            Sign up for free
-          </a>
         </div>
-      </section>
-    </>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <div className="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-lg text-indigo-600 mb-4">
+              <BuildingStorefrontIcon className="h-8 w-8" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4">For Businesses</h3>
+            <ul className="space-y-3 text-gray-600">
+              <li className="flex items-start">
+                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Access new markets with localized experiences</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Bulk order management and automated invoicing</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Simplified customs and regulatory compliance</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Comprehensive logistics and warehousing</span>
+              </li>
+            </ul>
+            <div className="mt-8">
+              <a href="/business" className="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
+                Learn more about B2B solutions →
+              </a>
+            </div>
+          </div>
+
+          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <div className="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-lg text-indigo-600 mb-4">
+              <UserGroupIcon className="h-8 w-8" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-4">For Consumers</h3>
+            <ul className="space-y-3 text-gray-600">
+              <li className="flex items-start">
+                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Shop unique products from around the world</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Personalized shopping experiences</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Multiple payment options and buyer protection</span>
+              </li>
+              <li className="flex items-start">
+                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Real-time order tracking and delivery estimates</span>
+              </li>
+            </ul>
+            <div className="mt-8">
+              <a href="/shop" className="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
+                Explore our marketplace →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Testimonials Section */}
+      <div className="bg-gray-50 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+              Testimonials
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">What Our Partners Say</h2>
+            <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
+              Hear from businesses and customers who have transformed their approach to global commerce with EXIMSO.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Testimonial 1 */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 italic mb-6">
+                &ldquo;EXIMSO helped us expand our handcrafted goods to 12 new countries in just 6 months. Their platform handles everything from translation to payments, allowing us to focus on creating our products.&ldquo;
+              </p>
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3">
+                  AK
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Anya Kowalski</h4>
+                  <p className="text-gray-500 text-sm">Founder, Artisan Collective</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 italic mb-6">
+                &ldquo;As a mid-sized electronics manufacturer, we used to struggle with international logistics. EXIMSO&apos;s end-to-end solution has streamlined our operations and doubled our export volume.&ldquo;
+              </p>
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3">
+                  LT
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Liu Tao</h4>
+                  <p className="text-gray-500 text-sm">Operations Director, TechPro Electronics</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 italic mb-6">
+                I&apos;ve been able to source unique products from around the world without worrying about currency conversion or shipping complications. EXIMSO makes global shopping feel local.
+              </p>
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3">
+                  JR
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">James Rodriguez</h4>
+                  <p className="text-gray-500 text-sm">Customer</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Global Presence Map Section */}
+      <div className="bg-indigo-50 py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
+              Global Presence
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Serving 190+ Countries</h2>
+            <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
+              Our global network of warehouses, logistics partners, and customer service centers ensures a seamless experience worldwide.
+            </p>
+          </div>
+
+          <div className="relative rounded-xl overflow-hidden shadow-lg">
+            <div className="relative aspect-[16/9]">
+              <img
+                src="/images/common/map.jpg"
+                alt="EXIMSO Global Presence Map"
+                className="object-cover w-full h-full"
+              />
+              <div className="absolute inset-0 bg-indigo-900 bg-opacity-30"></div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-indigo-900 to-transparent p-6">
+              <div className="flex justify-between text-white">
+                <div className="text-center">
+                  <div className="text-3xl font-bold">190+</div>
+                  <div className="text-sm">Countries</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">24</div>
+                  <div className="text-sm">Warehouses</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">15+</div>
+                  <div className="text-sm">Languages</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold">100+</div>
+                  <div className="text-sm">Currencies</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="px-6 py-12 md:p-12 md:flex items-center justify-between">
+            <div className="md:w-2/3 mb-8 md:mb-0">
+              <h2 className="text-3xl font-bold text-white md:text-4xl">Ready to expand your business globally?</h2>
+              <p className="mt-4 text-xl text-indigo-100">
+                Join EXIMSO today and reach customers and suppliers worldwide.
+              </p>
+            </div>
+            <div className="md:w-1/3 flex flex-col sm:flex-row md:flex-col space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-0 md:space-y-4">
+              <button className="px-6 py-3 bg-white text-indigo-700 font-medium rounded-md hover:bg-indigo-50 transition-colors">
+                Join as a Seller
+              </button>
+              <button className="px-6 py-3 bg-indigo-500 text-white font-medium rounded-md border border-indigo-300 hover:bg-indigo-400 transition-colors">
+                Shop Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

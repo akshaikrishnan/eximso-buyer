@@ -3,12 +3,15 @@ import AddressBlock from "@/components/checkout/address-block";
 import CheckoutBlock from "@/components/checkout/block";
 import OrderSummary from "@/components/checkout/order-summary";
 import RadioSelector from "@/components/checkout/radio-button";
+import { Price } from "@/components/common/price";
+import { useCart } from "@/hooks/use-cart";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api/axios.interceptor";
 import { sample } from "@/lib/data/checkoutdata";
 import { endpoints } from "@/lib/data/endpoints";
 import { razorPay } from "@/lib/razorpay";
 import { LockClosedIcon } from "@heroicons/react/20/solid";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { useMutation } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Loader2Icon } from "lucide-react";
@@ -27,9 +30,10 @@ export default function CheckoutPage() {
     shippingAddress: null,
     billingAddress: null,
     isSameAddress: true,
-    shippingMethod: sample.shippimngMethods[0],
-    paymentMethod: sample.paymentMethods[0],
+    shippingMethod: sample.shippimngMethods.find((item) => item.isActive),
+    paymentMethod: sample.paymentMethods.find((item) => item.isActive),
   });
+  const { subTotal } = useCart();
 
   const paymentMutation = useMutation({
     mutationFn: (data: any) =>
@@ -74,7 +78,7 @@ export default function CheckoutPage() {
   return (
     <>
       <div className="bg-white">
-        <div className="mx-auto container px-4 pb-16 pt-4 sm:px-6 sm:pb-24 sm:pt-8 lg:px-8 xl:px-2 xl:pt-14 relative overflow-auto">
+        <div className="mx-auto container px-4 pb-16 pt-4 sm:px-6 sm:pb-24 sm:pt-8 lg:px-8 xl:px-2 xl:pt-14 relative lg:overflow-auto">
           <h1 className="sr-only">Checkout</h1>
 
           <div className="mx-auto grid max-w-lg grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
@@ -132,12 +136,31 @@ export default function CheckoutPage() {
                   isGrid
                 />
               </CheckoutBlock>
-              <PlaceOrderButton
-                action={initiatePayment}
-                isValid={isValid()}
-                isLoading={paymentMutation.isPending}
+              <div className="hidden lg:block">
+                <PlaceOrderButton
+                  action={initiatePayment}
+                  isValid={isValid()}
+                  isLoading={paymentMutation.isPending}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="lg:hidden sticky bottom-0 left-0 right-0 bg-white p-4 flex justify-center items-center gap-2 border-t border-gray-200">
+            <div
+              onClick={() => scrollTo({ top: 0, behavior: "smooth" })}
+              className="flex-1 flex items-center justify-center cursor-pointer gap-2"
+            >
+              <Price amount={subTotal} />
+              <InformationCircleIcon
+                className="h-5 w-5 text-eximso-500"
+                aria-hidden="true"
               />
             </div>
+            <PlaceOrderButton
+              action={initiatePayment}
+              isValid={isValid()}
+              isLoading={paymentMutation.isPending}
+            />
           </div>
         </div>
       </div>

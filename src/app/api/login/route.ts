@@ -20,6 +20,18 @@ export async function GET(req: NextRequest, res: NextResponse) {
     if (!decodedToken) {
       return NextResponse.redirect(new URL("/auth/error", req.url));
     }
+
+    try {
+      const deviceToken = cookies().get("device_token")?.value;
+      const syncCart = await api.post("/cart/sync", {
+        deviceToken,
+        accessToken: token,
+      });
+      console.log(syncCart.data);
+    } catch (error) {
+      console.log("Error syncing cart:", error);
+    }
+
     cookies().set({
       name: "access_token",
       value: token,
@@ -35,6 +47,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     }
     return NextResponse.redirect(new URL(toPath, req.url));
   } catch (e) {
+    console.log(e);
     return NextResponse.redirect(new URL("/auth/error", req.url));
   }
 }

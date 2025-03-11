@@ -11,6 +11,7 @@ import {
 import { HistoryIcon, LogOutIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useLogout } from "@/hooks/use-logout";
 
 const tabs = [
   { name: "My Account", href: "/profile", icon: UserIcon, current: false },
@@ -44,13 +45,6 @@ const tabs = [
   //   icon: LockClosedIcon,
   //   current: false,
   // },
-
-  {
-    name: "Logout",
-    href: "#",
-    icon: LogOutIcon,
-    current: false,
-  },
 ];
 
 function classNames(...classes: any) {
@@ -63,6 +57,8 @@ export default function ProfileNavbar() {
   const isActive = (href: string) => {
     return pathName === href;
   };
+
+  const { logout } = useLogout();
 
   return (
     <div>
@@ -112,6 +108,26 @@ export default function ProfileNavbar() {
                 <span>{tab.name}</span>
               </Link>
             ))}
+            <Link
+              key={"logout"}
+              href={"#"}
+              onClick={logout}
+              className={classNames(
+                "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+                "group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+              )}
+              aria-current={false}
+            >
+              <LogOutIcon
+                className={classNames(
+                  "hover:text-indigo-500",
+                  "text-gray-400 group-hover:text-gray-500",
+                  "-ml-0.5 mr-2 h-5 w-5"
+                )}
+                aria-hidden="true"
+              />
+              <span>Logout</span>
+            </Link>
           </nav>
         </div>
       </div>
