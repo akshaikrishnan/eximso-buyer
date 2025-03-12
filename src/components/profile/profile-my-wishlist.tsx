@@ -83,7 +83,7 @@ const WishlistPage = () => {
                   <h3 className="text-lg font-medium text-gray-800">
                     {item.name}
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-gray-500 line-clamp-1">
                     {item.shortDescription}
                   </p>
                   <div className="mt-2 flex items-center space-x-2 text-sm">
