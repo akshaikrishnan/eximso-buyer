@@ -106,7 +106,7 @@ const Navbar = (props: any) => {
           <li className="nav-item flex items-center gap-4">
             <button
               className="hamburger cursor-pointer text-2xl md:hidden"
-              // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
+            // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
             >
               <i className="fa-solid fa-bars"></i>
             </button>
@@ -139,8 +139,9 @@ const Navbar = (props: any) => {
                     <AvatarFallback>
                       {user?.name
                         ? user?.name.split(" ").length > 1
-                          ? user?.name.split(" ")[0].charAt(0) +
-                            user?.name.split(" ")[1].charAt(0)
+
+                          ? user?.name.split(" ")[0].charAt(0) + user?.name.split(" ")[1].charAt(0)
+
                           : user?.name.charAt(0) // If there is only one word, take the first letter
                         : ""}
                     </AvatarFallback>
@@ -151,7 +152,7 @@ const Navbar = (props: any) => {
               </span>
             </Link>
           </li>
-          <li className="cart cursor-pointer text-xl md:order-7">
+          <li className="cart cursor-pointer text-xl md:order-7 hidden md:block">
             <Link href={"/cart"} className="relative">
               <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                 {cart?.items?.length || 0}
