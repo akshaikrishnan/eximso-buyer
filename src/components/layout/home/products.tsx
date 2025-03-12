@@ -52,7 +52,7 @@ export default function ProductsGrid() {
           {products.map((product) => (
             <div
               key={product._id}
-              className="hover:shadow-lg hover:scale-105 transition-transform duration-300"
+              className="hover:scale-105 transition-transform duration-300"
             >
               <ProductCard product={product} />
             </div>
