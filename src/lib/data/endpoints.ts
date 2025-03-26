@@ -7,4 +7,5 @@ export const endpoints = {
   wishlist: "wishlist",
   address: "address",
   checkout: "checkout",
+  banner: "banner",
 };

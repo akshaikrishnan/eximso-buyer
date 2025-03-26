@@ -47,7 +47,7 @@ const BannerSection: React.FC<PropType> = (props) => {
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
           {slides.map((banner) => (
-            <div className="embla__slide" key={banner.title}>
+            <div className="embla__slide   flex justify-center items-center" key={banner.title}>
               <BannerCard {...banner} />
             </div>
           ))}
