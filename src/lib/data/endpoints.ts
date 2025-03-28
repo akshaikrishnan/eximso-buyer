@@ -8,4 +8,5 @@ export const endpoints = {
   address: "address",
   checkout: "checkout",
   banner: "banner",
+  order: "order",
 };
