@@ -14,18 +14,39 @@ import { endpoints } from "@/lib/data/endpoints";
 export default async function Home() {
   const OPTIONS: EmblaOptionsType = { loop: true };
 
+  // Define banner type
+  interface Banner {
+    image: string;
+    title: string;
+    linkUrl: string;
+    type: string;
+    createdAt?: string;
+    updatedAt?: string;
+  }
+
   // Fetch banner images dynamically
-  let banners = [];
+  let banners: Banner[] = [];
   try {
     const res = await api.get(endpoints.banner);
-    // console.log("API Response:", res.data);
+    console.log("API Response:", res.data);
     banners = res.data.result || [];
   } catch (error) {
     console.error("Error loading banners:", error);
   }
 
+  // Sort banners by latest createdAt or updatedAt (descending order)
+  banners.sort((a: Banner, b: Banner) => 
+    new Date(b.createdAt || b.updatedAt || "").getTime() - 
+    new Date(a.createdAt || a.updatedAt || "").getTime()
+  );
+
+  // Filter banners of type 'sidebar' and get only the latest 3
+  const filteredBanners = banners
+    .filter((banner: Banner) => banner.type === "sidebar")
+    .slice(0, 3); // Take only the latest 3 banners
+
   // Transform API data into required format
-  const SLIDES = banners.map((banner: { image: any; title: any; linkUrl: any; }) => ({
+  const SLIDES = filteredBanners.map((banner: Banner) => ({
     image: banner.image || "/placeholder-image.jpg",
     title: banner.title || "Banner",
     href: banner.linkUrl || "#",
@@ -37,7 +58,7 @@ export default async function Home() {
         <HeroWithCategories />
       </Container>
 
-      {/* Pass API-fetched banners */}
+      {/* Pass only the latest 3 banners */}
       <BannerSection slides={SLIDES} options={OPTIONS} />
 
       <Container>
@@ -53,3 +74,6 @@ export default async function Home() {
     </main>
   );
 }
+
+
+

@@ -11,27 +11,35 @@ interface BannerItem {
   width: number;
   height: number;
   alt: string;
+  type: string;
 }
 
-// ✅ Fetch banners with proper response handling
+// ✅ Fetch banners with better handling
 async function fetchBanners(): Promise<BannerItem[]> {
   try {
     const res = await api.get(endpoints.banner);
-    console.log("API Response:", res.data); // Debugging log
+    console.log("API Response:", res.data);
 
-    // ✅ Ensure correct data format
-    const banners = res.data.result || res.data || [];
+    // Ensure the response data is in the correct format
+    let banners = res.data?.result || res.data || [];
 
-    return banners.slice(0, 3).map((banner: any) => ({
+    // Sort banners by latest, handling missing `createdAt`
+    banners = banners.sort(
+      (a: any, b: any) =>
+        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+
+    return banners.map((banner: any) => ({
       id: banner._id || crypto.randomUUID(),
       image: banner.image || "/placeholder-image.jpg",
       linkUrl: banner.link || "#",
       width: 370,
       height: 450,
       alt: banner.title || "Banner",
+      type: banner.type || "homepage",
     }));
-  } catch (error) {
-    console.error("Error fetching banners:", error);
+  } catch (error: any) {
+    console.error("Error fetching banners:", error?.response?.data || error.message);
     return [];
   }
 }
@@ -39,45 +47,48 @@ async function fetchBanners(): Promise<BannerItem[]> {
 export default async function HeroThreeGrid() {
   const banners = await fetchBanners();
 
-  // ✅ Handle empty state
-  if (banners.length === 0) {
-    return (
-      <div className="col-span-full lg:col-span-5 xl:col-span-5 row-span-full lg:row-auto grid grid-cols-2 gap-2 md:gap-3.5 lg:gap-5 xl:gap-7">
-        <div className="col-span-2 text-center text-gray-500">
-          No banners available
-        </div>
-      </div>
-    );
-  }
+  // Store banner types to avoid multiple `.find()` calls
+  const homepageBanner = banners.find((b) => b.type === "homepage");
+  const footerBanner = banners.find((b) => b.type === "footer");
+  const mainBanner = banners.find((b) => b.type === "main-banner");
 
   return (
-    <div
-      className={`col-span-full lg:col-span-5 xl:col-span-5 row-span-full lg:row-auto grid ${
-        banners.length === 3 ? "grid-cols-2" : "grid-cols-1"
-      } gap-2 md:gap-3.5 lg:gap-5 xl:gap-7`}
-    >
-      {banners.map((banner: BannerItem, index: number) => (
-        <div
-          key={banner.id}
-          className={`mx-auto ${
-            banners.length === 3 && index === 0 ? "col-span-2" : "col-span-1"
-          } w-full`}
-        >
-          <Link
-            className="h-full group flex justify-center relative overflow-hidden"
-            href={banner.linkUrl}
-          >
-            <Image
-              className="bg-gray-300 object-cover w-full rounded-md h-[150px] sm:h-[200px] md:h-[300px] lg:h-[300px] xl:h-[350px]"
-              src={banner.image}
-              width={banner.width}
-              height={banner.height}
-              alt={banner.alt}
-              priority={index < 2} 
-            />
-          </Link>
-        </div>
-      ))}
+    <div className="col-span-full lg:col-span-5 xl:col-span-5 row-span-full lg:row-auto grid grid-cols-2 gap-2 md:gap-3.5 lg:gap-5 xl:gap-0">
+      {homepageBanner && (
+        <BannerItemComponent banner={homepageBanner} className="col-span-2 w-full h-auto" imageHeight="h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[24rem]" />
+      )}
+      {footerBanner && (
+        <BannerItemComponent banner={footerBanner} className="col-span-1 w-full" imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-[18rem]" />
+      )}
+      {mainBanner && (
+        <BannerItemComponent banner={mainBanner} className="col-span-1 w-full" imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-[18rem]" />
+      )}
+    </div>
+  );
+}
+
+// ✅ Extracted BannerItemComponent to avoid repetition
+function BannerItemComponent({
+  banner,
+  className,
+  imageHeight
+}: {
+  banner: BannerItem;
+  className: string;
+  imageHeight: string;
+}) {
+  return (
+    <div className={`mx-auto ${className}`}>
+      <Link className="h-full group flex justify-center relative overflow-hidden" href={banner.linkUrl}>
+        <Image
+          className={`bg-gray-300 object-cover w-full rounded-md ${imageHeight}`}
+          src={banner.image}
+          width={banner.width}
+          height={banner.height}
+          alt={banner.alt}
+          // priority={true}
+        />
+      </Link>
     </div>
   );
 }
