@@ -1,4 +1,3 @@
-// endpoints.tsx
 export const endpoints = {
   products: "products",
   categories: "category",
@@ -7,6 +6,6 @@ export const endpoints = {
   wishlist: "wishlist",
   address: "address",
   checkout: "checkout",
-  banner: "banner",
+  banner: "banner", // Keeping the banner endpoint
   order: "order",
 };
