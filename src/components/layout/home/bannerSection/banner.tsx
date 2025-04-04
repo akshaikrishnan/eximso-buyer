@@ -31,18 +31,21 @@ const BannerCard: FC<BannerProps> = ({
           classNameInner
         )}
       >
-        <Image
-          src={image}
-          width={1920}
-          height={1080}
-          alt={title}
-          quality={100}
-          className={cn("bg-gray-300 object-cover w-full", {
-            "rounded-md": variant === "rounded",
-          })}
-          // sizes="(max-width: 768px) 100vw"
-          priority
-        />
+        <div className="relative w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px]">
+          <img
+            src={image}
+            alt={title}
+            className={cn(
+              "bg-gray-300 object-cover rounded-md w-full h-full max-w-full",
+              {
+                "rounded-md": variant === "rounded",
+              }
+            )}
+          />
+
+        </div>
+
+
         {/* <Image
           src={image.desktop.url}
           fill
