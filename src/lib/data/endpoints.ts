@@ -9,4 +9,5 @@ export const endpoints = {
   checkout: "checkout",
   order: "order",
   banner: "banner",
+  collection:"collection"
 };
