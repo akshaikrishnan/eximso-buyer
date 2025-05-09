@@ -9,28 +9,34 @@ interface UseProductsParams {
   filters?: Record<string, any>;
   sort?: string;
   slug?: string;
+  params?: Record<string, any>;
 }
 
 export const useProducts = ({
   filters = {},
   sort = "",
   slug = "",
+  params = [],
 }: UseProductsParams) => {
+  console.log("params", params);
   const searchParams = useSearchParams();
   const name = searchParams.get("q");
   const getProducts = async ({ pageParam = 1 }: { pageParam: number }) => {
+    console.log("paramsaaaa", params);
     const res = await api.get(endpoints.products, {
       params: {
         name: name,
         page: pageParam,
         limit: 10,
+        category: params?.params[0] || null,
+        subcategory: params?.params[1] || null,
       },
     });
     return res.data.result;
   };
 
   return useInfiniteQuery({
-    queryKey: ["products", { q: name }, filters, slug],
+    queryKey: ["products", params || "allProducts", searchParams || ""],
     queryFn: getProducts,
     getNextPageParam: (lastPage: any, allPages) => {
       if (!lastPage || !lastPage.nextPage) {
