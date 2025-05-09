@@ -4,7 +4,7 @@ import ProductCard from "@/components/common/product-card";
 import { useProducts } from "@/lib/hooks/useProducts";
 import { InView } from "react-intersection-observer";
 
-export default function ProductsGrid() {
+export default function ProductsGrid({ params }: any) {
   const {
     data,
     isLoading,
@@ -14,9 +14,10 @@ export default function ProductsGrid() {
     hasNextPage,
     isFetchingNextPage,
     refetch,
-  } = useProducts({});
+  } = useProducts({ params });
 
-  const products: any[] = data?.pages?.flatMap((page) => page?.data || []) || [];
+  const products: any[] =
+    data?.pages?.flatMap((page) => page?.data || []) || [];
 
   return (
     <div className="p-6">
@@ -30,10 +31,10 @@ export default function ProductsGrid() {
       {/* Error State */}
       {isError && (
         <div className="text-center text-red-500">
-          <p className="mb-2">Error: {error?.message || "Something went wrong."}</p>
-          <button
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
-          >
+          <p className="mb-2">
+            Error: {error?.message || "Something went wrong."}
+          </p>
+          <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">
             Retry
           </button>
         </div>

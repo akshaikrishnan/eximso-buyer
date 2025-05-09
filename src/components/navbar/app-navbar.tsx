@@ -14,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import TopBar from "./topbar";
 import HeaderMenu from "./header-menu";
-import { menu } from "@/lib/data/menu";
+// import { menu } from "@/lib/data/menu";
 import { Bars3BottomRightIcon } from "@heroicons/react/20/solid";
 import { useUI } from "@/contexts/ui.context";
 import { useQuery } from "@tanstack/react-query";
@@ -94,6 +94,11 @@ const Navbar = (props: any) => {
     }, 1000);
   }, [searchParams]);
 
+  const { data: menu } = useQuery({
+    queryKey: ["menu"],
+    queryFn: () => api.get(endpoints.menu).then((res) => res.data.result),
+  });
+
   return (
     <>
       <TopBar className="px-5 container mx-auto" />
@@ -106,7 +111,7 @@ const Navbar = (props: any) => {
           <li className="nav-item flex items-center gap-4">
             <button
               className="hamburger cursor-pointer text-2xl md:hidden"
-            // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
+              // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
             >
               <i className="fa-solid fa-bars"></i>
             </button>
@@ -139,9 +144,8 @@ const Navbar = (props: any) => {
                     <AvatarFallback>
                       {user?.name
                         ? user?.name.split(" ").length > 1
-
-                          ? user?.name.split(" ")[0].charAt(0) + user?.name.split(" ")[1].charAt(0)
-
+                          ? user?.name.split(" ")[0].charAt(0) +
+                            user?.name.split(" ")[1].charAt(0)
                           : user?.name.charAt(0) // If there is only one word, take the first letter
                         : ""}
                     </AvatarFallback>

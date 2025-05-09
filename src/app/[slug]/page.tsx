@@ -19,7 +19,6 @@ export default async function page({ params }: any) {
       return <div className="">Product not found</div>;
     }
   } catch (err) {
-    console.log(err);
     notFound();
   }
 }
