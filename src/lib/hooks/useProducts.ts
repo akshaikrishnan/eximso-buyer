@@ -14,13 +14,13 @@ interface UseProductsParams {
 
 export const useProducts = ({
   filters = {},
-  sort = "",
   slug = "",
   params = [],
 }: UseProductsParams) => {
   console.log("params", params);
   const searchParams = useSearchParams();
   const name = searchParams.get("q");
+  const sort = searchParams.get("sort");
   const getProducts = async ({ pageParam = 1 }: { pageParam: number }) => {
     console.log("paramsaaaa", params);
     const res = await api.get(endpoints.products, {
@@ -28,15 +28,16 @@ export const useProducts = ({
         name: name,
         page: pageParam,
         limit: 10,
-        category: params?.params[0] || null,
-        subcategory: params?.params[1] || null,
+        category: params?.params?.[0] || null,
+        subcategory: params?.params?.[1] || null,
+        sort: sort || null,
       },
     });
     return res.data.result;
   };
 
   return useInfiniteQuery({
-    queryKey: ["products", params || "allProducts", searchParams || ""],
+    queryKey: ["products", params, name, sort],
     queryFn: getProducts,
     getNextPageParam: (lastPage: any, allPages) => {
       if (!lastPage || !lastPage.nextPage) {
