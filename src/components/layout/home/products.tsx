@@ -4,7 +4,7 @@ import ProductCard from "@/components/common/product-card";
 import { useProducts } from "@/lib/hooks/useProducts";
 import { InView } from "react-intersection-observer";
 
-export default function ProductsGrid({ params }: any) {
+export default function ProductsGrid({ params, searchParams }: any) {
   const {
     data,
     isLoading,
@@ -14,7 +14,7 @@ export default function ProductsGrid({ params }: any) {
     hasNextPage,
     isFetchingNextPage,
     refetch,
-  } = useProducts({ params });
+  } = useProducts({ params, ...searchParams });
 
   const products: any[] =
     data?.pages?.flatMap((page) => page?.data || []) || [];

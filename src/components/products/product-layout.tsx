@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -22,13 +22,14 @@ import {
   Squares2X2Icon,
 } from "@heroicons/react/20/solid";
 import mergeClasses from "@/lib/utils/classNames";
+import { useQueryParamState } from "@/lib/hooks/useQueryParamState";
 
-const sortOptions = [
-  { name: "Most Popular", href: "#", current: true },
-  { name: "Best Rating", href: "#", current: false },
-  { name: "Newest", href: "#", current: false },
-  { name: "Price: Low to High", href: "#", current: false },
-  { name: "Price: High to Low", href: "#", current: false },
+const rawSortOptions = [
+  { name: "Most Popular", sortValue: "", current: true },
+  { name: "Best Rating", sortValue: "popular", current: false },
+  { name: "Newest", sortValue: "createdAt", current: false },
+  { name: "Price: Low to High", sortValue: "price", current: false },
+  { name: "Price: High to Low", sortValue: "-price", current: false },
 ];
 const subCategories = [
   { name: "Totes", href: "#" },
@@ -77,6 +78,20 @@ const filters = [
 
 export default function ProductLayout({ children }: { children: ReactNode }) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [sort, setSort] = useQueryParamState<string>("sort", "", {
+    parse: (v) => v ?? "",
+    serialize: (v) => (v ? v : null),
+  });
+
+  // annotate which option is currently active
+  const sortOptions = useMemo(
+    () =>
+      rawSortOptions.map((option) => ({
+        ...option,
+        current: option.sortValue === sort,
+      })),
+    [sort]
+  );
 
   return (
     <div className="bg-white">
@@ -200,7 +215,7 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
                     {sortOptions.map((option) => (
                       <MenuItem key={option.name}>
                         <a
-                          href={option.href}
+                          onClick={() => setSort(option.sortValue)}
                           className={mergeClasses(
                             option.current
                               ? "font-medium text-gray-900"
