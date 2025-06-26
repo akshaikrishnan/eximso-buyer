@@ -72,7 +72,7 @@ const Collection: React.FC<{ data: CollectionGroupProps[] }> = ({ data }) => {
                 {/* Optional Product Description */}
                 {product.description && (
                   <p className="text-xs text-gray-500 text-center mt-1">
-                    {product.description||'description'}
+                    {/* {product.description||'description'} */}
                   </p>
                 )}
               </a>

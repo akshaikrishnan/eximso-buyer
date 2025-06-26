@@ -10,6 +10,7 @@ import React from "react";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 
+
 // Type interfaces
 interface Banner {
   image: string;
@@ -71,6 +72,7 @@ export default async function Home() {
 
   return (
     <main className="space-y-6">
+      
       <Container className="pt-4">
         <HeroWithCategories />
       </Container>

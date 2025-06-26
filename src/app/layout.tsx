@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import MobileDoc from "@/components/navbar/MobileDoc";
+import PushNotificationHandler from "@/components/PushNotificationHandler";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="en" dir="ltr">
       <body className={`${inter.className} overflow-x-hidden`}>
         <Providers>
+          <PushNotificationHandler />
           <AppNavBar />
           <Suspense>{children}</Suspense>
           <Footer />
@@ -38,7 +40,7 @@ export default function RootLayout({
           <Analytics />
           <SpeedInsights />
           <ReactQueryDevtools initialIsOpen={false} />
-          <MobileDoc /> 
+          <MobileDoc />
         </Providers>
       </body>
     </html>
