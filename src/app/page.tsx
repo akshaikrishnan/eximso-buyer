@@ -10,7 +10,6 @@ import React from "react";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 
-
 // Type interfaces
 interface Banner {
   image: string;
@@ -87,7 +86,7 @@ export default async function Home() {
 
       <Container>
         <ThreeGridCollection />
-        <ProductsGrid />
+        <ProductsGrid disableInfiniteScroll={true} limit={10}/>
       </Container>
     </main>
   );

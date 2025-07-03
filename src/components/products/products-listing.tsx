@@ -43,7 +43,7 @@ export default async function ProductsListing({ params, searchParams }: any) {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ProductLayout>
-        <ProductsGrid params={params} searchParams={searchParams} />
+        <ProductsGrid params={params.params} searchParams={searchParams} />
       </ProductLayout>
     </HydrationBoundary>
   );
