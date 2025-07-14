@@ -117,7 +117,7 @@ const Navbar = (props: any) => {
             </button>
             <Link
               href={"/"}
-              className="Eximso-logo cursor-pointer mt-1 w-20 md:w-28"
+              className="Eximso-logo cursor-pointer mt-1 w-10 md:w-15"
             >
               <img
                 className="h-full"

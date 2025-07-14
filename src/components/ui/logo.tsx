@@ -17,8 +17,8 @@ export default function Logo({
         className="h-full"
         src={"/images/common/logo.png"}
         alt="Eximso.com"
-        height={200}
-        width={400}
+        height={20}
+        width={40}
         loading="eager"
         sizes="(max-width: 768px) 100vw"
       />
