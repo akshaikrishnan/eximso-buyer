@@ -2,13 +2,6 @@ import React from "react";
 import IncentivesFooter from "./incentives-footer";
 
 const footerNavigation = {
-  products: [
-    { name: "Bags", href: "#" },
-    { name: "Tees", href: "#" },
-    { name: "Objects", href: "#" },
-    { name: "Home Goods", href: "#" },
-    { name: "Accessories", href: "#" },
-  ],
   customerService: [
     { name: "Logistics and supply chain", href: "https://1shipping.in/" },
     { name: "Cancellation & Return policy", href: "/policy/return-policy" },
@@ -52,95 +45,77 @@ export default function Footer() {
         <h2 id="footer-heading" className="sr-only">
           Footer
         </h2>
-        <div className=" mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-200">
-            <div className="pt-16 pb-20">
-              <div className="md:flex md:justify-center">
-                <img
-                  src="/images/common/logo.png"
-                  alt=""
-                  className="h-8 w-auto"
-                />
-              </div>
-              <div className="mt-16  mx-auto xl:grid xl:grid-cols-2 xl:gap-8">
-                <div className="grid grid-cols-2 gap-8 xl:col-span-2">
-                  <div className="space-y-12 md:space-y-0 md:grid md:grid-cols-2 md:gap-8">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">
-                        Products
-                      </h3>
-                      <ul role="list" className="mt-6 space-y-6">
-                        {footerNavigation.products.map((item) => (
-                          <li key={item.name} className="text-sm">
-                            <a
-                              href={item.href}
-                              className="text-gray-500 hover:text-gray-600"
-                            >
-                              {item.name}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">
-                        Customer Service
-                      </h3>
-                      <ul role="list" className="mt-6 space-y-6">
-                        {footerNavigation.customerService.map((item) => (
-                          <li key={item.name} className="text-sm">
-                            <a
-                              href={item.href}
-                              className="text-gray-500 hover:text-gray-600"
-                            >
-                              {item.name}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="space-y-12 md:space-y-0 md:grid md:grid-cols-2 md:gap-8">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">
-                        Company
-                      </h3>
-                      <ul role="list" className="mt-6 space-y-6">
-                        {footerNavigation.company.map((item) => (
-                          <li key={item.name} className="text-sm">
-                            <a
-                              href={item.href}
-                              className="text-gray-500 hover:text-gray-600"
-                            >
-                              {item.name}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">
-                        Legal
-                      </h3>
-                      <ul role="list" className="mt-6 space-y-6">
-                        {footerNavigation.legal.map((item) => (
-                          <li key={item.name} className="text-sm">
-                            <a
-                              href={item.href}
-                              className="text-gray-500 hover:text-gray-600"
-                            >
-                              {item.name}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="border-t border-gray-200 pt-16 pb-20">
+            <div className="flex justify-center">
+              <img
+                src="/images/common/logo.png"
+                alt="Eximso"
+                className="h-8 w-auto"
+              />
+            </div>
+
+            {/* Centered Grid Columns */}
+            <div className="mt-16 flex justify-center">
+              <div className="grid w-full max-w-6xl  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 px-4">
+                {/* Customer Service */}
+               <div className="flex flex-col items-start text-left">
+  <h3 className="text-sm font-medium text-gray-900">
+    Customer Service
+  </h3>
+  <ul role="list" className="mt-6 space-y-4">
+    {footerNavigation.customerService.map((item) => (
+      <li key={item.name} className="text-sm">
+        <a
+          href={item.href}
+          className="text-gray-500 hover:text-gray-600"
+        >
+          {item.name}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+
+                {/* Company */}
+                <div className="flex flex-col items-start text-left">
+                  <h3 className="text-sm font-medium text-gray-900">Company</h3>
+                  <ul role="list" className="mt-6 space-y-4">
+                    {footerNavigation.company.map((item) => (
+                      <li key={item.name} className="text-sm">
+                        <a
+                          href={item.href}
+                          className="text-gray-500 hover:text-gray-600"
+                        >
+                          {item.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Legal */}
+                <div className="flex flex-col items-start text-left">
+                  <h3 className="text-sm font-medium text-gray-900">Legal</h3>
+                  <ul role="list" className="mt-6 space-y-4">
+                    {footerNavigation.legal.map((item) => (
+                      <li key={item.name} className="text-sm">
+                        <a
+                          href={item.href}
+                          className="text-gray-500 hover:text-gray-600"
+                        >
+                          {item.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </div>
 
-            <div className="lg:grid lg:grid-cols-2 lg:gap-x-6 xl:gap-x-8">
+            {/* Newsletter and CTA */}
+            <div className="mt-16 lg:grid lg:grid-cols-2 lg:gap-x-6 xl:gap-x-8">
               <div className="bg-gray-100 rounded-lg p-6 flex items-center sm:p-10">
                 <div className="max-w-sm mx-auto">
                   <h3 className="font-semibold text-gray-900">
@@ -199,41 +174,38 @@ export default function Footer() {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="py-10 md:flex md:items-center md:justify-between">
-            <div className="text-center md:text-left">
-              <p className="text-sm text-gray-500">
+            {/* Footer Bottom Section */}
+            <div className="mt-10 md:flex md:items-center md:justify-between">
+              <p className="text-sm text-gray-500 text-center md:text-left">
                 &copy; 2021 All Rights Reserved
               </p>
-            </div>
-
-            <div className="mt-4 flex items-center justify-center md:mt-0">
-              <div className="flex space-x-8">
-                {footerNavigation.bottomLinks.map((item) => (
+              <div className="mt-4 flex items-center justify-center md:mt-0">
+                <div className="flex space-x-8">
+                  {footerNavigation.bottomLinks.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      className="text-sm text-gray-500 hover:text-gray-600"
+                    >
+                      {item.name}
+                    </a>
+                  ))}
+                </div>
+                <div className="ml-6 border-l border-gray-200 pl-6">
                   <a
-                    key={item.name}
-                    href={item.href}
-                    className="text-sm text-gray-500 hover:text-gray-600"
+                    href="#"
+                    className="flex items-center text-gray-500 hover:text-gray-600"
                   >
-                    {item.name}
+                    <img
+                      src="https://tailwindui.com/img/flags/flag-canada.svg"
+                      alt=""
+                      className="w-5 h-auto flex-shrink-0"
+                    />
+                    <span className="ml-3 text-sm">Change</span>
+                    <span className="sr-only">location and currency</span>
                   </a>
-                ))}
-              </div>
-
-              <div className="ml-6 border-l border-gray-200 pl-6">
-                <a
-                  href="#"
-                  className="flex items-center text-gray-500 hover:text-gray-600"
-                >
-                  <img
-                    src="https://tailwindui.com/img/flags/flag-canada.svg"
-                    alt=""
-                    className="w-5 h-auto flex-shrink-0"
-                  />
-                  <span className="ml-3 text-sm">Change</span>
-                  <span className="sr-only">location and currency</span>
-                </a>
+                </div>
               </div>
             </div>
           </div>
