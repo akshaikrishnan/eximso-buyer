@@ -41,7 +41,7 @@ export function CartItem({ item, onRemove }: CartItemProps) {
               )}
             </div>
             <p className="mt-1 text-sm font-medium text-gray-900">
-              <Price amount={item.product.price} />
+              <Price amount={item.product.offerPrice ?? item.product.price} />
             </p>
             <CartBtn product={item} />
           </div>

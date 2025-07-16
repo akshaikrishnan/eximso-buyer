@@ -1,110 +1,81 @@
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
-// Define the product structure
+// Product type definition
 interface Product {
   title: string;
   href: string;
   image: string;
   thumbnail?: string;
-  description?: string;
-  name?: string
+  name?: string;
 }
 
-// Define the collection group structure
+// Collection group type definition
 interface CollectionGroupProps {
   title: string;
-  description?: string;
   bannerImage?: string;
   products: Product[];
 }
 
-// Collection Component - Renders each collection group
-const Collection: React.FC<{ data: CollectionGroupProps[] }> = ({ data }) => {
+// Individual Collection Group component
+const CollectionGroup: React.FC<{ collectionGroup: CollectionGroupProps }> = ({
+  collectionGroup
+}) => {
   return (
-    <>
-      {data.map((collectionGroup, index) => (
-        <div key={index} className="mb-8">
-          {/* Banner Image */}
-          {/* {collectionGroup.bannerImage && (
-            <Image
-              src={collectionGroup.bannerImage}
-              alt={`${collectionGroup.title} Banner`}
-              width={800}
-              height={200}
-              className="w-full h-auto rounded-lg mb-4 object-cover"
-            />
-          )} */}
+    <div className="space-y-4">
+      {/* Section Title */}
+      <h2 className="text-2xl text-center font-bold capitalize">
+        {collectionGroup.title}
+      </h2>
 
-          {/* Collection Title */}
-          <h2 className="text-2xl text-center font-bold mb-2">{collectionGroup.title}</h2>
+      {/* Product Grid */}
+      <div className="grid grid-cols-2 gap-4 p-4">
+        {collectionGroup.products.map((product, productIndex) => (
+          <Link
+            key={productIndex}
+            href={product.href || "/"}
+            className="group flex flex-col bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200"
+          >
+            {/* Product Image */}
+            <div className="w-full aspect-[3/4] relative rounded-lg overflow-hidden bg-gray-100">
+              <Image
+                src={product.thumbnail || product.image || "/placeholder.png"}
+                alt={product.name || product.title || "Product"}
+                fill
+                className="object-cover object-center group-hover:scale-105 transition-transform duration-200"
+              />
+            </div>
 
-          {/* Optional Description */}
-          {/* {collectionGroup.description && (
-            <p className="text-sm text-gray-600 mb-4">
-              {collectionGroup.description}
-            </p>
-          )} */}
-
-          {/* Products Grid */}
-          <div className="grid grid-cols-2 gap-4 p-4 h-full">
-            {collectionGroup.products.map((product, productIndex) => (
-              <a
-                key={productIndex}
-                href={product.href}
-                className="group flex flex-col item-center object-cover text-md bg-white p-3 pb-0 rounded-lg shadow hover:shadow-md transition"
-              >
-                {/* Product Thumbnail */}
-                <div className="xl:w-[12rem] xl:h-[15rem] rounded-lg ">
-                  <Image
-                    src={product.thumbnail || 'no image'}
-                    alt={product.title||'title'}
-                    className="w-full h-full object-cover object-center"
-                    width={240}
-                    height={240}
-
-                  />
-                </div>
-
-                {/* Product Title */}
-                <span className="mt-4 font-medium text-center">{product.name||'title'}</span>
-
-                {/* Optional Product Description */}
-                {product.description && (
-                  <p className="text-xs text-gray-500 text-center mt-1">
-                    {/* {product.description||'description'} */}
-                  </p>
-                )}
-              </a>
-            ))}
-          </div>
-        </div>
-      ))}
-    </>
+            {/* Product Title - Fixed Height */}
+            <div className="mt-4 h-10 flex items-center justify-center">
+              <span className="font-medium text-center text-sm line-clamp-2 leading-tight">
+                {product.name || product.title}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 };
 
-// Main Wrapper Component
+// Main wrapper component
 export default function CollectionGroups({
   data,
   title,
-  description,
   bestProducts,
 }: {
   data: CollectionGroupProps[];
   title?: string;
-  description?: string;
   bestProducts?: React.ReactNode;
 }) {
   return (
     <div className="space-y-6">
-      {/* Main Title */}
-      {title && <h1 className="text-3xl font-bold">{title}</h1>}
+      {/* Page Title */}
+      {title && <h1 className="text-3xl font-bold text-center">{title}</h1>}
 
-      {/* Main Description */}
-      {description && <p className="text-gray-600">{description}</p>}
-
-      {/* Best Products Section */}
+      {/* Optional Best Products Section */}
       {bestProducts && (
         <div className="border p-4 rounded-lg bg-yellow-50">
           <h2 className="text-xl font-semibold mb-2">Best Products</h2>
@@ -112,9 +83,11 @@ export default function CollectionGroups({
         </div>
       )}
 
-      {/* Collection Groups */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Collection data={data} />
+      {/* Grouped Product Sections */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        {data.map((collectionGroup, index) => (
+          <CollectionGroup key={index} collectionGroup={collectionGroup} />
+        ))}
       </div>
     </div>
   );

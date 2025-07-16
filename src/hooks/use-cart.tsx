@@ -8,6 +8,7 @@ export interface CartItem {
     _id: string;
     name: string;
     price: number;
+    offerPrice?: number;
     thumbnail: string;
     slug: string;
   };
@@ -45,7 +46,7 @@ export function useCart() {
 
   const subTotal =
     cart?.items?.reduce(
-      (acc, item) => acc + item.product.price * item.quantity,
+      (acc, item) => acc + (item.product.offerPrice ?? item.product.price) * item.quantity,
       0
     ) || 0;
 
