@@ -46,7 +46,13 @@ export function useCart() {
 
   const subTotal =
     cart?.items?.reduce(
-      (acc, item) => acc + (item.product.offerPrice ?? item.product.price) * item.quantity,
+      (acc, item) => {
+        const price =
+          typeof item.product.offerPrice === "number" && item.product.offerPrice !== 0
+            ? item.product.offerPrice
+            : item.product.price;
+        return acc + price * item.quantity;
+      },
       0
     ) || 0;
 
