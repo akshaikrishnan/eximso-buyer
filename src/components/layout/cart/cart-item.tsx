@@ -41,7 +41,13 @@ export function CartItem({ item, onRemove }: CartItemProps) {
               )}
             </div>
             <p className="mt-1 text-sm font-medium text-gray-900">
-              <Price amount={item.product.price} />
+              {(() => {
+                const displayPrice =
+                  typeof item.product.offerPrice === "number" && item.product.offerPrice !== 0
+                    ? item.product.offerPrice
+                    : item.product.price;
+                return <Price amount={displayPrice} />;
+              })()}
             </p>
             <CartBtn product={item} />
           </div>
