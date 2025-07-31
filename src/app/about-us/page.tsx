@@ -23,85 +23,83 @@ import { LeafIcon, DollarSignIcon } from "lucide-react";
 
 const coreValues = [
   {
-    name: "Global Reach",
+    name: "Global Marketplace Access",
     icon: GlobeAltIcon,
-    description: "Connect with sellers and buyers from over 190 countries with our localized experiences and logistics solutions."
+    description: "Enabling sellers from anywhere in the world to showcase and sell their products worldwide."
   },
   {
-    name: "Customer-First",
+    name: "Smart Logistics Integration",
     icon: UserGroupIcon,
-    description: "Every decision we make starts with our customers. We're committed to delivering exceptional experiences at every touchpoint."
+    description: " Partnered with leading logistics companies to manage seamless door-to-door delivery globally."
   },
   {
-    name: "Reliability",
+    name: "Secure Cross-Border Payments",
     icon: ShieldCheckIcon,
-    description: "Our secure payment systems and buyer protection policies ensure every transaction is protected and worry-free."
+    description: "Facilitating smooth and reliable international transactions."
   },
   {
-    name: "Innovation",
+    name: "Localized Customer Experience",
     icon: SparklesIcon,
-    description: "We're constantly pushing the boundaries of what's possible in e-commerce, from AI-powered recommendations to next-day delivery."
+    description: "Providing multilingual and multi-currency support to enhance user satisfaction globally."
   },
 ];
-const howItWorks = [
-  {
-    name: "Connecting Businesses & Customers",
-    icon: BuildingStorefrontIcon,
-    description: "We connect businesses with customers across borders, creating opportunities for sellers to expand their reach and buyers to access unique products from around the world. Whether you're a business looking to go global or a customer exploring international brands, our platform makes the process simple and straightforward."
-  },
-  {
-    name: "User-Friendly Platform",
-    icon: CubeIcon,
-    description: "Our platform is designed with simplicity in mind, enabling businesses and customers to interact effortlessly. Sellers can list their products easily, while buyers can browse and shop through an intuitive interface. We prioritize a hassle-free experience for everyone."
-  },
-  {
-    name: "End-to-End Logistics",
-    icon: TruckIcon,
-    description: "From product sourcing to final delivery, we handle every step of the logistics chain. Our robust shipping solutions, powered by 1shipping.in, ensure timely and cost-effective transportation of goods. We manage customs, duties, and compliance so you can focus on growing your business."
-  },
-  {
-    name: "Secure Payments",
-    icon: CreditCardIcon,
-    description: "We offer secure payment gateways for both businesses and customers. Our system supports multiple currencies and ensures that all transactions are encrypted and protected, fostering trust and reliability."
-  },
-  {
-    name: "Advanced Analytics",
-    icon: ChartBarIcon,
-    description: "Our technology-driven platform leverages AI and data analytics to provide insights into market trends, customer preferences, and more. This helps businesses optimize their offerings and improve customer satisfaction."
-  },
-  {
-    name: "Comprehensive Support",
-    icon: LifebuoyIcon,
-    description: "Our team is dedicated to supporting you at every step. From setting up your online store to navigating international trade regulations, our experts provide guidance and assistance tailored to your needs."
-  },
-  {
-    name: "Sustainability",
-    icon: LeafIcon,
-    description: "We are committed to promoting sustainable and ethical trade practices. By optimizing our operations and encouraging eco-friendly practices, we aim to minimize our impact on the environment."
-  },
-  {
-    name: "Seamless Integration",
-    icon: LinkIcon,
-    description: "Our platform integrates with popular marketplaces and social media channels for maximum exposure."
-  },
-  {
-    name: "Cost-Effective Solutions",
-    icon: DollarSignIcon,
-    description: "We support multiple languages, enabling businesses to reach a broader audience and customers to shop."
-  },
-  {
-    name: "Customer-Centric Approach",
-    icon: UserIcon,
-    description: "We prioritize customer satisfaction with responsive service and easy returns."
-  }
-];
+// const howItWorks = [
+//   {
+//     name: "Connecting Businesses & Customers",
+//     icon: BuildingStorefrontIcon,
+//     description: "We connect businesses with customers across borders, creating opportunities for sellers to expand their reach and buyers to access unique products from around the world. Whether you're a business looking to go global or a customer exploring international brands, our platform makes the process simple and straightforward."
+//   },
+//   {
+//     name: "User-Friendly Platform",
+//     icon: CubeIcon,
+//     description: "Our platform is designed with simplicity in mind, enabling businesses and customers to interact effortlessly. Sellers can list their products easily, while buyers can browse and shop through an intuitive interface. We prioritize a hassle-free experience for everyone."
+//   },
+//   {
+//     name: "End-to-End Logistics",
+//     icon: TruckIcon,
+//     description: "From product sourcing to final delivery, we handle every step of the logistics chain. Our robust shipping solutions, powered by 1shipping.in, ensure timely and cost-effective transportation of goods. We manage customs, duties, and compliance so you can focus on growing your business."
+//   },
+//   {
+//     name: "Secure Payments",
+//     icon: CreditCardIcon,
+//     description: "We offer secure payment gateways for both businesses and customers. Our system supports multiple currencies and ensures that all transactions are encrypted and protected, fostering trust and reliability."
+//   },
+//   {
+//     name: "Advanced Analytics",
+//     icon: ChartBarIcon,
+//     description: "Our technology-driven platform leverages AI and data analytics to provide insights into market trends, customer preferences, and more. This helps businesses optimize their offerings and improve customer satisfaction."
+//   },
+//   {
+//     name: "Comprehensive Support",
+//     icon: LifebuoyIcon,
+//     description: "Our team is dedicated to supporting you at every step. From setting up your online store to navigating international trade regulations, our experts provide guidance and assistance tailored to your needs."
+//   },
+//   {
+//     name: "Sustainability",
+//     icon: LeafIcon,
+//     description: "We are committed to promoting sustainable and ethical trade practices. By optimizing our operations and encouraging eco-friendly practices, we aim to minimize our impact on the environment."
+//   },
+//   {
+//     name: "Seamless Integration",
+//     icon: LinkIcon,
+//     description: "Our platform integrates with popular marketplaces and social media channels for maximum exposure."
+//   },
+//   {
+//     name: "Cost-Effective Solutions",
+//     icon: DollarSignIcon,
+//     description: "We support multiple languages, enabling businesses to reach a broader audience and customers to shop."
+//   },
+//   {
+//     name: "Customer-Centric Approach",
+//     icon: UserIcon,
+//     description: "We prioritize customer satisfaction with responsive service and easy returns."
+//   }
+// ];
 const brandOnDemandSteps = [
-  "Market Research: Identify high-demand products and add your brand name.",
-  "Product Sourcing: Share details with us; we connect with manufacturers and provide quotes and samples.",
-  "Order Confirmation: Approve production by making full or partial payments.",
-  "Manufacturing & Storage: We coordinate with manufacturers and offer warehouse storage.",
-  "Product Listing: Upload your inventory on EXIMSO and set your pricing.",
-  "Order Fulfillment: Upon sale, we handle shipping and transfer your earnings."
+  "Global Reach:  opportunities in new markets with ease.",
+  "Customer-Centric Approach:  A hassle-free shopping experience for buyers around the globe.",
+  "Tech-Driven Solutions: We use advanced tools to simplify logistics, payments, and operations.",
+  "Support for Small Businesses: Helping local sellers go global and thrive.Whether you're exploring international products or scaling your business globally, eximso here to make cross-border trade simple, reliable, and efficient.",
 ];
 
 export default function AboutUs() {
@@ -122,7 +120,7 @@ export default function AboutUs() {
       </div>
 
       {/* Mission & Vision Section */}
-      <div className="bg-indigo-50 py-16">
+      {/* <div className="bg-indigo-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
@@ -147,21 +145,26 @@ export default function AboutUs() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Our Story Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-              Our Story
+              ABOUT US 
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">From a simple idea to global impact</h2>
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Eximso is a next-generation cross-border e-commerce platform built with a bold 
+            mission:</h2>
             <p className="mt-4 text-lg text-gray-600">
-              Founded in 2018, we started with a simple question: why is buying from another country still so difficult? Our founders, having experienced the frustrations of cross-border shopping firsthand, decided to build a solution that would make global commerce as seamless as local shopping.
+            To enable a hassle-free global shopping experience by leveraging technology.Headquartered in India, Eximso empowers local businesses to go global and connects 
+            global customers under proxy export and hybrid mode—all through a single, seamless 
+            digital platform.
             </p>
             <p className="mt-4 text-lg text-gray-600">
-              Today, we connect millions of buyers and sellers across 190+ countries, processing over 10 million transactions daily. But our mission remains the same: to break down barriers and build bridges in global commerce.
+            Whether you're a small manufacturer in any part of the world and  
+            looking to expand your reach or a consumer abroad “eximso” bridges that gap with 
+            trust, speed, and simplicity.
             </p>
             <div className="mt-8 flex gap-4">
               <div className="text-center">
@@ -197,12 +200,12 @@ export default function AboutUs() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-              Our Values
+             What We Do 
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">What drives us every day</h2>
-            <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">At Eximso, we simplify international commerce by offering end-to-end support</h2>
+            {/* <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
               These core principles guide our decisions, shape our culture, and help us deliver exceptional experiences.
-            </p>
+            </p> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -220,7 +223,7 @@ export default function AboutUs() {
       </div>
 
       {/* How EXIMSO Works Section  */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center mb-12">
           <div className="inline-block bg-indigo-100 px-4 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
             Our Process
@@ -247,30 +250,22 @@ export default function AboutUs() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* BrandOnDemand Section */}
       <div className="bg-indigo-50 py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-                Innovative Solution
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">BrandOnDemand: Sell Without Inventory</h2>
+             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Our Vision</h2>
               <p className="mt-4 text-lg text-gray-600">
-                Our innovative dropshipping program enables businesses to sell globally without holding inventory. Start your global e-commerce journey with minimal upfront investment.
+                To be the most trusted cross-border e-commerce platform that makes global 
+                trade and shopping easy for businesses and consumers everywhere.
               </p>
-
-              <div className="mt-8">
-                <a href="#" className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700">
-                  Join BrandOnDemand
-                </a>
-              </div>
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="text-xl font-semibold text-indigo-600 mb-6">How It Works</h3>
+              <h3 className="text-xl font-semibold text-indigo-600 mb-6">Why Choose EXIMSO ? </h3>
               <div>
                 {brandOnDemandSteps.map((step, index) => (
                   <div key={index} className="flex mb-4 pb-4 border-b border-gray-100 last:border-0">
@@ -281,190 +276,12 @@ export default function AboutUs() {
                   </div>
                 ))}
               </div>
-              <p className="mt-4 text-indigo-600 font-medium">Minimal Costs: Pay a small storage fee for goods in our warehouse.</p>
+              <p className="mt-4 text-indigo-600 font-medium">Discover how we're transforming the world of e-commerce—one border at a time.</p>
             </div>
           </div>
         </div>
       </div>
-
-      {/* B2B & B2C Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="text-center mb-12">
-          <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-            Comprehensive Solutions
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">B2B & B2C: Transforming Global E-Commerce</h2>
-          <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
-            EXIMSO bridges the gap between B2B and B2C transactions, offering a versatile and efficient platform for all your needs.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-            <div className="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-lg text-indigo-600 mb-4">
-              <BuildingStorefrontIcon className="h-8 w-8" />
-            </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">For Businesses</h3>
-            <ul className="space-y-3 text-gray-600">
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Access new markets with localized experiences</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Bulk order management and automated invoicing</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Simplified customs and regulatory compliance</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Comprehensive logistics and warehousing</span>
-              </li>
-            </ul>
-            <div className="mt-8">
-              <a href="/business" className="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
-                Learn more about B2B solutions →
-              </a>
-            </div>
-          </div>
-
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-            <div className="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-lg text-indigo-600 mb-4">
-              <UserGroupIcon className="h-8 w-8" />
-            </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">For Consumers</h3>
-            <ul className="space-y-3 text-gray-600">
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Shop unique products from around the world</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Personalized shopping experiences</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Multiple payment options and buyer protection</span>
-              </li>
-              <li className="flex items-start">
-                <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Real-time order tracking and delivery estimates</span>
-              </li>
-            </ul>
-            <div className="mt-8">
-              <a href="/shop" className="text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
-                Explore our marketplace →
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Testimonials Section */}
-      <div className="bg-gray-50 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-              Testimonials
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">What Our Partners Say</h2>
-            <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
-              Hear from businesses and customers who have transformed their approach to global commerce with EXIMSO.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Testimonial 1 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center mb-4">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-600 italic mb-6 text-justify">
-                &ldquo;EXIMSO helped us expand our handcrafted goods to 12 new countries in just 6 months. Their platform handles everything from translation to payments, allowing us to focus on creating our products.&ldquo;
-              </p>
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3">
-                  AK
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Anya Kowalski</h4>
-                  <p className="text-gray-500 text-sm">Founder, Artisan Collective</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 2 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center mb-4">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-600 italic mb-6  text-justify">
-                &ldquo;As a mid-sized electronics manufacturer, we used to struggle with international logistics. EXIMSO&apos;s end-to-end solution has streamlined our operations and doubled our export volume.&ldquo;
-              </p>
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3">
-                  LT
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Liu Tao</h4>
-                  <p className="text-gray-500 text-sm">Operations Director, TechPro Electronics</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Testimonial 3 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center mb-4">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-600 italic mb-6  text-justify">
-                I&apos;ve been able to source unique products from around the world without worrying about currency conversion or shipping complications. EXIMSO makes global shopping feel local.
-              </p>
-              <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-3">
-                  JR
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">James Rodriguez</h4>
-                  <p className="text-gray-500 text-sm">Customer</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
+  {/* CTA Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="px-6 py-12 md:p-12 md:flex items-center justify-between">

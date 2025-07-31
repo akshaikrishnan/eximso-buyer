@@ -3,28 +3,23 @@ import IncentivesFooter from "./incentives-footer";
 
 const footerNavigation = {
   customerService: [
-    { name: "Logistics and supply chain", href: "https://1shipping.in/" },
     { name: "Cancellation & Return policy", href: "/policy/return-policy" },
     { name: "News and updates", href: "#" },
     { name: "Secure Payments", href: "#" },
-    { name: "Procurement", href: "#" },
-    { name: "Post your requirements", href: "#" },
-    { name: "Personal project manager", href: "#" },
+    { name: "What drives us everyday", href: "/drives-us-everyday" },
+    { name: "Why Sell with Eximso", href: "/whysellwitheximso" },
+   
   ],
   company: [
-    { name: "About", href: "#" },
+    { name: "About", href: "/about-us" },
+    { name: "Mission and Vision", href: "/mission-vision" },
     { name: "How do we work", href: "#" },
-    { name: "Sell globally", href: "#" },
-    { name: "Project management", href: "#" },
-    { name: "OEM Manufacturing & Conditions", href: "#" },
     { name: "Focus on both B2B & B2C", href: "#" },
-    { name: "White label-Build your brand with us", href: "#" },
     { name: "Contact Us", href: "/contact" },
   ],
   legal: [
     { name: "Careers", href: "#" },
     { name: "FAQ", href: "#" },
-    { name: "SKU", href: "#" },
     { name: "Terms & Conditions", href: "/policy/terms-and-conditions" },
     { name: "Privacy Policy", href: "/policy/privacy-policy" },
     { name: "Return Policy", href: "/policy/return-policy" },
@@ -49,7 +44,8 @@ export default function Footer() {
           <div className="border-t border-gray-200 pt-16 pb-20">
             <div className="flex justify-center">
               <img
-                src="/images/common/logo.png"
+                src="/images/common/logo.png
+                "
                 alt="Eximso"
                 className="h-8 w-auto"
               />
@@ -60,22 +56,22 @@ export default function Footer() {
               <div className="grid w-full max-w-6xl  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 px-4">
                 {/* Customer Service */}
                <div className="flex flex-col items-start text-left">
-  <h3 className="text-sm font-medium text-gray-900">
-    Customer Service
-  </h3>
-  <ul role="list" className="mt-6 space-y-4">
-    {footerNavigation.customerService.map((item) => (
-      <li key={item.name} className="text-sm">
-        <a
-          href={item.href}
-          className="text-gray-500 hover:text-gray-600"
-        >
-          {item.name}
-        </a>
-      </li>
-    ))}
-  </ul>
-</div>
+                 <h3 className="text-sm font-medium text-gray-900">
+                    Customer Service
+                      </h3>
+                       <ul role="list" className="mt-6 space-y-4">
+                          {footerNavigation.customerService.map((item) => (
+                             <li key={item.name} className="text-sm">
+                                <a
+                                  href={item.href}
+                                 className="text-gray-500 hover:text-gray-600"
+                                 >
+                             {item.name}
+                           </a>
+                         </li>
+                        ))}
+                    </ul>
+                </div>
 
 
                 {/* Company */}
@@ -178,7 +174,7 @@ export default function Footer() {
             {/* Footer Bottom Section */}
             <div className="mt-10 md:flex md:items-center md:justify-between">
               <p className="text-sm text-gray-500 text-center md:text-left">
-                &copy; 2021 All Rights Reserved
+                &copy; 2025 All Rights Reserved
               </p>
               <div className="mt-4 flex items-center justify-center md:mt-0">
                 <div className="flex space-x-8">
