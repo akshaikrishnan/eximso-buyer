@@ -1,21 +1,18 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import OrderTracking from "./order-tracking";
-import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { Description } from '@headlessui/react';
 import { Price } from "../common/price"; // Ensure correct import path
+import { useQuery } from '@tanstack/react-query'; // or 'react-query' for v3
 
 export default function OrderDetails({ orderId }: { orderId: string }) {
-  const {
-    data: orderData,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["order"],
-    queryFn: () => api.get(endpoints.order).then((res) => res.data.result),
+  const { data: orderData, isLoading, isError } = useQuery({
+    queryKey: ['order', orderId],
+    queryFn: () => api.get(endpoints.order, { params: { orderId } }).then(res => res.data.result),
+    enabled: !!orderId, // Only run query if orderId exists
   });
 
   if (isLoading) {
@@ -26,15 +23,16 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
     return <div>Error fetching data</div>;
   }
 
-  // If orderData is an array:
-  const orderid = Array.isArray(orderData) ? orderData[0] : orderData;
+  // If orderData is an array, find the order matching orderId
+  const orderid = Array.isArray(orderData)
+    ? orderData.find((order: any) => order._id === orderId || order.id === orderId)
+    : orderData;
 
   if (!orderid) {
     return <div>No order data found</div>;
   }
 
   console.log("orderid", orderid);
-
   return (
     <div className="py-14 px-4 md:px-6 2xl:px-6 2xl:container 2xl:mx-auto">
       <div className="flex justify-start item-start space-y-2 flex-col">
@@ -103,14 +101,22 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                         <div className="flex justify-between items-start w-full">
                           {/* Offer Price and Original Price */}
                           <div className="flex flex-col space-y-1">
-                            <p className="text-base dark:text-white xl:text-lg leading-6">
-                              <Price amount={item.product.offerPrice || 0} />
-                            </p>
-                            <p className="text-base dark:text-white xl:text-lg leading-6">
-                              <span className="text-red-300 line-through">
-                                <Price amount={item.product.price || 0} />
-                              </span>
-                            </p>
+                            {item.product.offerPrice && item.product.offerPrice > 0 ? (
+                              <>
+                                <p className="text-base dark:text-white xl:text-lg leading-6">
+                                  <Price amount={item.product.offerPrice} />
+                                </p>
+                                <p className="text-base dark:text-white xl:text-lg leading-6">
+                                  <span className="text-red-300 line-through">
+                                    <Price amount={item.product.price} />
+                                  </span>
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-base dark:text-white xl:text-lg leading-6">
+                                <Price amount={item.product.price} />
+                              </p>
+                            )}
                           </div>
                           {/* Quantity */}
                           <p className="text-base dark:text-white xl:text-lg leading-6 text-gray-800">
@@ -120,7 +126,9 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                           <p className="text-base dark:text-white xl:text-lg font-semibold leading-6 text-gray-800">
                             <Price
                               amount={
-                                (item.product.offerPrice || 0) * (item.quantity || 1)
+                                (item.product.offerPrice && item.product.offerPrice > 0
+                                  ? item.product.offerPrice
+                                  : item.product.price) * (item.quantity || 1)
                               }
                             />
                           </p>
@@ -134,7 +142,7 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
           </div>
           <div className="flex justify-center flex-col md:flex-row items-stretch w-full space-y-4 md:space-y-0 md:space-x-6 xl:space-x-8">
             <div className="flex flex-col px-4 py-6 md:p-6 xl:p-8 w-full bg-gray-50 dark:bg-gray-800 space-y-6">
-              <OrderTracking />
+              <OrderTracking orderId={orderId} status={orderid?.status} />
               <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800">
                 Summary
               </h3>
@@ -285,18 +293,16 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
                     </div>
                   </div>
                   <div className="flex w-full justify-center items-center md:justify-start md:items-start">
-                  <Link
-  href={`/profile/my-orders/${orderId}/invoice`}
-  className="mt-6 md:mt-0 text-center dark:border-white dark:hover:bg-gray-900 
+                    <Link
+                      href={`/profile/my-orders/${orderId}/invoice`}
+                      className="mt-6 md:mt-0 text-center dark:border-white dark:hover:bg-gray-900 
   dark:bg-transparent dark:text-white py-5 hover:bg-gray-200 
   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 
   border border-gray-800 font-medium w-96 2xl:w-full text-base 
   leading-4 text-gray-800"
->
-  Download Invoice
-</Link>
-
-
+                    >
+                      Download Invoice
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -304,6 +310,6 @@ export default function OrderDetails({ orderId }: { orderId: string }) {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>
+  );
 }
