@@ -119,35 +119,7 @@ export default function AboutUs() {
         </div>
       </div>
 
-      {/* Mission & Vision Section */}
-      {/* <div className="bg-indigo-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-              EXIMSO
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl mb-8">Revolutionizing Cross-Border E-Commerce</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <h3 className="text-xl font-semibold text-indigo-600 mb-3">Our Mission</h3>
-                <p className="text-gray-700">
-                  &ldquo;Enabling a hassle-free global shopping experience by leveraging technology.&rdquo;
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <h3 className="text-xl font-semibold text-indigo-600 mb-3">Our Vision</h3>
-                <p className="text-gray-700">
-                  &ldquo;To be the most trusted cross-border e-commerce platform, making global trade and shopping easy for businesses and consumers everywhere.&ldquo;
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
-
-      {/* Our Story Section */}
+    {/* Our Story Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -157,12 +129,12 @@ export default function AboutUs() {
             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Eximso is a next-generation cross-border e-commerce platform built with a bold 
             mission:</h2>
             <p className="mt-4 text-lg text-gray-600">
-            To enable a hassle-free global shopping experience by leveraging technology.Headquartered in India, Eximso empowers local businesses to go global and connects 
-            global customers under proxy export and hybrid mode—all through a single, seamless 
+            To enable a hassle free global shopping experience by leveraging technology.Headquartered in India, Eximso empowers local businesses to go global and connects 
+            global customers under proxy export and hybrid mode all through a single, seamless 
             digital platform.
             </p>
             <p className="mt-4 text-lg text-gray-600">
-            Whether you're a small manufacturer in any part of the world and  
+            Whether you&apos;re a small manufacturer in any part of the world and  
             looking to expand your reach or a consumer abroad “eximso” bridges that gap with 
             trust, speed, and simplicity.
             </p>
@@ -276,7 +248,7 @@ export default function AboutUs() {
                   </div>
                 ))}
               </div>
-              <p className="mt-4 text-indigo-600 font-medium">Discover how we're transforming the world of e-commerce—one border at a time.</p>
+              <p className="mt-4 text-indigo-600 font-medium">Discover how we&apos;re transforming the world of e-commerce—one border at a time.</p>
             </div>
           </div>
         </div>

@@ -131,7 +131,7 @@ export default function whysellwitheximso() {
             </div>
             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Are you ready to take your business global?</h2>
             <p className="mt-4 text-lg text-gray-600">
-            With Eximso, selling internationally is no longer a challenge—it's an opportunity. Our advanced cross-border e-commerceplatform empowers Indian businesses to reach millions of international customers with ease. Whether you're a small business or a growing brand, Eximso simplifies global selling so you can scale faster and smarter. 
+            With Eximso, selling internationally is no longer a challenge—it&apos;s an opportunity. Our advanced cross-border e-commerceplatform empowers Indian businesses to reach millions of international customers with ease. Whether you&apos;re a small business or a growing brand, Eximso simplifies global selling so you can scale faster and smarter. 
             </p>
           </div>
           <div className="relative">
@@ -158,7 +158,7 @@ export default function whysellwitheximso() {
             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Why Sell Internationally with Eximso?</h2>
             <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
               Expanding your business to global markets offers unmatched growth potential. 
-              Here’s why you should go global today: 
+              Here&apos;s why you should go global today: 
             </p>
           </div>
 
@@ -281,7 +281,7 @@ export default function whysellwitheximso() {
                 <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span>Don’t let borders limit your business potential. Join Eximso today and explore the limitless possibilities of cross-border e-commerce. Start your global selling journey now—reach customers in the USA, Europe, Middle East, and beyond.</span>
+                <span>Don&#39;t let borders limit your business potential. Join Eximso today and explore the limitless possibilities of cross-border e-commerce. Start your global selling journey now—reach customers in the USA, Europe, Middle East, and beyond.</span>
               </li>
             </ul>
            </div>
