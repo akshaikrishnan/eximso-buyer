@@ -193,10 +193,10 @@ const Navbar = (props: any) => {
             </div>
           </li>
           <li className="nav-item returns cursor-pointer md:order-6">
-            <div className="space-y-0 leading-5">
+            <Link href="/profile/my-orders" className="space-y-0 leading-5">
               <div className="upper text-start text-xs">Returns</div>
               <div className="lower font-medium">& Orders</div>
-            </div>
+            </Link>
           </li>
         </ul>
         {/* lower part */}
