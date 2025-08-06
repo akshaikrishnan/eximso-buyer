@@ -129,7 +129,7 @@ export default function ProductDetail({ product }: any) {
                     <img
                       src={image}
                       alt=""
-                      className="h-full w-full object-cover object-center sm:rounded-lg"
+                      className="h-full w-full object-cover object-top sm:rounded-lg"
                     />
                   </TabPanel>
                 ))}

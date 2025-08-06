@@ -102,7 +102,7 @@ const Navbar = (props: any) => {
   return (
     <>
       <TopBar className="px-5 container mx-auto" />
-      <nav className="bg-gray-100 text-black  top-0 z-30">
+      <nav className="sticky top-0 left-0 right-0 bg-gray-100 text-black z-30 w-full">
         {/* Upper part */}
         {/* MOBILE MENU */}
         <HamburgerMenu isNavOpen={isNavOpen} setIsNavOpen={setIsNavOpen} />
@@ -192,7 +192,7 @@ const Navbar = (props: any) => {
               EN <i className="fa-solid fa-sort-down text-xs text-gray-400"></i>
             </div>
           </li>
-          <li className="nav-item returns cursor-pointer md:order-6">
+           <li className="nav-item returns cursor-pointer md:order-6">
             <Link href="/profile/my-orders" className="space-y-0 leading-5">
               <div className="upper text-start text-xs">Returns</div>
               <div className="lower font-medium">& Orders</div>
@@ -252,14 +252,14 @@ export default Navbar;
 const HamburgerMenu = (props: any) => {
   const { isNavOpen, setIsNavOpen } = props;
   return (
-    <div
+      <div
       className={
         isNavOpen
           ? "flex h-screen w-screen fixed top-0 left-0 translate-x-0 duration-500 z-50"
           : "flex h-screen w-screen fixed top-0 left-0 -translate-x-full duration-500 z-50"
       }
     >
-      <nav className="h-full w-[80%] max-w-[350px] bg-white flex flex-col overflow-auto text-black pb-20">
+      <nav className="fixed top-0 h-full w-[80%] max-w-[350px] bg-white flex flex-col overflow-auto text-black pb-20">
         <header className="flex flex-col gap-2 px-5 py-4 bg-eximblue-800 text-white">
           <p className="user self-end">
             <Link

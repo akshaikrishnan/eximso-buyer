@@ -7,7 +7,7 @@ export default function TopBar({ className }: { className: string }) {
   return (
     <>
       <div
-        className={`w-full bg-white h-10 border-b border-qgray-border ${
+        className={`w-full bg-white h-10 border-b border-gray-200 ${
           className || ""
         }`}
       >
@@ -46,7 +46,7 @@ export default function TopBar({ className }: { className: string }) {
               </ul>
             </div>
 
-            <div className="topbar-dropdowns sm:block hidden">
+            <div className="topbar-dropdowns sm:block relative z-50">
               <CurrencySelector />
             </div>
           </div>
