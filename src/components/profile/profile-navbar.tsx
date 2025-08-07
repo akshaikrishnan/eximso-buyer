@@ -70,12 +70,19 @@ export default function ProfileNavbar() {
         <select
           id="tabs"
           name="tabs"
-          className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+          className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-lg py-0.5"
           defaultValue={tabs.find((tab) => tab.current)?.name || ""}
+          onChange={(e) => {
+            const selectedValue = e.target.value;
+            if (selectedValue === "Logout") {
+              logout();
+            }
+          }}
         >
           {tabs.map((tab) => (
-            <option key={tab.name}>{tab.name}</option>
+            <option key={tab.name} value={tab.name} className="text-xs py-0.5">{tab.name}</option>
           ))}
+          <option key="logout" value="Logout" className="text-xs py-0.5">Logout</option>
         </select>
       </div>
       <div className="hidden sm:block">

@@ -118,7 +118,7 @@ export default function ProductsGrid({
 
       {/* Product Grid */}
       {!isLoading && !isError && displayedProducts.length > 0 && (
-        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {displayedProducts.map((product) => (
             <div
               key={product._id}
