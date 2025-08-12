@@ -133,28 +133,6 @@ export default function Missionandvision() {
           </div>
         </div>
       </div>
-
-     {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="px-6 py-12 md:p-12 md:flex items-center justify-between">
-            <div className="md:w-2/3 mb-8 md:mb-0">
-              <h2 className="text-3xl font-bold text-white md:text-4xl">Ready to expand your business globally?</h2>
-              <p className="mt-4 text-xl text-indigo-100">
-                Join EXIMSO today and reach customers and suppliers worldwide.
-              </p>
-            </div>
-            <div className="md:w-1/3 flex flex-col sm:flex-row md:flex-col space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-0 md:space-y-4">
-              <button className="px-6 py-3 bg-white text-indigo-700 font-medium rounded-md hover:bg-indigo-50 transition-colors">
-                Join as a Seller
-              </button>
-              <button className="px-6 py-3 bg-indigo-500 text-white font-medium rounded-md border border-indigo-300 hover:bg-indigo-400 transition-colors">
-                Shop Now
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  </div>
   );
 }
