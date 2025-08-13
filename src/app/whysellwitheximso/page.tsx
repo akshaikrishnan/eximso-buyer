@@ -290,7 +290,7 @@ export default function whysellwitheximso() {
 
     
       {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="px-6 py-12 md:p-12 md:flex items-center justify-between">
             <div className="md:w-2/3 mb-8 md:mb-0">
@@ -309,7 +309,7 @@ export default function whysellwitheximso() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

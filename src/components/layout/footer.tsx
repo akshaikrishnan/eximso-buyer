@@ -5,7 +5,7 @@ const footerNavigation = {
   customerService: [
     { name: "Cancellation & Return policy", href: "/policy/return-policy" },
     { name: "News and updates", href: "#" },
-    { name: "Secure Payments", href: "#" },
+    { name: "Secure Payments", href: "/secure-payment" },
     { name: "What drives us everyday", href: "/drives-us-everyday" },
     { name: "Why Sell with Eximso", href: "/whysellwitheximso" },
    
@@ -14,7 +14,7 @@ const footerNavigation = {
     { name: "About", href: "/about-us" },
     { name: "Mission and Vision", href: "/mission-vision" },
     { name: "How do we work", href: "#" },
-    { name: "Focus on both B2B & B2C", href: "#" },
+    { name: "Focus on both B2B & B2C", href: "/B2B-B2C" },
     { name: "Contact Us", href: "/contact" },
   ],
   legal: [
@@ -41,15 +41,15 @@ export default function Footer() {
           Footer
         </h2>
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-200 pt-16 pb-20">
-            <div className="flex justify-center">
+          <div className="border-t border-gray-200">
+            {/* <div className="flex justify-center">
               <img
                 src="/images/common/logo.png
                 "
                 alt="Eximso"
                 className="h-8 w-auto"
               />
-            </div>
+            </div> */}
 
             {/* Centered Grid Columns */}
             <div className="mt-16 flex justify-center">
@@ -111,7 +111,7 @@ export default function Footer() {
             </div>
 
             {/* Newsletter and CTA */}
-            <div className="mt-16 lg:grid lg:grid-cols-2 lg:gap-x-6 xl:gap-x-8">
+            {/* <div className="mt-16 lg:grid lg:grid-cols-2 lg:gap-x-6 xl:gap-x-8">
               <div className="bg-gray-100 rounded-lg p-6 flex items-center sm:p-10">
                 <div className="max-w-sm mx-auto">
                   <h3 className="font-semibold text-gray-900">
@@ -169,7 +169,7 @@ export default function Footer() {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Footer Bottom Section */}
             <div className="mt-10 md:flex md:items-center md:justify-between">
