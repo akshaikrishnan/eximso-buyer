@@ -92,7 +92,7 @@ export default function ProductDetail({ product }: any) {
               className="flex flex-col-reverse lg:sticky top-10"
             >
               {/* Image selector */}
-              <div className="mx-auto mt-6 hidden w-full max-w-2xl sm:block lg:max-w-none">
+              <div className="mx-auto mt-6 w-full max-w-2xl sm:block lg:max-w-none">
                 <TabList className="grid grid-cols-4 gap-6">
                   {product.images.map((image: string, index: number) => (
                     <Tab
@@ -102,13 +102,14 @@ export default function ProductDetail({ product }: any) {
                       {({ selected }) => (
                         <>
                           {/* <span className="sr-only">{image.name}</span> */}
-                          <span className="absolute inset-0 overflow-hidden rounded-md">
-                            <img
-                              src={image}
-                              alt=""
-                              className="h-full w-full object-cover object-center"
-                            />
-                          </span>
+                          <span className="absolute inset-0 overflow-hidden rounded-md flex items-center justify-center">
+  <img
+    src={image}
+    alt=""
+    className="max-h-full max-w-full object-contain"
+  />
+</span>
+
                           <span
                             className={classNames(
                               selected ? "ring-indigo-500" : "ring-transparent",
@@ -123,17 +124,18 @@ export default function ProductDetail({ product }: any) {
                 </TabList>
               </div>
 
-              <TabPanels className="aspect-h-1 aspect-w-1 w-full ">
+              <TabPanels className="w-full">
                 {product.images.map((image: string, idx: number) => (
-                  <TabPanel key={idx}>
+                  <TabPanel key={idx} className="flex justify-center">
                     <img
                       src={image}
                       alt=""
-                      className="h-full w-full object-cover object-top sm:rounded-lg"
+                      className="max-w-full max-h-[80vh] object-contain sm:rounded-lg"
                     />
                   </TabPanel>
                 ))}
               </TabPanels>
+
             </Tab.Group>
 
             {/* Product info */}
