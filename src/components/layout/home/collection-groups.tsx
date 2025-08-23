@@ -9,6 +9,7 @@ interface Product {
   image: string;
   thumbnail?: string;
   name?: string;
+  slug?: string;
 }
 
 // Collection group type definition
@@ -34,7 +35,7 @@ const CollectionGroup: React.FC<{ collectionGroup: CollectionGroupProps }> = ({
         {collectionGroup.products.map((product, productIndex) => (
           <Link
             key={productIndex}
-            href={product.href || "/"}
+            href={product.slug ? "/" + product.slug : product.href}
             className="group flex flex-col bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200"
           >
             {/* Product Image */}
