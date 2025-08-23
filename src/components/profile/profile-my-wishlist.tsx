@@ -1,5 +1,6 @@
 "use client";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ interface WishlistItem {
     offerPrice: string;
     price: string;
     discountPercentage: number;
+    slug: string;
   };
 }
 
@@ -73,7 +75,7 @@ const WishlistPage = () => {
               key={wishItem.id}
               className="flex items-center justify-between p-5 shadow-sm ring-1 ring-gray-900/5 sm:rounded pb-4"
             >
-              <div className="flex items-center space-x-4">
+              <Link href={`/${item.slug}`} className="flex items-center space-x-4 flex-1">
                 <img
                   src={item.thumbnail}
                   alt={item.name}
@@ -88,15 +90,19 @@ const WishlistPage = () => {
                   </p>
                   <div className="mt-2 flex items-center space-x-2 text-sm">
                     <p className="text-lg font-semibold text-gray-900">
-                      {item.offerPrice}
+                      {Number(item.offerPrice) === 0 ? item.price : item.offerPrice}
                     </p>
-                    <p className="text-gray-500 line-through">{item.price}</p>
-                    <p className="text-green-500">
-                      {item.discountPercentage}% Off
-                    </p>
+                    {Number(item.offerPrice) !== 0 && (
+                      <p className="text-gray-500 line-through">{item.price}</p>
+                    )}
+                    {Number(item.offerPrice) !== 0 && item.discountPercentage > 0 && (
+                      <p className="text-green-500">
+                        {item.discountPercentage}% Off
+                      </p>
+                    )}
                   </div>
                 </div>
-              </div>
+              </Link>
               <button
                 className="text-gray-500 hover:text-red-500"
                 onClick={() => handleRemove(item.id)}

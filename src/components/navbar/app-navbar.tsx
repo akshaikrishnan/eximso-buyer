@@ -235,10 +235,10 @@ const Navbar = (props: any) => {
             data={menu}
             className="hidden lg:flex ltr:md:ml-6 ltr:xl:ml-10 rtl:md:mr-6 rtl:xl:mr-10"
           />
-          <button className="bg-eximblue-600 whitespace-nowrap rounded-xl px-5 py-3 font-medium text-white  gap-2 flex items-center">
+          <Link href={process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login"} className="bg-eximblue-600 whitespace-nowrap rounded-xl px-5 py-3 font-medium text-white gap-2 flex items-center">
             <BuildingStorefrontIcon className="w-6 h-6" />
             Become a Seller
-          </button>
+          </Link>
         </div>
       </nav>
     </>
