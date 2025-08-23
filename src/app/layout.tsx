@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title:
-    "Online Shopping India Mobile, Cameras, Lifestyle & more Online | Eximso.com | b2b & b2c",
+    "The Most Trusted Platform for Global Shopping",
   description:
     "India's leading online platform for B2C and B2B needs. Find the widest selection of Mobiles, Fashion, Electronics, Appliances, Books, Homeware, Furniture, Groceries, Jewelry, Sporting Goods, Beauty & Personal Care, and more! We offer the largest brand selection at unbeatable prices in India.",
 };
