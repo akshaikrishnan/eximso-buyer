@@ -3,7 +3,7 @@ import IncentivesFooter from "./incentives-footer";
 
 const footerNavigation = {
   customerService: [
-    { name: "Cancellation & Return policy", href: "/policy/return-policy" },
+    { name: "Cancellation & Return policy", href: "/cancellation" },
     { name: "News and updates", href: "#" },
     { name: "Secure Payments", href: "/secure-payment" },
     { name: "What drives us everyday", href: "/drives-us-everyday" },
@@ -19,7 +19,7 @@ const footerNavigation = {
   ],
   legal: [
     { name: "Careers", href: "#" },
-    { name: "FAQ", href: "#" },
+    { name: "FAQ", href: "/FAQ" },
     { name: "Terms & Conditions", href: "/policy/terms-and-conditions" },
     { name: "Privacy Policy", href: "/policy/privacy-policy" },
     { name: "Return Policy", href: "/policy/return-policy" },
@@ -109,67 +109,6 @@ export default function Footer() {
                 </div>
               </div>
             </div>
-
-            {/* Newsletter and CTA */}
-            {/* <div className="mt-16 lg:grid lg:grid-cols-2 lg:gap-x-6 xl:gap-x-8">
-              <div className="bg-gray-100 rounded-lg p-6 flex items-center sm:p-10">
-                <div className="max-w-sm mx-auto">
-                  <h3 className="font-semibold text-gray-900">
-                    Sign up for our newsletter
-                  </h3>
-                  <p className="mt-2 text-sm text-gray-500">
-                    The latest news, articles, and resources, sent to your inbox
-                    weekly.
-                  </p>
-                  <form className="mt-4 sm:mt-6 sm:flex">
-                    <label htmlFor="email-address" className="sr-only">
-                      Email address
-                    </label>
-                    <input
-                      id="email-address"
-                      type="text"
-                      autoComplete="email"
-                      required
-                      className="appearance-none min-w-0 w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-4 text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    />
-                    <div className="mt-3 sm:flex-shrink-0 sm:mt-0 sm:ml-4">
-                      <button
-                        type="submit"
-                        className="w-full bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-indigo-500"
-                      >
-                        Sign up
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-
-              <div className="mt-6 relative py-12 px-6 flex items-center sm:py-16 sm:px-10 lg:mt-0">
-                <div className="absolute inset-0 rounded-lg overflow-hidden">
-                  <img
-                    src="https://tailwindui.com/img/ecommerce-images/footer-02-exclusive-sale.jpg"
-                    alt=""
-                    className="w-full h-full filter saturate-0 object-center object-cover"
-                  />
-                  <div className="absolute inset-0 bg-indigo-600 bg-opacity-90" />
-                </div>
-                <div className="relative max-w-sm mx-auto text-center">
-                  <h3 className="text-2xl font-extrabold tracking-tight text-white">
-                    Become a seller
-                  </h3>
-                  <p className="mt-2 text-gray-200">
-                    Start selling on Eximso today and take advantage of
-                    competitive rates!{" "}
-                    <a
-                      href="#"
-                      className="font-bold text-white whitespace-nowrap hover:text-gray-200"
-                    >
-                      Go now<span aria-hidden="true"> &rarr;</span>
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </div> */}
 
             {/* Footer Bottom Section */}
             <div className="mt-10 md:flex md:items-center md:justify-between">
