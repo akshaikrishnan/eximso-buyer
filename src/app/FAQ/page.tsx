@@ -95,10 +95,10 @@ export default function FAQs() {
             <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
             Eximso – Frequently Asked Questions (FAQs)
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Welcome to Eximso&apos;s FAQ section! Whether you're an international customer 
-             shopping Indian products or a seller looking to go global,</h2>
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Welcome to Eximso&apos;s FAQ section! Whether you&apos;re an international customer 
+             shopping Indian products or a seller looking to go global</h2>
             <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
-              we&apos;re here to help you understand how Eximso simplifies cross-border e-commerce.            </p>
+              we&apos;re here to help you understand how Eximso simplifies cross-border e-commerce.</p>
           </div>
          </div>
       </div>
