@@ -22,7 +22,6 @@ const footerNavigation = {
     { name: "FAQ", href: "/FAQ" },
     { name: "Terms & Conditions", href: "/policy/terms-and-conditions" },
     { name: "Privacy Policy", href: "/policy/privacy-policy" },
-    { name: "Return Policy", href: "/policy/return-policy" },
     { name: "Shipping Policy", href: "/policy/shipping-policy" },
   ],
   bottomLinks: [

@@ -74,7 +74,7 @@ const howItWorks = [
   }
 ];
 const brandOnDemandSteps = [
-  "You&apos;ll need:  GST certificate,Bank account details,Product catalog & pricing.",
+  "You'll need:  GST certificate,Bank account details,Product catalog & pricing.",
   "Can I sell both B2B and B2C? : Yes. Eximso enables you to sell to global consumers (B2C)  under proxy export and bulk buyers or importers (B2B) through a single dashboard.",
   "Who handles logistics and shipping?: Eximso offers integrated international logistics via air and sea freight through our logistics arm.",
   "Do I need to handle customs and documentation?: No worries. Since we operate under proxy export, Eximso will deal with all export documentation, customs clearance, shipping labels, and more for a hassle-free selling experience.",
@@ -95,8 +95,8 @@ export default function FAQs() {
             <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
             Eximso – Frequently Asked Questions (FAQs)
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Welcome to Eximso&apos;s FAQ section! Whether you&apos;re an international customer 
-             shopping Indian products or a seller looking to go global</h2>
+            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Welcome to Eximso FAQ section! Whether you&apos;re an international customer 
+              or a seller looking to go global</h2>
             <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
               we&apos;re here to help you understand how Eximso simplifies cross-border e-commerce.</p>
           </div>
@@ -128,7 +128,7 @@ export default function FAQs() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">How do I register as a seller?</h2>
+             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">How do we register as a seller?</h2>
               <p className="mt-4 text-lg text-gray-600">
                 Simply visit seller.eximso.com and sign up by submitting your business documents, 
                 bank details, and product information. 
