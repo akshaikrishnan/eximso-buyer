@@ -7,10 +7,10 @@ export default function RefundPolicy() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center">
           <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-            Refund & Return Policy
+            Cancellation & Return policy
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-            Eximso Refund and Return Policy
+            Eximso Cancellation & Return policy
           </h1>
           <p className="mt-4 text-lg text-gray-600 leading-relaxed">
             PLEASE READ THIS REFUND AND RETURN POLICY CAREFULLY BEFORE MAKING A PURCHASE ON EXIMSO. 

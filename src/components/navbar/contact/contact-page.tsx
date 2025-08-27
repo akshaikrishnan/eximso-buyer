@@ -27,21 +27,22 @@ function Contact() {
       {/* Contact Info */}
       <div className="w-full md:w-1/2 p-8">
         <h2 className="text-5xl font-bold mb-9">Get in touch</h2>
-        <p className="text-gray-600 mb-6">
+        {/* <p className="text-gray-600 mb-6">
           Proin volutpat consequat porttitor cras nullam gravida at. Orci molestie a eu arcu.
-        </p>
+        </p> */}
         <div className="space-y-7 text-gray-700">
           <p className="flex items-center gap-3">
-            <HiLocationMarker className="text-gray-600 text-xl" />
-            <span className="font-semibold">Address:</span> 545 Mavis Island, Chicago, IL 99191
+            <HiLocationMarker className="text-gray-300 text-xl" />
+            <span className="font-semibold">Address:</span>No 15/1031, PM KAREEM CENTRE, ATHANI JUNCTION, WONDERLA ROAD, 
+              KAKKANAD, ERNAKULAM, KERALA PIN 682030, INDIA
           </p>
           <p className="flex items-center gap-3">
             <HiPhone className="text-gray-600 text-xl" />
-            <span className="font-semibold">Phone :</span> +1 (555) 234-5678
+            <span className="font-semibold">Phone :</span> +91 90378 50541
           </p>
           <p className="flex items-center gap-3">
             <HiMail className="text-gray-600 text-xl" />
-            <span className="font-semibold">Email:</span> hello@example.com
+            <span className="font-semibold">Email:</span> contact@eximso.com
           </p>
         </div>
       </div>
