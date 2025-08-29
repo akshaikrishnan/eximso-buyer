@@ -1,3 +1,5 @@
+import api from "@/lib/api/axios.interceptor";
+import { endpoints } from "@/lib/data/endpoints";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
@@ -70,7 +72,7 @@ const ListItem = ({
     >
       <div className="flex items-center">
         <Image
-          className="w-50 h-50 rounded-full"
+          className="w-50 h-50 rounded-full aspect-1"
           src={data?.image}
           width={50}
           height={50}
@@ -88,20 +90,15 @@ const ListItem = ({
   );
 };
 
-export default function CategoryList() {
+export default async function CategoryList() {
+  const categories = await api
+    .get(`${endpoints.categories}/top?limit=9`)
+    .then((res) => res.data);
   return (
     <div className="space-y-2">
-      {mock.map((item, index) => (
-        <ListItem key={index} data={item} />
+      {categories.map((item: any) => (
+        <ListItem key={item.slug} data={item} />
       ))}
-      <ListItem
-        data={{
-          name: "Fashion",
-          image: "/images/category/kid.jpg",
-          slug: "fashion",
-          count: 20,
-        }}
-      />
     </div>
   );
 }
