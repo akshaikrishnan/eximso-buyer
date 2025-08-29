@@ -18,7 +18,6 @@ interface BannerItem {
 async function fetchBanners(): Promise<BannerItem[]> {
   try {
     const res = await api.get(endpoints.banner);
-    console.log("API Response:", res.data);
 
     // Ensure the response data is in the correct format
     let banners = res.data?.result || res.data || [];
@@ -26,7 +25,8 @@ async function fetchBanners(): Promise<BannerItem[]> {
     // Sort banners by latest, handling missing `createdAt`
     banners = banners.sort(
       (a: any, b: any) =>
-        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        new Date(b.createdAt || 0).getTime() -
+        new Date(a.createdAt || 0).getTime()
     );
 
     return banners.map((banner: any) => ({
@@ -39,7 +39,10 @@ async function fetchBanners(): Promise<BannerItem[]> {
       type: banner.type || "homepage",
     }));
   } catch (error: any) {
-    console.error("Error fetching banners:", error?.response?.data || error.message);
+    console.error(
+      "Error fetching banners:",
+      error?.response?.data || error.message
+    );
     return [];
   }
 }
@@ -55,13 +58,25 @@ export default async function HeroThreeGrid() {
   return (
     <div className="col-span-full lg:col-span-5 xl:col-span-5 row-span-full lg:row-auto grid grid-cols-2 gap-2 md:gap-3.5 lg:gap-5 xl:gap-0">
       {homepageBanner && (
-        <BannerItemComponent banner={homepageBanner} className="col-span-2 w-full h-auto" imageHeight="h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[24rem]" />
+        <BannerItemComponent
+          banner={homepageBanner}
+          className="col-span-2 w-full h-auto"
+          imageHeight="h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[24rem]"
+        />
       )}
       {footerBanner && (
-        <BannerItemComponent banner={footerBanner} className="col-span-1 w-full" imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-[18rem]" />
+        <BannerItemComponent
+          banner={footerBanner}
+          className="col-span-1 w-full"
+          imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-[18rem]"
+        />
       )}
       {mainBanner && (
-        <BannerItemComponent banner={mainBanner} className="col-span-1 w-full" imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-[18rem]" />
+        <BannerItemComponent
+          banner={mainBanner}
+          className="col-span-1 w-full"
+          imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-[18rem]"
+        />
       )}
     </div>
   );
@@ -71,7 +86,7 @@ export default async function HeroThreeGrid() {
 function BannerItemComponent({
   banner,
   className,
-  imageHeight
+  imageHeight,
 }: {
   banner: BannerItem;
   className: string;
@@ -79,7 +94,10 @@ function BannerItemComponent({
 }) {
   return (
     <div className={`mx-auto ${className}`}>
-      <Link className="h-full group flex justify-center relative overflow-hidden" href={banner.linkUrl}>
+      <Link
+        className="h-full group flex justify-center relative overflow-hidden"
+        href={banner.linkUrl}
+      >
         <Image
           className={`bg-gray-300 object-cover w-full rounded-md ${imageHeight}`}
           src={banner.image}

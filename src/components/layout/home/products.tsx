@@ -7,6 +7,7 @@ import { InView } from "react-intersection-observer";
 import ProductCard from "@/components/common/product-card";
 import { useSearchParams } from "next/navigation";
 import { endpoints } from "@/lib/data/endpoints";
+import { getSearchParamsObject } from "@/lib/getSearchParamsObj";
 
 export default function ProductsGrid({
   params,
@@ -19,20 +20,21 @@ export default function ProductsGrid({
   const category = params?.[0] || null;
   const subcategory = params?.[1] || null;
 
+  const searchParamsObj = getSearchParamsObject(searchParams);
+
   const fetchProducts = async ({ pageParam = 1 }) => {
     const res = await axios.get(endpoints.products, {
       params: {
         page: pageParam,
         limit,
-        name,
-        sort,
         category,
         subcategory,
+        ...searchParamsObj,
       },
     });
     return res.data.result;
   };
-
+  console.log(["products", params, searchParamsObj]);
   const {
     data,
     isLoading,
@@ -43,7 +45,7 @@ export default function ProductsGrid({
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["products", name, sort, category, subcategory],
+    queryKey: ["products", params, searchParamsObj],
     queryFn: fetchProducts,
     getNextPageParam: (lastPage) => {
       const currentPage = lastPage?.pagination?.page ?? 1;
@@ -76,10 +78,13 @@ export default function ProductsGrid({
     }
   }, [nextPageLoading]);
 
-  const products: any[] = data?.pages?.flatMap((page) => page?.data || []) || [];
+  const products: any[] =
+    data?.pages?.flatMap((page) => page?.data || []) || [];
 
   // Limit products to first page if infinite scroll is disabled
-  const displayedProducts = disableInfiniteScroll ? products.slice(0, limit) : products;
+  const displayedProducts = disableInfiniteScroll
+    ? products.slice(0, limit)
+    : products;
 
   const handleInViewChange = (inView: boolean) => {
     if (disableInfiniteScroll) return;
@@ -101,7 +106,9 @@ export default function ProductsGrid({
       {/* Error Handling */}
       {!isLoading && isError && (
         <div className="text-center text-red-500">
-          <p className="mb-2">Error: {error?.message || "Something went wrong."}</p>
+          <p className="mb-2">
+            Error: {error?.message || "Something went wrong."}
+          </p>
           <button
             onClick={() => refetch()}
             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
@@ -158,7 +165,8 @@ export default function ProductsGrid({
       {/* End Message */}
       {!hasNextPage && displayedProducts.length > 0 && (
         <div className="text-center text-gray-500 mt-6">
-          🎉 <span className="font-medium">You’ve reached the end!</span> No more products to load.
+          🎉 <span className="font-medium">You’ve reached the end!</span> No
+          more products to load.
         </div>
       )}
     </div>

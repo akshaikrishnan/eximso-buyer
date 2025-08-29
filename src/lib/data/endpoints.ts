@@ -12,4 +12,5 @@ export const endpoints = {
   collection: "collection",
   menu: "menu",
   pushSubscribe: "push/subscribe",
+  filters: "products/filters",
 };

@@ -12,8 +12,8 @@ export default function TopBar({ className }: { className: string }) {
         }`}
       >
         <div className="container-x mx-auto h-full">
-          <div className="flex justify-between items-center h-full">
-            <div className="topbar-nav">
+          <div className="flex justify-between items-center h-full ">
+            <div className="topbar-nav ">
               <ul className="flex space-x-6">
                 <li>
                   <Link href="/profile">
@@ -23,7 +23,7 @@ export default function TopBar({ className }: { className: string }) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/tracking-order">
+                  <Link target="_blank" href="https://tracking.1shipping.in/">
                     <span className="text-xs leading-6 text-qblack font-500">
                       Track Order
                     </span>
@@ -46,7 +46,7 @@ export default function TopBar({ className }: { className: string }) {
               </ul>
             </div>
 
-            <div className="topbar-dropdowns sm:block relative z-50">
+            <div className="topbar-dropdowns sm:block relative z-50 hidden xl:block">
               <CurrencySelector />
             </div>
           </div>

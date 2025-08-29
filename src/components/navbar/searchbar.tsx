@@ -25,7 +25,7 @@ export default function Searchbar({ categories }: any) {
         name="category"
         id="main-dropdown"
       >
-        <option value="All Categories" className="text-base">
+        <option value="" className="text-base">
           All Categories
         </option>
         {categories?.map((option: any) => {
@@ -33,7 +33,7 @@ export default function Searchbar({ categories }: any) {
             <option
               className="text-base"
               key={option._id}
-              value={option._id}
+              value={option.slug}
               onClick={handleOnClickCategory}
             >
               {option.name}
