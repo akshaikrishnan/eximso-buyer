@@ -1,5 +1,6 @@
 import { Price } from "@/components/common/price";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 export default function FlashSlide({
@@ -18,10 +19,13 @@ export default function FlashSlide({
   offerPrice?: number;
 }) {
   return (
-    <div className="h-full flex flex-col justify-between py-10">
+    <Link
+      href={link}
+      className="h-full flex flex-col justify-between py-10 group cursor-pointer"
+    >
       <div className="flex flex-col justify-between gap-10">
         <Image
-          className="bg-gray-300 object-cover rounded-s-md rounded-md transition duration-150 ease-linear transform group-hover:scale-105"
+          className="bg-gray-300 object-cover rounded-md transition duration-150 ease-linear transform group-hover:scale-105"
           src={image}
           alt={title}
           width={500}
@@ -36,30 +40,32 @@ export default function FlashSlide({
           </p>
           <div
             className="font-semibold text-sm sm:text-xl mt-1.5 flex flex-wrap gap-x-2 md:text-base lg:text-xl md:mt-2.5 2xl:mt-3
-           text-heading"
+             text-heading"
           >
-            <span className="inline-block false">
+            <span className="inline-block">
               <Price amount={offerPrice ? offerPrice : price} />
             </span>
-            <del className="text-gray-500">
-              <Price amount={price} />
-            </del>
+            {offerPrice && (
+              <del className="text-gray-500">
+                <Price amount={price} />
+              </del>
+            )}
           </div>
         </div>
       </div>
 
       <div>
         <div className="flex items-center justify-between">
-          <span>Claimed : 180</span>
-          <span>Total : 400</span>
+          <span>Claimed : 0</span>
+          <span>Total : 0</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div
             className="bg-eximblue-500 h-2.5 rounded-full"
-            style={{ width: "45%" }}
+            style={{ width: "5%" }}
           ></div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
