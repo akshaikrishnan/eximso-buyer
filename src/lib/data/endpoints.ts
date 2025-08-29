@@ -11,4 +11,5 @@ export const endpoints = {
   banner: "banner",
   collection: "collection",
   menu: "menu",
+  pushSubscribe: "push/subscribe",
 };
