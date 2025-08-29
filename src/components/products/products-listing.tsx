@@ -17,32 +17,42 @@ export default async function ProductsListing({ params, searchParams }: any) {
         limit: 10,
         category: params?.params?.[0] || null,
         subcategory: params?.params?.[1] || null,
-        name: q || null,
-        sort: sort || null,
+        ...searchParams,
       },
     });
     return res.data.result;
   };
 
   const queryClient = new QueryClient();
+  console.log(["products", params?.params, searchParams]);
 
   await queryClient.prefetchInfiniteQuery({
-    queryKey: [
-      "products",
-      params,
-      searchParams?.q || "",
-      searchParams?.sort || "",
-    ],
+    queryKey: ["products", params?.params, searchParams],
     queryFn: getProducts,
     initialPageParam: 1,
     getNextPageParam: (lastPage, pages) => lastPage.nextPage,
     pages: 2,
   });
+
+  const res = await api.get(endpoints.products, {
+    params: {
+      page: 1,
+      limit: 1,
+      category: params?.params?.[0] || null,
+      subcategory: params?.params?.[1] || null,
+      ...searchParams,
+    },
+  });
+  console.log(res?.data);
   const pageData: any = await queryClient.getQueryData(["products", {}, ""]);
-  console.log(pageData);
+  const title = res.data?.result?.title ?? "Products";
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ProductLayout>
+      <ProductLayout
+        params={params.params}
+        searchParams={searchParams}
+        title={title}
+      >
         <ProductsGrid params={params.params} searchParams={searchParams} />
       </ProductLayout>
     </HydrationBoundary>

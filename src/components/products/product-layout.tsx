@@ -23,6 +23,10 @@ import {
 } from "@heroicons/react/20/solid";
 import mergeClasses from "@/lib/utils/classNames";
 import { useQueryParamState } from "@/lib/hooks/useQueryParamState";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/api/axios.interceptor";
+import { endpoints } from "@/lib/data/endpoints";
+import FilterCheckbox from "../helpers/filter-checkbox";
 
 const rawSortOptions = [
   { name: "Most Popular", sortValue: "", current: true },
@@ -76,7 +80,17 @@ const filters = [
   },
 ];
 
-export default function ProductLayout({ children }: { children: ReactNode }) {
+export default function ProductLayout({
+  children,
+  params,
+  searchParams,
+  title,
+}: {
+  children: ReactNode;
+  params?: any;
+  searchParams?: any;
+  title?: string;
+}) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [sort, setSort] = useQueryParamState<string>("sort", "", {
     parse: (v) => v ?? "",
@@ -92,6 +106,21 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
       })),
     [sort]
   );
+
+  const {
+    data: filterData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["filterData", params],
+    queryFn: () =>
+      api
+        .get(endpoints.filters, {
+          params: searchParams,
+        })
+        .then((res) => res.data),
+  });
+  console.log("filterData", filterData);
 
   return (
     <div className="bg-white">
@@ -128,7 +157,7 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
               <form className="mt-4 border-t border-gray-200">
                 <h3 className="sr-only">Categories</h3>
                 <ul role="list" className="px-2 py-3 font-medium text-gray-900">
-                  {subCategories.map((category) => (
+                  {filterData?.relatedCollections?.map((category: any) => (
                     <li key={category.name}>
                       <a href={category.href} className="block px-2 py-3">
                         {category.name}
@@ -137,7 +166,7 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
                   ))}
                 </ul>
 
-                {filters.map((section) => (
+                {filterData?.filters.map((section: any) => (
                   <Disclosure
                     key={section.id}
                     as="div"
@@ -162,24 +191,16 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
                     </h3>
                     <DisclosurePanel className="pt-6">
                       <div className="space-y-6">
-                        {section.options.map((option, optionIdx) => (
-                          <div key={option.value} className="flex items-center">
-                            <input
-                              defaultValue={option.value}
-                              defaultChecked={option.checked}
-                              id={`filter-mobile-${section.id}-${optionIdx}`}
-                              name={`${section.id}[]`}
-                              type="checkbox"
-                              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        {section.options.map(
+                          (option: any, optionIdx: number) => (
+                            <FilterCheckbox
+                              key={`${section.id}-${option.value}`}
+                              sectionId={section.id}
+                              option={option}
+                              inputId={`filter-mobile-${section.id}-${optionIdx}`}
                             />
-                            <label
-                              htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
-                              className="ml-3 min-w-0 flex-1 text-gray-500"
-                            >
-                              {option.label}
-                            </label>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </DisclosurePanel>
                   </Disclosure>
@@ -192,7 +213,7 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
         <main className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-5">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-              New Arrivals
+              {title}
             </h1>
 
             <div className="flex items-center">
@@ -262,14 +283,14 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
                   role="list"
                   className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
                 >
-                  {subCategories.map((category) => (
+                  {filterData?.relatedCollections?.map((category: any) => (
                     <li key={category.name}>
                       <a href={category.href}>{category.name}</a>
                     </li>
                   ))}
                 </ul>
 
-                {filters.map((section) => (
+                {filterData?.filters?.map((section: any) => (
                   <Disclosure
                     key={section.id}
                     as="div"
@@ -294,24 +315,16 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
                     </h3>
                     <DisclosurePanel className="pt-6">
                       <div className="space-y-4">
-                        {section.options.map((option, optionIdx) => (
-                          <div key={option.value} className="flex items-center">
-                            <input
-                              defaultValue={option.value}
-                              defaultChecked={option.checked}
-                              id={`filter-${section.id}-${optionIdx}`}
-                              name={`${section.id}[]`}
-                              type="checkbox"
-                              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        {section.options.map(
+                          (option: any, optionIdx: number) => (
+                            <FilterCheckbox
+                              key={`${section.id}-${option.value}`}
+                              sectionId={section.id}
+                              option={option}
+                              inputId={`filter-${section.id}-${optionIdx}`}
                             />
-                            <label
-                              htmlFor={`filter-${section.id}-${optionIdx}`}
-                              className="ml-3 text-sm text-gray-600"
-                            >
-                              {option.label}
-                            </label>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </DisclosurePanel>
                   </Disclosure>
@@ -327,17 +340,3 @@ export default function ProductLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/

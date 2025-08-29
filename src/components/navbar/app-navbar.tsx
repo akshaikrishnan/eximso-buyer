@@ -169,7 +169,7 @@ const Navbar = (props: any) => {
               <Searchbar categories={categories} />
             </Suspense>
           </li>
-          <li className="nav-item location cursor-pointer flex items-end gap-2 md:order-2">
+          <li className="nav-item location cursor-pointer lg:flex items-end gap-2 md:order-2 hidden ">
             <div className="text-xl">
               <i className="fa-solid fa-location-dot"></i>
             </div>
@@ -180,7 +180,7 @@ const Navbar = (props: any) => {
               </div>
             </div>
           </li>
-          <li className="nav-item country cursor-pointer flex items-center gap-2 md:order-4">
+          <li className="nav-item country cursor-pointer lg:flex hidden items-center gap-2 md:order-4">
             {/* <div className="w-5">
               <img
                 className="w-full h-full"
@@ -192,7 +192,7 @@ const Navbar = (props: any) => {
               EN <i className="fa-solid fa-sort-down text-xs text-gray-400"></i>
             </div>
           </li>
-           <li className="nav-item returns cursor-pointer md:order-6">
+          <li className="nav-item returns cursor-pointer md:order-6 hidden lg:block">
             <Link href="/profile/my-orders" className="space-y-0 leading-5">
               <div className="upper text-start text-xs">Returns</div>
               <div className="lower font-medium">& Orders</div>
@@ -224,7 +224,7 @@ const Navbar = (props: any) => {
         </ul> */}
         <div className="px-5 relative z-10 flex">
           <button
-            className="hamburger cursor-pointer text-xl gap-2 flex items-center px-5 rounded-lg font-medium"
+            className="hamburger cursor-pointer text-xl gap-2 lg:flex items-center px-5 rounded-lg font-medium hidden"
             // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
             onClick={openSidebar}
           >
@@ -235,7 +235,10 @@ const Navbar = (props: any) => {
             data={menu}
             className="hidden lg:flex ltr:md:ml-6 ltr:xl:ml-10 rtl:md:mr-6 rtl:xl:mr-10"
           />
-          <Link href={process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login"} className="bg-eximblue-600 whitespace-nowrap rounded-xl px-5 py-3 font-medium text-white gap-2 flex items-center">
+          <Link
+            href={process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login"}
+            className="bg-eximblue-600 whitespace-nowrap rounded-xl px-5 py-3 font-medium text-white gap-2 lg:flex items-center hidden"
+          >
             <BuildingStorefrontIcon className="w-6 h-6" />
             Become a Seller
           </Link>
@@ -252,7 +255,7 @@ export default Navbar;
 const HamburgerMenu = (props: any) => {
   const { isNavOpen, setIsNavOpen } = props;
   return (
-      <div
+    <div
       className={
         isNavOpen
           ? "flex h-screen w-screen fixed top-0 left-0 translate-x-0 duration-500 z-50"
