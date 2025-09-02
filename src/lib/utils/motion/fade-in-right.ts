@@ -1,18 +1,13 @@
-export function fadeInRight (duration:number = 0.3) {
-  return {
-    from: { 
-      right: '-100%',
-      transition: {
-        type: 'easeInOut',
-				duration: duration,
-      } 
-    },
-    to: { 
-      right: 0,
-      transition: {
-        type: 'easeInOut',
-				duration: duration,
-      } 
-    },
-  }
-}
+// /lib/utils/motion/fade-in-right.ts
+import type { Variants } from "framer-motion";
+
+export const fadeInRight = (duration = 0.3): Variants => ({
+  from: {
+    x: 300, // slide in from right
+    transition: { type: "tween", duration, ease: "easeInOut" },
+  },
+  to: {
+    x: 0,
+    transition: { type: "tween", duration, ease: "easeInOut" },
+  },
+});

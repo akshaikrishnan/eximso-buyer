@@ -4,7 +4,8 @@ import { endpoints } from "@/lib/data/endpoints";
 import { notFound } from "next/navigation";
 import React from "react";
 
-export default async function page({ params }: any) {
+export default async function page(props: any) {
+  const params = await props.params;
   try {
     if (params.slug) {
       const res: any = await api.get(

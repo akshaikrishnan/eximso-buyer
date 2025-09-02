@@ -1,5 +1,4 @@
 import axios from "axios";
-
 const isServer = typeof window === "undefined";
 
 const baseURL = isServer ? process.env.NEXT_PUBLIC_API_URL : "/backend";
@@ -13,11 +12,12 @@ api.interceptors.request.use(async (config) => {
   config.headers["language"] = `en`;
 
   if (isServer) {
-    const { cookies } = await import("next/headers"),
-      token = cookies().get("access_token")?.value,
-      deviceToken = cookies().get("device_token")?.value,
-      language = cookies().get("Next-Locale")?.value,
-      country = cookies().get("country")?.value;
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("access_token")?.value,
+      deviceToken = cookieStore.get("device_token")?.value,
+      language = cookieStore.get("Next-Locale")?.value,
+      country = cookieStore.get("country")?.value;
 
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
@@ -74,7 +74,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       if (isServer) {
         const { cookies } = await import("next/headers");
-        cookies().delete("access_token");
+        const cookieStore = await cookies();
+        cookieStore.delete("access_token");
       } else {
         document.cookie =
           "access_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT;";

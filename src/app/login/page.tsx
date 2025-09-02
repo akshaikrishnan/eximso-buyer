@@ -2,7 +2,8 @@ import Loader from "@/components/common/loader/loader";
 import { redirect } from "next/navigation";
 import React from "react";
 
-export default async function LoginPage({ searchParams }: any) {
+export default async function LoginPage(props: any) {
+  const searchParams = await props.searchParams;
   const { callbackUrl, token, newUser } = searchParams;
   const res = await fetch(
     `/api
