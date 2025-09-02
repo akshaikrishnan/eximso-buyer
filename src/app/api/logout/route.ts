@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest, res: NextResponse) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   try {
     cookieStore.delete("access_token");
     const url = req.nextUrl;

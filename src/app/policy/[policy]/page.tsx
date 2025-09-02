@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import "./policy.css";
-export default async function page({ params }: { params: { policy: string } }) {
+export default async function page(props: { params: Promise<{ policy: string }> }) {
+  const params = await props.params;
   const baseURL = process.env.NEXT_PUBLIC_API_URL!;
 
   try {

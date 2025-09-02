@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
     }
 
     try {
-      const deviceToken = cookies().get("device_token")?.value;
+      const deviceToken = (await cookies()).get("device_token")?.value;
       const syncCart = await api.post("/cart/sync", {
         deviceToken,
         accessToken: token,
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
       console.log("Error syncing cart:", error);
     }
 
-    cookies().set({
+    (await cookies()).set({
       name: "access_token",
       value: token,
       path: "/",
