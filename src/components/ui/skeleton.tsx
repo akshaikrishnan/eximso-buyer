@@ -10,7 +10,7 @@ export function Skeleton({
   ...props
 }: SkeletonProps) {
   return (
-    <div
+    <span
       className={cn(
         "animate-pulse bg-gray-200",
         variant === "circle" ? "rounded-full" : "rounded-md",
