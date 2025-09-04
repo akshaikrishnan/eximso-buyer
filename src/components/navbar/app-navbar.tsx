@@ -226,7 +226,7 @@ const Navbar = (props: any) => {
           <button
             className="hamburger cursor-pointer text-xl gap-2 lg:flex items-center px-5 rounded-lg font-medium hidden"
             // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
-            onClick={openSidebar}
+            onClick={handleMobileMenu}
           >
             <Bars3BottomRightIcon className="w-5 h-5" />
             <span className="text-sm whitespace-nowrap"> All Categories</span>
