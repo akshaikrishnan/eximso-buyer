@@ -9,6 +9,9 @@ const nextConfig = {
     ];
   },
   images: {
+    minimumCacheTTL: 2678400,
+    formats: ["image/webp"],
+    qualities: [25, 50, 75],
     remotePatterns: [
       {
         protocol: "https",
