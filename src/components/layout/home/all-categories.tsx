@@ -58,7 +58,9 @@ export default function CategoryMenu({ categories }: { categories: any }) {
                   <Link
                     key={index}
                     href={
-                      item.slug
+                      item.url
+                        ? item.url
+                        : item.slug
                         ? `/category/${item.slug}`
                         : `/category/${item.name
                             .toLowerCase()
