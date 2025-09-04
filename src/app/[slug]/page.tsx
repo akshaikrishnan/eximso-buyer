@@ -1,4 +1,4 @@
-// app/products/[slug]/page.tsx (or your route file)
+// app/products/[slug]/page.tsx
 import ProductDetail from "@/components/products/product-detail";
 import { endpoints } from "@/lib/data/endpoints";
 import { notFound } from "next/navigation";
@@ -40,7 +40,6 @@ async function getProduct(slug: string): Promise<Product | null> {
     const res = await fetch(`${API_URL + endpoints.products}/${slug}`, {
       next: { revalidate },
     });
-
     if (!res.ok) return null;
 
     const json = await res.json();
@@ -51,14 +50,15 @@ async function getProduct(slug: string): Promise<Product | null> {
   }
 }
 
+// ✅ Next.js 15: params is a Promise and must be awaited
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const product = await getProduct(params.slug);
+  const { slug } = await params;
+  const product = await getProduct(slug);
   if (!product) {
-    // Allows Next to render the 404 metadata (optional)
     return {
       title: "Product not found | Eximso",
       robots: { index: false, follow: false },
@@ -70,32 +70,23 @@ export async function generateMetadata({
     shortDescription,
     images = [],
     thumbnail,
-    price,
-    offerPrice = 0,
-    discountPercentage = 0,
     brand,
-    sku,
+    tags = [],
     category,
     subcategory,
-    tags = [],
     seller,
-    slug,
   } = product;
 
-  const titleParts = [name];
-  if (brand) titleParts.push(`by ${brand.trim()}`);
-  const title = `${titleParts.join(" ")} | Eximso`;
+  const title = `${name}${brand ? ` by ${brand.trim()}` : ""} | Eximso`;
+  const desc = (
+    shortDescription ??
+    `${name}${brand ? ` by ${brand.trim()}` : ""} available on Eximso.`
+  ).slice(0, 300);
 
-  const desc =
-    shortDescription?.slice(0, 300) ||
-    `${name}${brand ? ` by ${brand.trim()}` : ""} available on Eximso.`;
-
-  // OG/Twitter images must be absolute URLs
-  const ogImages = (images.length ? images : thumbnail ? [thumbnail] : [])
-    .slice(0, 4)
-    .map((url) => ({ url }));
-
-  const canonical = `${BASE_URL}/products/${slug}`;
+  const ogImages: string[] = (
+    images.length ? images : thumbnail ? [thumbnail] : []
+  ).slice(0, 4);
+  const canonical = `${BASE_URL}/products/${product.slug}`;
 
   return {
     title,
@@ -103,7 +94,7 @@ export async function generateMetadata({
     keywords: [
       name,
       brand ?? "",
-      ...(tags || []),
+      ...tags,
       category?.name ?? "",
       subcategory?.name ?? "",
       "Eximso",
@@ -113,19 +104,19 @@ export async function generateMetadata({
     ].filter(Boolean),
     alternates: { canonical },
     openGraph: {
-      type: "website", // ✅ use a supported union
+      type: "website", // use a supported union
       url: canonical,
       siteName: "Eximso",
       title,
       description: desc,
-      images: ogImages, // ✅ strings are fine
+      images: ogImages, // strings satisfy the type cleanly
     },
     twitter: {
       card: ogImages.length ? "summary_large_image" : "summary",
       title,
       description: desc,
-      images: ogImages, // ✅ string | string[]
-      creator: seller?.name ? `@${seller.name}` : undefined,
+      images: ogImages,
+      creator: seller?.name ? `@${seller.name}` : undefined, // adjust to a real handle if you have one
     },
     robots: {
       index: true,
@@ -133,7 +124,7 @@ export async function generateMetadata({
       googleBot: {
         index: true,
         follow: true,
-        "max-snippet": -1, // ✅ hyphen-case inside googleBot
+        "max-snippet": -1,
         "max-image-preview": "large",
         "max-video-preview": -1,
       },
@@ -141,8 +132,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const product = await getProduct(params.slug);
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params; // ✅ await first
+  const product = await getProduct(slug);
   if (!product) notFound();
 
   const {
@@ -162,7 +158,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     stock,
   } = product;
 
-  // Build JSON-LD for Product
+  // Product JSON-LD
   const productLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -190,9 +186,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       eligibleQuantity: minimumOrderQuantity
         ? { "@type": "QuantitativeValue", value: minimumOrderQuantity }
         : undefined,
-      // Add validFrom if you have it; Google likes precise dates
     },
-    // Add aggregateRating/review if/when available
   };
 
   return (
@@ -200,7 +194,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
       <Script
         id="product-jsonld"
         type="application/ld+json"
-        // Avoid SSR hydration warnings for JSON strings
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
       />
       <ProductDetail product={product} />
