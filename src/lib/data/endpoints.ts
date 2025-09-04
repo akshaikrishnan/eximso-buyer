@@ -13,4 +13,5 @@ export const endpoints = {
   menu: "menu",
   pushSubscribe: "push/subscribe",
   filters: "products/filters",
+  categoryPage: "category/page",
 };
