@@ -194,7 +194,7 @@ export default function ProductLayout({
                         {section.options.map(
                           (option: any, optionIdx: number) => (
                             <FilterCheckbox
-                              key={`${section.id}-${option.value}`}
+                              key={`${section.id}-${option.value}-${optionIdx}`}
                               sectionId={section.id}
                               option={option}
                               inputId={`filter-mobile-${section.id}-${optionIdx}`}
@@ -233,8 +233,8 @@ export default function ProductLayout({
                   className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
                 >
                   <div className="py-1">
-                    {sortOptions.map((option) => (
-                      <MenuItem key={option.name}>
+                    {sortOptions.map((option, idx) => (
+                      <MenuItem key={`${option.name}-${idx}`}>
                         <a
                           onClick={() => setSort(option.sortValue)}
                           className={mergeClasses(
@@ -283,11 +283,13 @@ export default function ProductLayout({
                   role="list"
                   className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
                 >
-                  {filterData?.relatedCollections?.map((category: any) => (
-                    <li key={category.name}>
-                      <a href={category.href}>{category.name}</a>
-                    </li>
-                  ))}
+                  {filterData?.relatedCollections?.map(
+                    (category: any, idx: number) => (
+                      <li key={`${category.name}-${idx}`}>
+                        <a href={category.href}>{category.name}</a>
+                      </li>
+                    )
+                  )}
                 </ul>
 
                 {filterData?.filters?.map((section: any) => (

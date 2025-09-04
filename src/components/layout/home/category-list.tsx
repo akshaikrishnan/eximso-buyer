@@ -4,57 +4,6 @@ import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 
-const mock = [
-  {
-    name: "Electronics",
-    image: "/images/category/bags.jpg",
-    slug: "electronics",
-    count: 10,
-  },
-  {
-    name: "Fashion",
-    image: "/images/category/kid.jpg",
-    slug: "fashion",
-    count: 20,
-  },
-  {
-    name: "Books",
-    image: "/images/category/man.jpg",
-    slug: "books",
-    count: 30,
-  },
-  {
-    name: "Watch",
-    image: "/images/category/watch.jpg",
-    slug: "electronics",
-    count: 10,
-  },
-  {
-    name: "Sneakers",
-    image: "/images/category/sneakers.jpg",
-    slug: "fashion",
-    count: 20,
-  },
-  {
-    name: "Artwork Tees",
-    image: "/images/category/sports.jpg",
-    slug: "books",
-    count: 30,
-  },
-  {
-    name: "Accessories",
-    image: "/images/category/sunglass.jpg",
-    slug: "electronics",
-    count: 10,
-  },
-  {
-    name: "Watches",
-    image: "/images/category/woman.jpg",
-    slug: "fashion",
-    count: 20,
-  },
-];
-
 const ListItem = ({
   data,
 }: {
