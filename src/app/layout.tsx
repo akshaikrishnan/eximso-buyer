@@ -75,12 +75,12 @@ export default function RootLayout({
       <body className={`${inter.className} overflow-x-hidden`}>
         <Providers>
           <PushNotificationHandler />
+          <InstallPrompt />
           <AppNavBar />
           <Suspense>{children}</Suspense>
           <Footer />
           <ManagedDrawer />
           <Toaster />
-          <InstallPrompt />
           <Analytics />
           <SpeedInsights />
           <ReactQueryDevtools initialIsOpen={false} />
