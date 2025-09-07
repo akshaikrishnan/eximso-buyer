@@ -178,7 +178,7 @@ export default function InstallPrompt() {
       <Transition show={open} as={Fragment}>
         <Dialog onClose={onNotNow} className="relative z-50">
           {/* Backdrop */}
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="transition ease-out duration-200"
             enterFrom="opacity-0"
@@ -188,7 +188,7 @@ export default function InstallPrompt() {
             leaveTo="opacity-0"
           >
             <div className="fixed inset-0 bg-black/30" />
-          </Transition.Child>
+          </TransitionChild>
 
           {/* Bottom Sheet */}
           <div className="fixed inset-0 flex items-end justify-center p-0">
