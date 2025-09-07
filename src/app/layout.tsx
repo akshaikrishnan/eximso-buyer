@@ -22,11 +22,44 @@ export const viewport: Viewport = {
   themeColor: "#521dd3",
   viewportFit: "cover",
 };
-
+const APP_NAME = "Eximso";
+const APP_DEFAULT_TITLE = "The Most Trusted Platform for Global Shopping";
+const APP_TITLE_TEMPLATE = "%s - PWA App";
+const APP_DESCRIPTION =
+  "India's leading online platform for B2C and B2B needs. Find the widest selection of Mobiles, Fashion, Electronics, Appliances, Books, Homeware, Furniture, Groceries, Jewelry, Sporting Goods, Beauty & Personal Care, and more! We offer the largest brand selection at unbeatable prices in India.";
 export const metadata: Metadata = {
-  title: "The Most Trusted Platform for Global Shopping",
-  description:
-    "India's leading online platform for B2C and B2B needs. Find the widest selection of Mobiles, Fashion, Electronics, Appliances, Books, Homeware, Furniture, Groceries, Jewelry, Sporting Goods, Beauty & Personal Care, and more! We offer the largest brand selection at unbeatable prices in India.",
+  applicationName: APP_NAME,
+  title: {
+    default: APP_DEFAULT_TITLE,
+    template: APP_TITLE_TEMPLATE,
+  },
+  description: APP_DESCRIPTION,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: APP_DEFAULT_TITLE,
+    // startUpImage: [],
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: APP_NAME,
+    title: {
+      default: APP_DEFAULT_TITLE,
+      template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary",
+    title: {
+      default: APP_DEFAULT_TITLE,
+      template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
