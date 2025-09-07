@@ -127,11 +127,13 @@ export default function PushNotificationHandler() {
           });
 
           console.log("[Push] Token successfully sent to server:", response);
-          toast({
-            title: "Notifications enabled",
-            description: "You will now receive push notifications",
-            variant: "default",
-          });
+          if (localStorage.getItem("push-subscribed") !== "true")
+            toast({
+              title: "Notifications enabled",
+              description: "You will now receive push notifications",
+              variant: "default",
+            });
+          localStorage.setItem("push-subscribed", "true");
         } catch (apiError) {
           console.error("[Push] Failed to send token to server:", apiError);
           toast({

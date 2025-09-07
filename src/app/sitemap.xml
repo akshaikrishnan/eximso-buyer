@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://eximso.com/</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/about-us</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/contact</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/FAQ</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/mission-vision</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/whysellwitheximso</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/secure-payment</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/cancellation</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/B2B-B2C</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/drives-us-everyday</loc>
+  </url>
+  <url>
+    <loc>https://eximso.com/category</loc>
+  </url>
+  <!-- Dynamic product pages -->
+  <url>
+    <loc>https://eximso.com/products/[slug]</loc>
+  </url>
+  <!-- Dynamic policy pages -->
+  <url>
+    <loc>https://eximso.com/policy/[policy]</loc>
+  </url>
+  <!-- Add more dynamic/static routes as needed -->
+</urlset>
