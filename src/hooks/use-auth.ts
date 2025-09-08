@@ -14,6 +14,14 @@ export const useAuth = (): {
   const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const generateUUID = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
   useEffect(() => {
     const token = document.cookie.replace(
       /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
@@ -44,7 +52,7 @@ export const useAuth = (): {
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + 399); // Expires in 400 days
       const token = btoa(
-        crypto.randomUUID() +
+        generateUUID() +
           Date.now().toLocaleString() +
           navigator.userAgent +
           Math.random()

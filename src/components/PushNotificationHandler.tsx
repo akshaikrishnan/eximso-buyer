@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { getToken, onMessage, isSupported } from "firebase/messaging";
-import { messaging } from "@/app/config/constants/services/push.service";
+import { getFirebaseMessaging } from "@/app/config/constants/services/push.service";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api/axios.interceptor";
 import { useQuery } from "@tanstack/react-query";
@@ -95,6 +95,11 @@ export default function PushNotificationHandler() {
 
         // 5. Get FCM token
         console.log("[Push] Getting FCM token...");
+        const messaging = getFirebaseMessaging();
+        if (!messaging) {
+          console.error("[Push] Failed to initialize Firebase messaging");
+          return;
+        }
         const token = await getToken(messaging, {
           vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
           serviceWorkerRegistration: registration,
