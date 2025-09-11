@@ -138,20 +138,6 @@ export default function AboutUs() {
             looking to expand your reach or a consumer abroad “eximso” bridges that gap with 
             trust, speed, and simplicity.
             </p>
-            <div className="mt-8 flex gap-4">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-indigo-600">190+</div>
-                <div className="text-gray-600">Countries</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-indigo-600">50M+</div>
-                <div className="text-gray-600">Customers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-indigo-600">$10B+</div>
-                <div className="text-gray-600">GMV</div>
-              </div>
-            </div>
           </div>
           <div className="relative">
             <div className="relative z-10">

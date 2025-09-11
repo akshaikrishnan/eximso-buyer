@@ -109,8 +109,7 @@ export default function Footer() {
                 <ul role="list" className="mt-6 flex flex-col space-y-4">
                   {footerNavigation.social.map((item) => (
                     <li key={item.name}>
-                      <li key={item.name}></li>
-                      <a
+                    <a
                         href={item.href}
                         target="_blank"
                         rel="noopener noreferrer"
