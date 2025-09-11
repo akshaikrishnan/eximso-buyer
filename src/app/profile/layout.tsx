@@ -4,9 +4,7 @@ import React from "react";
 export default function layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <div className="hidden sm:block">
-        <ProfileNavbar />
-      </div>
+      <ProfileNavbar />
       <div className="xl:px-8 px-4">{children}</div>
     </>
   );
