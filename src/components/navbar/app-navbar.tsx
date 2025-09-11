@@ -117,10 +117,10 @@ const Navbar = (props: any) => {
             </button>
             <Link
               href={"/"}
-              className="Eximso-logo cursor-pointer mt-1 w-10 h-10 md:w-15 md:h-15"
+              className="Eximso-logo cursor-pointer mt-1 w-10 md:w-15"
             >
               <img
-                className="h-full w-full object-contain"
+                className="h-full"
                 src={"/images/common/logo.png"}
                 alt="Eximso.com"
               />
