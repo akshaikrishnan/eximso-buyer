@@ -24,6 +24,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Searchbar from "./searchbar";
 import { toast } from "@/hooks/use-toast";
+import ProfileNavbar from "../profile/profile-navbar";
 
 const Navbar = (props: any) => {
   const { data: categories, isLoading } = useQuery({
@@ -127,35 +128,42 @@ const Navbar = (props: any) => {
             </Link>
           </li>
           <li className="flex-1 md:hidden"></li>
-          <li className="md:order-5">
-            <Link
-              href={getProfileUrl()}
-              className="user cursor-pointer flex items-center text-xs gap-1 "
-            >
-              {!user && (
-                <span className="flex items-center">
-                  Sign in <ChevronRightIcon className="w-5 h-5" />
-                </span>
-              )}
-              <span>
-                {user && user?.logo ? (
-                  <Avatar>
-                    <AvatarImage src={user?.logo} alt={user?.name} />
-                    <AvatarFallback>
-                      {user?.name
-                        ? user?.name.split(" ").length > 1
-                          ? user?.name.split(" ")[0].charAt(0) +
-                            user?.name.split(" ")[1].charAt(0)
-                          : user?.name.charAt(0) // If there is only one word, take the first letter
-                        : ""}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <UserCircleIcon className="w-7 h-7" />
-                )}
-              </span>
-            </Link>
-          </li>
+          {/* Desktop only (>= sm) */}
+<li className="md:order-5 hidden sm:block">
+  <Link
+    href={getProfileUrl()}
+    className="user cursor-pointer flex items-center text-xs gap-1"
+  >
+    {!user && (
+      <span className="flex items-center">
+        Sign in <ChevronRightIcon className="w-5 h-5" />
+      </span>
+    )}
+    <span>
+      {user && user?.logo ? (
+        <Avatar>
+          <AvatarImage src={user?.logo} alt={user?.name} />
+          <AvatarFallback>
+            {user?.name
+              ? user?.name.split(" ").length > 1
+                ? user?.name.split(" ")[0].charAt(0) +
+                  user?.name.split(" ")[1].charAt(0)
+                : user?.name.charAt(0)
+              : ""}
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <UserCircleIcon className="w-7 h-7" />
+      )}
+    </span>
+  </Link>
+</li>
+
+{/* Mobile only (< sm) */}
+<li className="md:order-5 sm:hidden">
+  <ProfileNavbar />
+</li>
+
           <li className="cart cursor-pointer text-xl md:order-7 hidden md:block">
             <Link href={"/cart"} className="relative">
               <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
