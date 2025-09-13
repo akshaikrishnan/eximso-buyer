@@ -20,7 +20,7 @@ permissions:
 jobs:
   maybe_promote:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release'))
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release')) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,10 +33,25 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.pr_number }}" ]; then
-            PR="${{ inputs.pr_number }}"
-          else
+          PR_INPUT="${{ inputs.pr_number || '' }}"
+          if [ -n "$PR_INPUT" ]; then
+            PR="$PR_INPUT"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             PR="${{ github.event.pull_request.number }}"
+          else
+            echo "No pr_number input and not a PR event; discovering latest open release PR to master..."
+            PR=$(gh pr list --state open --base master --json number,headRefName,title,labels,updatedAt |               jq -r '[ .[]
+                | select(
+                    ( (.labels|map(.name)|index("release")) != null )
+                    or (.headRefName|startswith("release/"))
+                    or (.title|test("(?i)\brelease\b"))
+                  )
+              ] | sort_by(.updatedAt) | reverse | (.[0].number // empty)')
+          fi
+
+          if [ -z "${PR:-}" ]; then
+            echo "No open release PR targeting master found. Provide 'pr_number' when dispatching." >&2
+            exit 1
           fi
           echo "pr=$PR" >> "$GITHUB_OUTPUT"
           echo "PR=$PR"
@@ -60,6 +75,7 @@ jobs:
           q='query($n:Int!){ repository(owner:"${{ github.repository_owner }}", name:"${{ github.event.repository.name }}"){ pullRequest(number:$n){ mergeable state } } }'
           jq -n --argjson n "${{ steps.resolve.outputs.pr }}" '{query:"'${q}'",variables:{n:$n}}' > gql.json
           curl -s -H "Authorization: bearer $GH_TOKEN" -H "Content-Type: application/json" -d @gql.json https://api.github.com/graphql > gql.out.json
+          cat gql.out.json
           MERGEABLE=$(jq -r '.data.repository.pullRequest.mergeable' gql.out.json)
           PRSTATE=$(jq -r '.data.repository.pullRequest.state' gql.out.json)
           echo "mergeable=$MERGEABLE" >> "$GITHUB_OUTPUT"
@@ -82,7 +98,7 @@ jobs:
           git checkout master
           git pull --ff-only origin master
           PKG_FILE="package.json"
-          if [ -n "${{ inputs.tag }}" ]; then
+          if [ -n "${{ inputs.tag || '' }}" ]; then
             TAG="${{ inputs.tag }}"
           else
             if [ -f "$PKG_FILE" ]; then
@@ -112,7 +128,11 @@ jobs:
           set -euo pipefail
           TAG="${{ steps.tagv.outputs.tag }}"
           PREV=$(git describe --tags --abbrev=0 --match "v*" "$(git rev-list --tags --max-count=1 --skip=1)" 2>/dev/null || true)
-          RANGE="${PREV}..${TAG}"
+          if [ -n "$PREV" ]; then
+            RANGE="${PREV}..${TAG}"
+          else
+            RANGE="${TAG}"
+          fi
           echo "prev_tag=$PREV" >> "$GITHUB_OUTPUT"
           echo "range=$RANGE" >> "$GITHUB_OUTPUT"
 
