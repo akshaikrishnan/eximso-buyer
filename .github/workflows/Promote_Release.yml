@@ -1,12 +1,26 @@
 name: Auto Merge and Tag
 
-# Runs every Sunday at 00:00 IST (which is 18:30 UTC on Saturday)
 on:
   schedule:
-    - cron: "30 18 * * 6" # 18:30 UTC Saturday == 00:00 IST Sunday
+    # PROD: every Sunday 00:00 IST == Saturday 18:30 UTC
+    - cron: "30 18 * * 6"
+    # (For testing you can temporarily use */15 * * * * on default branch)
+  workflow_dispatch:
+    inputs:
+      skip_merge:
+        description: "Skip merging PR (tag/release only)"
+        required: false
+        default: false
+        type: boolean
+      pr_number:
+        description: "Merge this specific PR number (optional)"
+        required: false
+        type: string
 
 jobs:
   merge-pr:
+    # Do not run this job when manually triggered with skip_merge = true
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_merge == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,38 +35,48 @@ jobs:
         with:
           ref: master
 
-      - name: Find most recent open release PR to master
+      - name: Find most recent open release PR to master (or use input)
         id: find_pr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_PR_NUMBER: ${{ inputs.pr_number }}
         run: |
           set -euo pipefail
-
           REPO="${{ github.repository }}"
 
-          # Get open PRs targeting master, newest first
-          PRS_JSON=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${REPO}/pulls?state=open&base=master&per_page=100&sort=updated&direction=desc")
+          # If pr_number was provided via manual trigger, use it directly
+          if [ -n "${INPUT_PR_NUMBER:-}" ]; then
+            echo "Manual input provided: PR #${INPUT_PR_NUMBER}"
+            PR_NUMBER="$INPUT_PR_NUMBER"
+            # Optionally validate it exists and targets master
+            PR_DETAIL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}")
+            STATE=$(echo "$PR_DETAIL" | jq -r '.state // empty')
+            BASE=$(echo "$PR_DETAIL"  | jq -r '.base.ref // empty')
+            HEAD=$(echo "$PR_DETAIL"  | jq -r '.head.ref // empty')
+            if [ "$STATE" != "open" ] || [ "$BASE" != "master" ]; then
+              echo "::error::PR #$PR_NUMBER is not open against master (state=$STATE, base=$BASE)."
+              exit 1
+            fi
+          else
+            # Auto-discover newest open release PR to master
+            PRS_JSON=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${REPO}/pulls?state=open&base=master&per_page=100&sort=updated&direction=desc")
 
-          # Pick the most recent PR whose head ref starts with 'release/v'
-          PR_NUMBER=$(echo "$PRS_JSON" | jq -r '
-            map(select(.head.ref | startswith("release/v"))) | first | .number // empty
-          ')
-
-          if [ -z "${PR_NUMBER:-}" ]; then
-            echo "::notice::No open release PR (from release/v*) into master found. Exiting."
-            echo "pr_number=" >> "$GITHUB_OUTPUT"
-            exit 0
+            PR_NUMBER=$(echo "$PRS_JSON" | jq -r '
+              map(select(.head.ref | startswith("release/v"))) | first | .number // empty
+            ')
+            if [ -z "${PR_NUMBER:-}" ]; then
+              echo "::notice::No open release PR (release/v*) into master found. Exiting."
+              echo "pr_number=" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Auto-selected release PR #$PR_NUMBER"
+            PR_DETAIL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}")
           fi
 
-          echo "Found candidate release PR #$PR_NUMBER"
-          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
-
-          # Fetch single PR to get reliable 'mergeable' + 'mergeable_state'
-          PR_DETAIL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}")
-
-          # NOTE: 'mergeable' can be null immediately; poll a couple of times if needed
+          # Poll until mergeable is computed
           ATTEMPTS=5
           SLEEP_SECS=2
           MERGEABLE=$(echo "$PR_DETAIL" | jq -r '.mergeable')
@@ -68,6 +92,8 @@ jobs:
             i=$((i+1))
           done
 
+          echo "Found PR #$PR_NUMBER  mergeable=$MERGEABLE  state=$MERGEABLE_STATE"
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           echo "mergeable=$MERGEABLE" >> "$GITHUB_OUTPUT"
           echo "mergeable_state=$MERGEABLE_STATE" >> "$GITHUB_OUTPUT"
 
@@ -78,33 +104,26 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-
           PR_NUMBER='${{ steps.find_pr.outputs.pr_number }}'
           MERGEABLE='${{ steps.find_pr.outputs.mergeable }}'
           MERGEABLE_STATE='${{ steps.find_pr.outputs.mergeable_state }}'
-
           echo "::notice::PR #$PR_NUMBER mergeable=$MERGEABLE, mergeable_state=$MERGEABLE_STATE"
 
-          # Treat only 'true' + 'clean' as green for auto-merge
+          # Only proceed when mergeable=true and state=clean
           if [ "$MERGEABLE" != "true" ] || [ "$MERGEABLE_STATE" != "clean" ]; then
-            echo "::notice::Release PR #$PR_NUMBER cannot be merged automatically (mergeable=$MERGEABLE, state=$MERGEABLE_STATE)."
-
+            echo "::notice::Release PR #$PR_NUMBER cannot be merged automatically."
             curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
               -H "Content-Type: application/json" \
               -d '{"body":"⚠️ **AUTOMATIC MERGE FAILED:** This pull request could not be merged automatically due to conflicts, required checks, or protections. Please resolve them manually."}' \
               "https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" >/dev/null
-
             exit 1
           fi
-
-          echo "::notice::Release PR #$PR_NUMBER is mergeable (clean). Proceeding."
 
       - name: Merge the Pull Request (squash + delete branch)
         id: merge_pr
         if: ${{ success() && steps.find_pr.outputs.pr_number != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # gh reads GH_TOKEN
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           gh pr merge '${{ steps.find_pr.outputs.pr_number }}' --squash --delete-branch --repo '${{ github.repository }}'
@@ -113,7 +132,8 @@ jobs:
   release-tag:
     runs-on: ubuntu-latest
     needs: merge-pr
-    if: ${{ always() && (needs.merge-pr.outputs.pr-merged == 'true' || inputs.skip_merge == true) }}
+    # Run if merge happened OR manual tag-only requested
+    if: ${{ always() && (needs.merge-pr.outputs.pr-merged == 'true' || (github.event_name == 'workflow_dispatch' && inputs.skip_merge == 'true')) }}
     permissions:
       contents: write
 
@@ -123,78 +143,64 @@ jobs:
         with:
           ref: master
 
-      - name: Tag the master branch
-        id: tag_master
+      # GROUPED "sub-steps": tag + release
+      - name: Tag master and create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for gh CLI
+        shell: bash
         run: |
           set -euo pipefail
 
+          echo "::group::Ensure latest master"
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Ensure latest master
           git fetch origin master --tags
           git checkout master
           git pull --ff-only origin master
-          git fetch --tags
+          echo "::endgroup::"
 
-          # Read version from package.json
+          echo "::group::Compute version and tag"
           VERSION=$(jq -r '.version' package.json)
           if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
             echo "Could not read version from package.json" >&2
             exit 1
           fi
           TAG="v${VERSION}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag: $TAG"
+          echo "::endgroup::"
 
-          # Create tag only if it doesn't exist
+          echo "::group::Create tag (if missing) and push"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "::notice::Tag $TAG already exists. Skipping tag creation."
-            exit 0
+            echo "Tag $TAG already exists, skipping tag creation."
+          else
+            git tag -a "$TAG" -m "Release $TAG"
+            git push origin "$TAG"
           fi
+          echo "::endgroup::"
 
-          git tag -a "$TAG" -m "Release $TAG"
-          git push origin "$TAG"
-
-      - name: Create GitHub Release with notes
-        if: ${{ success() && steps.tag_master.outputs.tag != '' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # gh reads GH_TOKEN
-        run: |
-          set -euo pipefail
-
-          TAG='${{ steps.tag_master.outputs.tag }}'
-
-          # Make sure tags are present for changelog calc
-          git fetch --tags
-
-          # Find previous tag (second newest by creation date). If none, generate notes from all history.
+          echo "::group::Create or update GitHub Release"
+          # Find previous tag (second newest by date). If none, include all commits.
           PREV_TAG=$(git tag --sort=-creatordate | sed -n '2p' || true)
-
           if [ -n "$PREV_TAG" ]; then
             RANGE="${PREV_TAG}..${TAG}"
           else
-            # No previous tag: use all commits reachable from the tag
             RANGE="${TAG}"
           fi
 
-          # Build release notes as a bulleted list of commit subjects (oldest first)
           NOTES=$(git log --pretty=format:'- %s' --reverse $RANGE || true)
 
-          # If NOTES is empty (e.g., squash merge with same subject), fall back to GitHub autogenerated notes
           if [ -z "$NOTES" ]; then
-            echo "::notice::No commits found for range $RANGE. Using auto-generated notes."
-            # Try to create with auto notes; if exists, edit it
+            echo "No commit notes found, using auto-generated notes."
             if gh release view "$TAG" >/dev/null 2>&1; then
-              gh release edit "$TAG" --generate-notes
+              gh release edit "$TAG" --title "$TAG" --generate-notes
             else
               gh release create "$TAG" --title "$TAG" --generate-notes
             fi
-            exit 0
-          fi
-
-          # Create (or update) the release with our notes
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --title "$TAG" --notes "$NOTES"
           else
-            gh release create "$TAG" --title "$TAG" --notes "$NOTES"
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              gh release edit "$TAG" --title "$TAG" --notes "$NOTES"
+            else
+              gh release create "$TAG" --title "$TAG" --notes "$NOTES"
+            fi
           fi
+          echo "::endgroup::"
