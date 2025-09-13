@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       path: "/",
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 20), // 20 days
       secure: process.env.NODE_ENV === "production",
-      httpOnly: true, // recommended for auth tokens
+      httpOnly: false, // recommended for auth tokens
       sameSite: "lax",
     });
 

@@ -62,28 +62,34 @@ export default function ProfileNavbar() {
 
   return (
     <div>
-      <div className="sm:hidden">
-        <label htmlFor="tabs" className="sr-only">
-          Select a tab
-        </label>
-        {/* Use an "onChange" listener to redirect the user to the selected tab URL. */}
-        <select
-          id="tabs"
-          name="tabs"
-          className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-lg py-0.5"
-          defaultValue={tabs.find((tab) => tab.current)?.name || ""}
-          onChange={(e) => {
-            const selectedValue = e.target.value;
-            if (selectedValue === "Logout") {
-              logout();
-            }
-          }}
+      <div className="sm:hidden flex overflow-x-auto border-b border-gray-200">
+        {tabs.map((tab) => (
+          <Link
+            key={tab.name}
+            href={tab.href}
+            className={classNames(
+              isActive(tab.href)
+                ? "border-indigo-500 text-indigo-600"
+                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+              "flex items-center border-b-2 py-4 px-6 text-sm font-medium flex-wrap"
+            )}
+            aria-current={tab.current ? "page" : undefined}
+          >
+            <span>{tab.name?.split(" ")[1]}</span>
+          </Link>
+        ))}
+        <Link
+          key={"logout"}
+          href={"#"}
+          onClick={logout}
+          className={classNames(
+            "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
+            "flex items-center border-b-2 py-4 px-6 text-sm font-medium flex-wrap"
+          )}
+          aria-current={false}
         >
-          {tabs.map((tab) => (
-            <option key={tab.name} value={tab.name} className="text-xs py-0.5">{tab.name}</option>
-          ))}
-          <option key="logout" value="Logout" className="text-xs py-0.5">Logout</option>
-        </select>
+          <span>Logout</span>
+        </Link>
       </div>
       <div className="hidden sm:block">
         <div className="border-b border-gray-200">

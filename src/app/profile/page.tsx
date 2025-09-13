@@ -91,13 +91,17 @@ export default function UserProfile() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, logo: reader.result as string });
-      };
-      if (file) {
-        reader.readAsDataURL(file);
-      }
+      const formDataObj = new FormData();
+      formDataObj.append("file", file);
+      api.post(endpoints.upload, formDataObj).then((res) => {
+        const imageUrl = res.data.fileUrl; // Assuming the response contains the URL
+        setFormData((prev) => ({ ...prev, logo: imageUrl }));
+        toast({
+          title: "Photo Updated!",
+          description:
+            "Your profile image has been uploaded, Please save the profile to apply changes.",
+        });
+      });
     }
   };
 
@@ -168,13 +172,13 @@ export default function UserProfile() {
                     <label className="block text-sm font-medium leading-6 text-gray-900">
                       Photo
                     </label>
-                    {/* <button
+                    <button
                       type="button"
                       onClick={handleLogoChangeButtonClick} // Trigger file input click
                       className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     >
                       Change
-                    </button> */}
+                    </button>
                     <input
                       type="file"
                       accept="image/*"

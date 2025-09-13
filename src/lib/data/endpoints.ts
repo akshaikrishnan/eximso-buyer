@@ -14,4 +14,5 @@ export const endpoints = {
   pushSubscribe: "push/subscribe",
   filters: "products/filters",
   categoryPage: "category/page",
+  upload: "media/s3-upload",
 };
