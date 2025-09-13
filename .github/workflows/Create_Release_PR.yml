@@ -4,7 +4,7 @@ name: Create Release Branch and PR
 # and can also be run manually with an optional version input.
 on:
   schedule:
-    - cron: "32 3 * * 6" # 06:30 UTC on Saturday (12:00 PM IST)
+    - cron: "5 4 * * 6" # 06:30 UTC on Saturday (12:00 PM IST)
   workflow_dispatch:
     inputs:
       version:
