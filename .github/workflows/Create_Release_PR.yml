@@ -59,7 +59,7 @@ jobs:
           set -euo pipefail
 
           # Use INPUT for convenience (empty when scheduled)
-          INPUT="${{ github.event.inputs.version || '' }}"
+          INPUT="${{ github.event.inputs.version || 'patch' }}"
 
           if [ "${{ github.event_name }}" = "schedule" ]; then
           # Scheduled run => bump patch
@@ -84,6 +84,19 @@ jobs:
           echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
           echo "Resolved new version: $NEW_VERSION"
+
+      - name: Check diff against master
+        id: check_diff
+        run: |
+          set -euo pipefail
+          git fetch origin master
+          if git diff --quiet origin/master...HEAD -- package.json; then
+            echo "No changes in package.json compared to master. Exiting."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changes detected in package.json compared to master."
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Generate release notes
         id: release_notes
