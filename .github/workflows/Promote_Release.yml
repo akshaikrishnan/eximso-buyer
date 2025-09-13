@@ -281,88 +281,75 @@ jobs:
             echo "::notice::Created release: $RELEASE_URL"
           fi
 
-      - name: Sync master back to develop
-        id: backsync
+      - name: Bump version in develop branch
+        id: version_bump
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
-          # Ensure we have latest develop
-          git fetch origin develop:develop --update-head-ok || {
-            echo "::error::Failed to fetch develop branch"
-            exit 1
-          }
+          # Get the current version from master (after merge)
+          git checkout master
+          git pull --ff-only origin master
 
-          # Create sync branch
-          SYNC_BRANCH="sync/master-to-develop-$(date +%Y%m%d-%H%M%S)"
-          git checkout -B "$SYNC_BRANCH" origin/develop
+          if [ ! -f "package.json" ]; then
+            echo "::warning::No package.json found, skipping version sync"
+            echo "status=no_package_json" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
-          echo "::notice::Created sync branch: $SYNC_BRANCH"
+          MASTER_VERSION=$(jq -r '.version' package.json)
+          echo "::notice::Master version: $MASTER_VERSION"
 
-          # Check if there are differences between master and develop
-          git fetch origin master:master --update-head-ok
+          # Switch to develop and check current version
+          git fetch origin develop:develop --update-head-ok
+          git checkout develop
+          git pull --ff-only origin develop
 
-          if git diff --quiet master..develop && git diff --quiet develop..master; then
-            echo "::notice::develop and master are already in sync"
+          if [ ! -f "package.json" ]; then
+            echo "::warning::No package.json in develop branch"
+            echo "status=no_package_json_develop" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          DEVELOP_VERSION=$(jq -r '.version' package.json)
+          echo "::notice::Develop version: $DEVELOP_VERSION"
+
+          # Check if versions are already in sync
+          if [ "$MASTER_VERSION" = "$DEVELOP_VERSION" ]; then
+            echo "::notice::Versions already in sync ($MASTER_VERSION)"
             echo "status=in_sync" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Attempt to merge master into the sync branch
-          if git merge --no-edit master; then
-            echo "::notice::Successfully merged master into sync branch"
-            
-            # Push the sync branch
-            git push -u origin "$SYNC_BRANCH"
-            
-            # Check if sync PR already exists
-            EXISTING_PR=$(gh pr list --search "in:title sync master to develop" \
-              --state open --base develop --json number --jq '.[0].number // empty')
-            
-            if [ -n "$EXISTING_PR" ]; then
-              echo "::notice::Sync PR already exists: #$EXISTING_PR"
-              echo "status=existing" >> "$GITHUB_OUTPUT"
-              echo "pr_number=$EXISTING_PR" >> "$GITHUB_OUTPUT"
-            else
-              # Create sync PR
-              PR_BODY="## Sync master → develop
+          echo "::notice::Updating develop version from $DEVELOP_VERSION to $MASTER_VERSION"
 
-                This PR syncs the latest changes from \`master\` back to \`develop\` to keep branches aligned.
+          # Update package.json version
+          jq ".version = \"$MASTER_VERSION\"" package.json > package.json.tmp && mv package.json.tmp package.json
 
-                ### Changes included:
-                - Release ${{ steps.tagv.outputs.tag }}
-                - Version bump and related changes
-                - Any hotfixes that were merged directly to master
-
-                ### Review notes:
-                - This is an automated sync PR
-                - Please review for any conflicts or issues
-                - Once merged, develop will be up to date with master"
-
-              PR_URL=$(gh pr create \
-                --base develop \
-                --head "$SYNC_BRANCH" \
-                --title "chore(sync): sync master → develop after release ${{ steps.tagv.outputs.tag }}" \
-                --body "$PR_BODY")
-              
-              echo "status=created" >> "$GITHUB_OUTPUT"
-              echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
-              echo "::notice::Created sync PR: $PR_URL"
-            fi
-          else
-            echo "::error::Failed to merge master into sync branch - manual intervention required"
-            echo "::error::Please resolve conflicts manually and sync develop with master"
-            
-            # Still push the branch so conflicts can be resolved manually
-            git add -A
-            git commit -m "WIP: sync master to develop (conflicts)" || true
-            git push -u origin "$SYNC_BRANCH" || true
-            
-            echo "status=conflicts" >> "$GITHUB_OUTPUT"
-            echo "branch=$SYNC_BRANCH" >> "$GITHUB_OUTPUT"
-            exit 1
+          # Update package-lock.json version if it exists
+          if [ -f "package-lock.json" ]; then
+            jq ".version = \"$MASTER_VERSION\"" package-lock.json > package-lock.json.tmp && mv package-lock.json.tmp package-lock.json
           fi
+
+          # Check if there are any changes to commit
+          if git diff --quiet; then
+            echo "::notice::No changes needed"
+            echo "status=no_changes" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Commit and push the version bump
+          git add package.json
+          [ -f "package-lock.json" ] && git add package-lock.json
+
+          git commit -m "chore: bump version to $MASTER_VERSION after release"
+          git push origin develop
+
+          echo "status=updated" >> "$GITHUB_OUTPUT"
+          echo "old_version=$DEVELOP_VERSION" >> "$GITHUB_OUTPUT"
+          echo "new_version=$MASTER_VERSION" >> "$GITHUB_OUTPUT"
+          echo "::notice::Successfully updated develop branch version to $MASTER_VERSION"
 
       - name: Summary
         if: always()
@@ -372,15 +359,15 @@ jobs:
           echo "✅ Tag: ${{ steps.tagv.outputs.tag }}"
           echo "✅ Previous Tag: ${{ steps.notes.outputs.prev_tag }}"
           echo "✅ Release Created: ${{ steps.create_release.outputs.created || 'false' }}"
-          echo "✅ Sync Status: ${{ steps.backsync.outputs.status || 'failed' }}"
+          echo "✅ Version Sync: ${{ steps.version_bump.outputs.status || 'failed' }}"
 
           if [ "${{ steps.create_release.outputs.created }}" = "true" ]; then
             echo "🎉 Release URL: ${{ steps.create_release.outputs.url }}"
           fi
 
-          if [ "${{ steps.backsync.outputs.status }}" = "created" ]; then
-            echo "🔄 Sync PR: ${{ steps.backsync.outputs.pr_url }}"
-          elif [ "${{ steps.backsync.outputs.status }}" = "conflicts" ]; then
-            echo "⚠️  Manual sync required on branch: ${{ steps.backsync.outputs.branch }}"
+          if [ "${{ steps.version_bump.outputs.status }}" = "updated" ]; then
+            echo "🔄 Updated develop version: ${{ steps.version_bump.outputs.old_version }} → ${{ steps.version_bump.outputs.new_version }}"
+          elif [ "${{ steps.version_bump.outputs.status }}" = "in_sync" ]; then
+            echo "✅ Develop already in sync with master version"
           fi
           echo "::endgroup::"
