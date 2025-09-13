@@ -4,7 +4,7 @@ name: Create Release Branch and PR
 # and can also be run manually with an optional version input.
 on:
   schedule:
-    - cron: "5 4 * * 6" # 06:30 UTC on Saturday (12:00 PM IST)
+    - cron: "30 6 * * 6" # 06:30 UTC on Saturday (12:00 PM IST)
   workflow_dispatch:
     inputs:
       version:
@@ -52,31 +52,38 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Get current and new version
+      - name: Compute version
         id: versioning
         shell: bash
         run: |
-          # Get the current version from package.json
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "Current version: $CURRENT_VERSION"
+          set -euo pipefail
 
-          # Determine the new version based on the trigger
+          # Use INPUT for convenience (empty when scheduled)
+          INPUT="${{ github.event.inputs.version || '' }}"
+
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            # Scheduled run: bump patch
-            npm version patch --no-git-tag-version
-            NEW_VERSION=$(node -p "require('./package.json').version")
-            echo "New version (patch): $NEW_VERSION"
-          elif [ -n "${{ github.event.inputs.version }}" ]; then
-            # Manual run with provided version
-            NEW_VERSION='${{ github.event.inputs.version }}'
-            npm version --no-git-tag-version "$NEW_VERSION"
-            echo "New version (manual): $NEW_VERSION"
+          # Scheduled run => bump patch
+          npm version patch --no-git-tag-version
+          elif [ -n "$INPUT" ]; then
+          # Manual run: accept major|minor|patch OR explicit SemVer
+          if [[ "$INPUT" =~ ^(major|minor|patch)$ ]]; then
+              npm version "$INPUT" --no-git-tag-version
+          elif [[ "$INPUT" =~ ^[0-9]+(\.[0-9]+){2}(-[0-9A-Za-z.-]+)?$ ]]; then
+              npm version "$INPUT" --no-git-tag-version
           else
-            echo "No version specified for manual trigger." >&2
-            exit 1
+              echo "Invalid version input: '$INPUT'. Use major|minor|patch or SemVer x.y.z[-prerelease]." >&2
+              exit 1
+          fi
+          else
+          echo "No version specified for manual trigger." >&2
+          exit 1
           fi
 
+          # ✅ Always read the actual new version from package.json
+          NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+          echo "Resolved new version: $NEW_VERSION"
 
       - name: Generate release notes
         id: release_notes
