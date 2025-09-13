@@ -70,13 +70,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "::group::Collect versions"
           PKG_FILE="package.json"
-          if [ ! -f "$PKG_FILE" ]; then
-            echo "package.json not found. If you use a different file, adjust the workflow."
-            exit 1
-          fi
-
           get_ver () { branch="$1"; git show "$branch:$PKG_FILE" | jq -r '.version'; }
 
           DEV_VER=$(get_ver "${{ env.BASE_BRANCH }}")
@@ -84,32 +78,19 @@ jobs:
 
           echo "develop version: $DEV_VER"
           echo "master  version: $MAS_VER"
+
+          # Pick max version
+          cmp() { npx semver -r ">$2" "$1" >/dev/null 2>&1; }
+          if cmp "$DEV_VER" "$MAS_VER"; then BASE="$DEV_VER"; else BASE="$MAS_VER"; fi
+
+          BUMP_KIND="${{ inputs.bump || 'patch' }}"
+          NEXT=$(npx semver "$BASE" -i "$BUMP_KIND")
+
+          echo "base_version=$BASE"       >> "$GITHUB_OUTPUT"
+          echo "new_version=$NEXT"        >> "$GITHUB_OUTPUT"
           echo "develop_version=$DEV_VER" >> "$GITHUB_OUTPUT"
           echo "master_version=$MAS_VER"  >> "$GITHUB_OUTPUT"
-          echo "::endgroup::"
-
-          # simple semver compare using node
-          cmp() { node -e "const s=require('semver'); process.exit(s.gt(process.argv[2],process.argv[3])?0:1)" "$1" "$2"; }
-
-          if cmp "$DEV_VER" "$MAS_VER"; then BASE="$DEV_VER"; else BASE="$MAS_VER"; fi
-          echo "base_version=$BASE" >> "$GITHUB_OUTPUT"
-
-          INPUT_VERSION="${{ inputs.version || '' }}"
-          BUMP_KIND="${{ inputs.bump || 'patch' }}"
-          if [ -n "$INPUT_VERSION" ]; then
-            NEXT="$INPUT_VERSION"
-          else
-            NEXT=$(node -e "const s=require('semver'); console.log(s.inc(process.argv[1], process.argv[2]));" "$BASE" "$BUMP_KIND")
-          fi
-
-          # Verify NEXT > BASE
-          if node -e "const s=require('semver'); if(!s.gt(process.argv[2],process.argv[1])) process.exit(1)" "$BASE" "$NEXT"; then
-            echo "new_version=$NEXT" >> "$GITHUB_OUTPUT"
-            echo "New version: $NEXT"
-          else
-            echo "Computed version ($NEXT) is not greater than base ($BASE). Exiting."
-            exit 1
-          fi
+          echo "New version: $NEXT"
 
       - name: Check if there are diffs from develop -> master
         id: diff
