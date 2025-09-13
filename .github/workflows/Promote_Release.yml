@@ -3,7 +3,7 @@ name: Auto Merge and Tag
 # Runs every Sunday at 00:00 IST (which is 18:30 UTC on Saturday)
 on:
   schedule:
-    - cron: "*/5 * * * *" # 18:30 UTC Saturday == 00:00 IST Sunday
+    - cron: "*/15 * * * *" # 18:30 UTC Saturday == 00:00 IST Sunday
 
 jobs:
   merge-and-tag:
