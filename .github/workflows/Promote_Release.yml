@@ -26,6 +26,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Resolve PR number
         id: resolve
@@ -40,31 +46,39 @@ jobs:
             PR="${{ github.event.pull_request.number }}"
           else
             echo "No pr_number input and not a PR event; discovering latest open release PR to master..."
-            PR=$(gh pr list --state open --base master --json number,headRefName,title,labels,updatedAt |               jq -r '[ .[]
+            PR=$(gh pr list --state open --base master --json number,headRefName,title,labels,updatedAt | \
+              jq -r '[ .[]
                 | select(
                     ( (.labels|map(.name)|index("release")) != null )
                     or (.headRefName|startswith("release/"))
-                    or (.title|test("(?i)\brelease\b"))
+                    or (.title|test("(?i)\\brelease\\b"))
                   )
               ] | sort_by(.updatedAt) | reverse | (.[0].number // empty)')
           fi
 
           if [ -z "${PR:-}" ]; then
-            echo "No open release PR targeting master found. Provide 'pr_number' when dispatching." >&2
+            echo "::error::No open release PR targeting master found. Provide 'pr_number' when dispatching."
             exit 1
           fi
           echo "pr=$PR" >> "$GITHUB_OUTPUT"
-          echo "PR=$PR"
+          echo "::notice::Found PR #$PR for promotion"
 
-          gh pr view "$PR" --json number,state,baseRefName,headRefName,isCrossRepository > pr.json
+          # Validate PR details
+          gh pr view "$PR" --json number,state,baseRefName,headRefName,isCrossRepository,mergeable > pr.json
           BASE=$(jq -r '.baseRefName' pr.json)
           STATE=$(jq -r '.state' pr.json)
+          HEAD_REF=$(jq -r '.headRefName' pr.json)
+
           if [ "$BASE" != "master" ]; then
-            echo "PR base is '$BASE', expected 'master'"; exit 1
+            echo "::error::PR base is '$BASE', expected 'master'"
+            exit 1
           fi
           if [ "$STATE" != "OPEN" ]; then
-            echo "PR is not open: $STATE"; exit 1
+            echo "::error::PR is not open: $STATE"
+            exit 1
           fi
+
+          echo "head_ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
 
       - name: Check mergeability & conflicts
         id: mergeable
@@ -72,127 +86,301 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          q='query($n:Int!){ repository(owner:"${{ github.repository_owner }}", name:"${{ github.event.repository.name }}"){ pullRequest(number:$n){ mergeable state } } }'
-          jq -n --argjson n "${{ steps.resolve.outputs.pr }}" '{query:"'${q}'",variables:{n:$n}}' > gql.json
-          curl -s -H "Authorization: bearer $GH_TOKEN" -H "Content-Type: application/json" -d @gql.json https://api.github.com/graphql > gql.out.json
-          cat gql.out.json
-          MERGEABLE=$(jq -r '.data.repository.pullRequest.mergeable' gql.out.json)
-          PRSTATE=$(jq -r '.data.repository.pullRequest.state' gql.out.json)
+
+          # Wait a moment for GitHub to compute mergeability
+          sleep 5
+
+          # Check mergeability via GraphQL
+          query='query($owner: String!, $name: String!, $number: Int!) {
+            repository(owner: $owner, name: $name) {
+              pullRequest(number: $number) {
+                mergeable
+                mergeStateStatus
+                state
+              }
+            }
+          }'
+
+          response=$(gh api graphql -f query="$query" \
+            -f owner="${{ github.repository_owner }}" \
+            -f name="${{ github.event.repository.name }}" \
+            -F number=${{ steps.resolve.outputs.pr }})
+
+          echo "$response" | jq .
+
+          MERGEABLE=$(echo "$response" | jq -r '.data.repository.pullRequest.mergeable')
+          MERGE_STATE=$(echo "$response" | jq -r '.data.repository.pullRequest.mergeStateStatus')
+          PR_STATE=$(echo "$response" | jq -r '.data.repository.pullRequest.state')
+
           echo "mergeable=$MERGEABLE" >> "$GITHUB_OUTPUT"
-          echo "state=$PRSTATE" >> "$GITHUB_OUTPUT"
+          echo "merge_state=$MERGE_STATE" >> "$GITHUB_OUTPUT"
+          echo "pr_state=$PR_STATE" >> "$GITHUB_OUTPUT"
+
           if [ "$MERGEABLE" = "CONFLICTING" ]; then
-            echo "PR has conflicts. Resolve conflicts before promoting."; exit 1
+            echo "::error::PR has merge conflicts. Resolve conflicts before promoting."
+            exit 1
           fi
+
+          if [ "$MERGE_STATE" = "DIRTY" ]; then
+            echo "::error::PR cannot be merged due to failing status checks."
+            exit 1
+          fi
+
+      - name: Get pre-merge version info
+        id: pre_merge_version
+        run: |
+          set -euo pipefail
+
+          # Get current master version
+          git checkout master
+          git pull --ff-only origin master
+
+          MASTER_VERSION=""
+          if [ -f "package.json" ]; then
+            MASTER_VERSION=$(jq -r '.version' package.json)
+          fi
+
+          # Get release branch version
+          git checkout "${{ steps.resolve.outputs.head_ref }}"
+
+          RELEASE_VERSION=""
+          if [ -f "package.json" ]; then
+            RELEASE_VERSION=$(jq -r '.version' package.json)
+          fi
+
+          echo "master_version=$MASTER_VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+
+          echo "::notice::Master version: $MASTER_VERSION"
+          echo "::notice::Release branch version: $RELEASE_VERSION"
 
       - name: Merge PR (squash)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          gh pr merge "${{ steps.resolve.outputs.pr }}" --squash --delete-branch --admin --subject "chore(release): merge release PR"
+
+          # Switch back to master for merge
+          git checkout master
+
+          echo "::notice::Merging PR #${{ steps.resolve.outputs.pr }}"
+          gh pr merge "${{ steps.resolve.outputs.pr }}" \
+            --squash \
+            --delete-branch \
+            --admin \
+            --subject "chore(release): merge release PR #${{ steps.resolve.outputs.pr }}"
 
       - name: Determine tag version
         id: tagv
         run: |
           set -euo pipefail
+
+          # Ensure we're on latest master after merge
           git checkout master
           git pull --ff-only origin master
-          PKG_FILE="package.json"
+
           if [ -n "${{ inputs.tag || '' }}" ]; then
             TAG="${{ inputs.tag }}"
+            echo "::notice::Using provided tag: $TAG"
           else
-            if [ -f "$PKG_FILE" ]; then
-              TAG="v$(jq -r '.version' "$PKG_FILE")"
+            if [ -f "package.json" ]; then
+              VERSION=$(jq -r '.version' package.json)
+              TAG="v$VERSION"
+              echo "::notice::Using package.json version: $TAG"
             else
-              echo "package.json not found; please pass 'tag' input."
+              echo "::error::package.json not found and no tag provided"
               exit 1
             fi
           fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Using tag: $TAG"
 
-      - name: Create tag (idempotent) and push
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+          # Validate tag format
+          if ! echo "$TAG" | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+' > /dev/null; then
+            echo "::warning::Tag '$TAG' doesn't follow semantic versioning"
+          fi
+
+      - name: Create tag and push
+        id: create_tag
         run: |
           set -euo pipefail
           TAG="${{ steps.tagv.outputs.tag }}"
+
+          # Check if tag already exists
           if git ls-remote --tags origin | grep -q "refs/tags/$TAG$"; then
-            echo "Tag $TAG already exists on origin; skipping."
+            echo "::warning::Tag $TAG already exists on origin; skipping tag creation"
+            echo "created=false" >> "$GITHUB_OUTPUT"
           else
+            echo "::notice::Creating tag $TAG"
             git tag -a "$TAG" -m "Release $TAG"
             git push origin "$TAG"
+            echo "created=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Generate release notes from commits
+      - name: Generate release notes
         id: notes
         run: |
           set -euo pipefail
           TAG="${{ steps.tagv.outputs.tag }}"
-          PREV=$(git describe --tags --abbrev=0 --match "v*" "$(git rev-list --tags --max-count=1 --skip=1)" 2>/dev/null || true)
+
+          # Find previous tag
+          PREV=$(git describe --tags --abbrev=0 --match "v*" HEAD~1 2>/dev/null || true)
+
           if [ -n "$PREV" ]; then
-            RANGE="${PREV}..${TAG}"
+            RANGE="${PREV}..HEAD"
+            echo "::notice::Generating notes for range: $RANGE"
           else
-            RANGE="${TAG}"
+            RANGE="HEAD"
+            echo "::notice::No previous tag found, generating notes for all commits"
           fi
-          echo "prev_tag=$PREV" >> "$GITHUB_OUTPUT"
+
+          echo "prev_tag=${PREV:-none}" >> "$GITHUB_OUTPUT"
           echo "range=$RANGE" >> "$GITHUB_OUTPUT"
 
-          echo "## What's Changed" > RELEASE_NOTES.md
-          if [ -n "$PREV" ]; then
-            git log --pretty=format:"- %s (%h)" "$RANGE" >> RELEASE_NOTES.md || true
-          else
-            git log --pretty=format:"- %s (%h)" >> RELEASE_NOTES.md || true
-          fi
+          # Generate release notes
+          {
+            echo "## What's Changed"
+            echo ""
+            
+            if [ -n "$PREV" ]; then
+              # Get commits between tags, excluding merge commits
+              git log --pretty=format:"- %s (%h)" --no-merges "$RANGE" || echo "- Initial release"
+            else
+              # Get all commits if no previous tag
+              git log --pretty=format:"- %s (%h)" --no-merges || echo "- Initial release"
+            fi
+            
+            echo ""
+            echo ""
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV:-$(git rev-list --max-parents=0 HEAD)}...$TAG"
+          } > RELEASE_NOTES.md
 
-          echo "Generated release notes:"
+          echo "::group::Generated release notes"
           cat RELEASE_NOTES.md
+          echo "::endgroup::"
 
-      - name: Create GitHub Release (idempotent, with notes)
+      - name: Create GitHub Release
+        id: create_release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           TAG="${{ steps.tagv.outputs.tag }}"
+
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists; skipping."
+            echo "::warning::Release $TAG already exists; skipping release creation"
+            echo "created=false" >> "$GITHUB_OUTPUT"
           else
-            gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md
+            echo "::notice::Creating GitHub release for $TAG"
+            RELEASE_URL=$(gh release create "$TAG" \
+              --title "Release $TAG" \
+              --notes-file RELEASE_NOTES.md \
+              --verify-tag)
+            echo "created=true" >> "$GITHUB_OUTPUT"
+            echo "url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+            echo "::notice::Created release: $RELEASE_URL"
           fi
 
-      - name: Sync back master -> develop (open PR)
+      - name: Sync master back to develop
         id: backsync
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git fetch origin develop:develop --update-head-ok || true
-          git checkout -B sync/master-to-develop origin/develop
-          git pull --ff-only origin master || true
-          if git merge --no-edit master; then
-            echo "Merged master into develop"
-          else
-            echo "Merge failed"; exit 1
-          fi
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "No changes to push for backsync."
-            echo "opened=no" >> "$GITHUB_OUTPUT"
+
+          # Ensure we have latest develop
+          git fetch origin develop:develop --update-head-ok || {
+            echo "::error::Failed to fetch develop branch"
+            exit 1
+          }
+
+          # Create sync branch
+          SYNC_BRANCH="sync/master-to-develop-$(date +%Y%m%d-%H%M%S)"
+          git checkout -B "$SYNC_BRANCH" origin/develop
+
+          echo "::notice::Created sync branch: $SYNC_BRANCH"
+
+          # Check if there are differences between master and develop
+          git fetch origin master:master --update-head-ok
+
+          if git diff --quiet master..develop && git diff --quiet develop..master; then
+            echo "::notice::develop and master are already in sync"
+            echo "status=in_sync" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git push -u origin HEAD || true
-          if gh pr list --search "in:title sync master to develop" --state open --base develop --json number | jq -e 'length>0' >/dev/null; then
-            echo "Backsync PR already open."
-            echo "opened=existing" >> "$GITHUB_OUTPUT"
+
+          # Attempt to merge master into the sync branch
+          if git merge --no-edit master; then
+            echo "::notice::Successfully merged master into sync branch"
+            
+            # Push the sync branch
+            git push -u origin "$SYNC_BRANCH"
+            
+            # Check if sync PR already exists
+            EXISTING_PR=$(gh pr list --search "in:title sync master to develop" \
+              --state open --base develop --json number --jq '.[0].number // empty')
+            
+            if [ -n "$EXISTING_PR" ]; then
+              echo "::notice::Sync PR already exists: #$EXISTING_PR"
+              echo "status=existing" >> "$GITHUB_OUTPUT"
+              echo "pr_number=$EXISTING_PR" >> "$GITHUB_OUTPUT"
+            else
+              # Create sync PR
+              PR_BODY="## Sync master → develop
+
+                This PR syncs the latest changes from \`master\` back to \`develop\` to keep branches aligned.
+
+                ### Changes included:
+                - Release ${{ steps.tagv.outputs.tag }}
+                - Version bump and related changes
+                - Any hotfixes that were merged directly to master
+
+                ### Review notes:
+                - This is an automated sync PR
+                - Please review for any conflicts or issues
+                - Once merged, develop will be up to date with master"
+
+              PR_URL=$(gh pr create \
+                --base develop \
+                --head "$SYNC_BRANCH" \
+                --title "chore(sync): sync master → develop after release ${{ steps.tagv.outputs.tag }}" \
+                --body "$PR_BODY")
+              
+              echo "status=created" >> "$GITHUB_OUTPUT"
+              echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+              echo "::notice::Created sync PR: $PR_URL"
+            fi
           else
-            URL=$(gh pr create --base develop --head $(git rev-parse --abbrev-ref HEAD) --title "chore(sync): master -> develop" --body "Sync master back into develop to keep versions aligned.")
-            echo "opened=url" >> "$GITHUB_OUTPUT"
-            echo "url=$URL" >> "$GITHUB_OUTPUT"
-            echo "BACKSYNC_PR=$URL"
+            echo "::error::Failed to merge master into sync branch - manual intervention required"
+            echo "::error::Please resolve conflicts manually and sync develop with master"
+            
+            # Still push the branch so conflicts can be resolved manually
+            git add -A
+            git commit -m "WIP: sync master to develop (conflicts)" || true
+            git push -u origin "$SYNC_BRANCH" || true
+            
+            echo "status=conflicts" >> "$GITHUB_OUTPUT"
+            echo "branch=$SYNC_BRANCH" >> "$GITHUB_OUTPUT"
+            exit 1
           fi
 
-      - name: Echo summary
+      - name: Summary
+        if: always()
         run: |
-          echo "PR=${{ steps.resolve.outputs.pr }}"
-          echo "TAG=${{ steps.tagv.outputs.tag }}"
-          echo "PREV_TAG=${{ steps.notes.outputs.prev_tag }}"
-          echo "RANGE=${{ steps.notes.outputs.range }}"
-          echo "BACKSYNC_OPENED=${{ steps.backsync.outputs.opened || 'no' }}"
-          echo "BACKSYNC_URL=${{ steps.backsync.outputs.url || '' }}"
+          echo "::group::Workflow Summary"
+          echo "✅ PR: #${{ steps.resolve.outputs.pr }}"
+          echo "✅ Tag: ${{ steps.tagv.outputs.tag }}"
+          echo "✅ Previous Tag: ${{ steps.notes.outputs.prev_tag }}"
+          echo "✅ Release Created: ${{ steps.create_release.outputs.created || 'false' }}"
+          echo "✅ Sync Status: ${{ steps.backsync.outputs.status || 'failed' }}"
+
+          if [ "${{ steps.create_release.outputs.created }}" = "true" ]; then
+            echo "🎉 Release URL: ${{ steps.create_release.outputs.url }}"
+          fi
+
+          if [ "${{ steps.backsync.outputs.status }}" = "created" ]; then
+            echo "🔄 Sync PR: ${{ steps.backsync.outputs.pr_url }}"
+          elif [ "${{ steps.backsync.outputs.status }}" = "conflicts" ]; then
+            echo "⚠️  Manual sync required on branch: ${{ steps.backsync.outputs.branch }}"
+          fi
+          echo "::endgroup::"
