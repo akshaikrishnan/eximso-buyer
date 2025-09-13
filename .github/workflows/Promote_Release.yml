@@ -1,0 +1,138 @@
+name: Auto Merge and Tag
+
+# Runs every Sunday at 00:00 IST (which is 18:30 UTC on Saturday)
+on:
+  schedule:
+    - cron: "30 18 * * 3" # 18:30 UTC Saturday == 00:00 IST Sunday
+
+jobs:
+  merge-and-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout master branch
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Find most recent open release PR to master
+        id: find_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          REPO="${{ github.repository }}"
+
+          # Get open PRs targeting master, newest first
+          PRS_JSON=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${REPO}/pulls?state=open&base=master&per_page=100&sort=updated&direction=desc")
+
+          # Pick the most recent PR whose head ref starts with 'release/v'
+          PR_NUMBER=$(echo "$PRS_JSON" | jq -r '
+            map(select(.head.ref | startswith("release/v"))) | first | .number // empty
+          ')
+
+          if [ -z "${PR_NUMBER:-}" ]; then
+            echo "::notice::No open release PR (from release/v*) into master found. Exiting."
+            echo "pr_number=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Found candidate release PR #$PR_NUMBER"
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+
+          # Fetch single PR to get reliable 'mergeable' + 'mergeable_state'
+          PR_DETAIL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}")
+
+          # NOTE: 'mergeable' can be null immediately; poll a couple of times if needed
+          ATTEMPTS=5
+          SLEEP_SECS=2
+          MERGEABLE=$(echo "$PR_DETAIL" | jq -r '.mergeable')
+          MERGEABLE_STATE=$(echo "$PR_DETAIL" | jq -r '.mergeable_state // ""')
+
+          i=1
+          while { [ "$MERGEABLE" = "null" ] || [ -z "$MERGEABLE_STATE" ]; } && [ $i -lt $ATTEMPTS ]; do
+            sleep $SLEEP_SECS
+            PR_DETAIL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${REPO}/pulls/${PR_NUMBER}")
+            MERGEABLE=$(echo "$PR_DETAIL" | jq -r '.mergeable')
+            MERGEABLE_STATE=$(echo "$PR_DETAIL" | jq -r '.mergeable_state // ""')
+            i=$((i+1))
+          done
+
+          echo "mergeable=$MERGEABLE" >> "$GITHUB_OUTPUT"
+          echo "mergeable_state=$MERGEABLE_STATE" >> "$GITHUB_OUTPUT"
+
+      - name: Check for conflicts and mergeability
+        id: check_status
+        if: ${{ steps.find_pr.outputs.pr_number != '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          PR_NUMBER='${{ steps.find_pr.outputs.pr_number }}'
+          MERGEABLE='${{ steps.find_pr.outputs.mergeable }}'
+          MERGEABLE_STATE='${{ steps.find_pr.outputs.mergeable_state }}'
+
+          echo "::notice::PR #$PR_NUMBER mergeable=$MERGEABLE, mergeable_state=$MERGEABLE_STATE"
+
+          # Treat only 'true' + 'clean' as green for auto-merge
+          if [ "$MERGEABLE" != "true" ] || [ "$MERGEABLE_STATE" != "clean" ]; then
+            echo "::notice::Release PR #$PR_NUMBER cannot be merged automatically (mergeable=$MERGEABLE, state=$MERGEABLE_STATE)."
+
+            curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d '{"body":"⚠️ **AUTOMATIC MERGE FAILED:** This pull request could not be merged automatically due to conflicts, required checks, or protections. Please resolve them manually."}' \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" >/dev/null
+
+            exit 1
+          fi
+
+          echo "::notice::Release PR #$PR_NUMBER is mergeable (clean). Proceeding."
+
+      - name: Merge the Pull Request (squash + delete branch)
+        id: merge_pr
+        if: ${{ success() && steps.find_pr.outputs.pr_number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # gh reads GH_TOKEN
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh pr merge '${{ steps.find_pr.outputs.pr_number }}' --squash --delete-branch --repo '${{ github.repository }}'
+
+      - name: Tag the master branch
+        if: ${{ success() && steps.find_pr.outputs.pr_number != '' }}
+        run: |
+          set -euo pipefail
+
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Ensure we have the latest master after the merge
+          git fetch origin master
+          git checkout master
+          git pull --ff-only origin master
+
+          # Read version from package.json without needing Node
+          VERSION=$(jq -r '.version' package.json)
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "Could not read version from package.json" >&2
+            exit 1
+          fi
+
+          TAG="v${VERSION}"
+
+          # Create tag only if it doesn't already exist
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::notice::Tag $TAG already exists. Skipping tag creation."
+            exit 0
+          fi
+
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"

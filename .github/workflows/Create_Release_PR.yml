@@ -1,0 +1,130 @@
+name: Create Release Branch and PR
+
+# This workflow runs automatically every Saturday at 12:00 PM IST (06:30 UTC)
+# and can also be run manually with an optional version input.
+on:
+  schedule:
+    - cron: "30 6 * * 6" # 06:30 UTC on Saturday (12:00 PM IST)
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The semantic version to use (e.g., 1.2.3)"
+        required: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop branch
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+  create-pr:
+    needs: lint # Run only if 'lint' succeeds
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout develop branch (full history for tags)
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0 # crucial to fetch all history and tags
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get current and new version
+        id: versioning
+        shell: bash
+        run: |
+          # Get the current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          # Determine the new version based on the trigger
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # Scheduled run: bump patch
+            npm version patch --no-git-tag-version
+            NEW_VERSION=$(node -p "require('./package.json').version")
+            echo "New version (patch): $NEW_VERSION"
+          elif [ -n "${{ github.event.inputs.version }}" ]; then
+            # Manual run with provided version
+            NEW_VERSION='${{ github.event.inputs.version }}'
+            npm version --no-git-tag-version "$NEW_VERSION"
+            echo "New version (manual): $NEW_VERSION"
+          else
+            echo "No version specified for manual trigger." >&2
+            exit 1
+          fi
+
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        id: release_notes
+        shell: bash
+        run: |
+          # Find the last tag on the master branch
+          LAST_TAG=$(git describe --tags --abbrev=0 master 2>/dev/null || echo "")
+
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous tag found. Generating release notes from all commits on develop."
+            LOG_RANGE="HEAD"
+          else
+            echo "Found last tag: $LAST_TAG. Generating notes from new commits."
+            LOG_RANGE="$LAST_TAG..HEAD"
+          fi
+
+          # Bulleted list of commit messages (oldest first)
+          RELEASE_NOTES=$(git log --pretty=format:'- %s' --reverse $LOG_RANGE)
+
+          # Escape for GitHub Actions output
+          RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
+
+          echo "release_notes=$RELEASE_NOTES" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release Branch and Pull Request
+        id: release_pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(release): Prepare release v${{ steps.versioning.outputs.new_version }}"
+          title: "Release ${{ steps.versioning.outputs.new_version }}"
+          body: |
+            ## Release Notes
+            This PR prepares the release for version `${{ steps.versioning.outputs.new_version }}`.
+
+            ### Changes since last release:
+            ${{ steps.release_notes.outputs.release_notes }}
+
+            ---
+            _**NOTE:** If this PR has conflicts, the `auto-merge-and-tag` workflow will fail. Please resolve conflicts manually._
+          branch: "release/v${{ steps.versioning.outputs.new_version }}"
+          base: master
+          labels: "release, automated"
+
+      - name: Check if PR was created
+        if: ${{ steps.release_pr.outputs.pull-request-number != '' }}
+        run: |
+          echo "Pull Request created successfully!"
+          echo "PR URL: ${{ steps.release_pr.outputs.pull-request-url }}"
