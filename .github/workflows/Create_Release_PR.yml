@@ -52,68 +52,48 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Compute & commit version bump
-        id: versioning
+      - name: Compute version (no write)
+        id: compute_version
         shell: bash
-        env:
-          GIT_AUTHOR_NAME: github-actions[bot]
-          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-          GIT_COMMITTER_NAME: github-actions[bot]
-          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: |
           set -euo pipefail
 
-          # Ensure git is happy to write here (in case of protected dirs)
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          CURR=$(node -p "require('./package.json').version")
+          INPUT="${{ github.event.inputs.version || '' }}"
+          EVENT="${{ github.event_name }}"
 
-          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
-          echo "Working tree status before bump:"
-          git status --porcelain
+          bump_semver () {
+            # bump_semver <x.y.z> <kind>
+            node -e "const s=process.argv[1].split('.'); const k=process.argv[2];
+              let [a,b,c]=s.map(n=>parseInt(n,10));
+              if(k==='major'){a+=1;b=0;c=0}
+              else if(k==='minor'){b+=1;c=0}
+              else {c+=1}
+              process.stdout.write([a,b,c].join('.'));"
+          }
 
-          # Decide bump strategy
-          VERSION_INPUT="${{ github.event.inputs.version || '' }}" || true
-
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-          BUMP_KIND="patch"
-          npm version patch --no-git-tag-version
-          elif [ -n "${VERSION_INPUT:-}" ]; then
-          if [[ "$VERSION_INPUT" =~ ^(major|minor|patch)$ ]]; then
-              BUMP_KIND="$VERSION_INPUT"
-              npm version "$VERSION_INPUT" --no-git-tag-version
-          elif [[ "$VERSION_INPUT" =~ ^[0-9]+(\.[0-9]+){2}(-[0-9A-Za-z.-]+)?$ ]]; then
-              BUMP_KIND="set"
-              npm version --no-git-tag-version "$VERSION_INPUT"
+          if [ "$EVENT" = "schedule" ]; then
+            NEW=$(bump_semver "$CURR" "patch")
+          elif [ -n "$INPUT" ]; then
+            if [[ "$INPUT" =~ ^(major|minor|patch)$ ]]; then
+              NEW=$(bump_semver "$CURR" "$INPUT")
+            elif [[ "$INPUT" =~ ^[0-9]+(\.[0-9]+){2}(-[0-9A-Za-z.-]+)?$ ]]; then
+              NEW="$INPUT"
+            else
+              echo "Invalid version input: $INPUT" >&2; exit 1
+            fi
           else
-              echo "Invalid version input: '$VERSION_INPUT'. Use major|minor|patch or SemVer x.y.z[-pre]." >&2
-              exit 1
-          fi
-          else
-          # Manual run without a version input? Decide your default; here we fail to be explicit.
-          echo "No version specified for manual trigger." >&2
-          exit 1
+            echo "No version specified for manual trigger." >&2; exit 1
           fi
 
-          # Read the new version from package.json
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          if [ -z "$NEW_VERSION" ] || [ "$NEW_VERSION" = "null" ]; then
-          echo "Failed to read version from package.json after bump." >&2
-          exit 1
-          fi
-          echo "Resolved new version: $NEW_VERSION"
+          echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
+          echo "release_branch=release/v$NEW" >> "$GITHUB_OUTPUT"
 
-          # Stage and commit changes if any
-          git add package.json package-lock.json 2>/dev/null || true
-          if git diff --cached --quiet; then
-          echo "No changes to commit after version bump."
-          else
-          git commit -m "chore(release): bump version to v$NEW_VERSION"
-          fi
-
-          # Expose the new version to later steps
-          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-
-          echo "Working tree status after bump:"
-          git status --porcelain
+      - name: Seed empty commit (for PR creation)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "chore(release): open PR for v${{ steps.compute_version.outputs.new_version }}"
 
       - name: Check diff against master
         id: check_diff
@@ -179,3 +159,39 @@ jobs:
         run: |
           echo "Pull Request created successfully!"
           echo "PR URL: ${{ steps.release_pr.outputs.pull-request-url }}"
+      - name: Bump version on PR branch and push
+        if: ${{ steps.release_pr.outputs.pull-request-branch != '' }}
+        env:
+          PR_BRANCH: ${{ steps.release_pr.outputs.pull-request-branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "PR branch is: $PR_BRANCH"
+
+          # Checkout the PR branch
+          git fetch origin "$PR_BRANCH:$PR_BRANCH"
+          git checkout "$PR_BRANCH"
+
+          # Perform the actual version write
+          NEW="${{ steps.compute_version.outputs.new_version }}"
+          echo "Bumping package.json to $NEW"
+          npm version "$NEW" --no-git-tag-version
+
+          # Commit and push the bump
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit after npm version (unexpected)."
+          else
+            git commit -m "chore(release): bump version to v$NEW"
+            git push origin "$PR_BRANCH"
+          fi
+              # (Optional) Update PR title/body to ensure version is visible after bump
+      - name: Update PR title after bump (optional)
+        if: ${{ steps.release_pr.outputs.pull-request-number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr edit "${{ steps.release_pr.outputs.pull-request-number }}" \
+            --title "Release ${{ steps.compute_version.outputs.new_version }}"
