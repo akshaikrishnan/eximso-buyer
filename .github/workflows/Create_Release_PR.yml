@@ -63,44 +63,40 @@ jobs:
           EVENT="${{ github.event_name }}"
 
           bump_semver () {
-          # bump_semver <x.y.z[-prerelease]> <major|minor|patch>
-          local ver="$1" kind="$2"
-          # strip any pre-release/build
-          ver_base="${ver%%-*}"
-          IFS='.' read -r a b c <<< "$ver_base"
-          a=${a:-0}; b=${b:-0}; c=${c:-0}
-          case "$kind" in
+            local ver="$1" kind="$2"
+            ver_base="${ver%%-*}"
+            IFS='.' read -r a b c <<< "$ver_base"
+            a=${a:-0}; b=${b:-0}; c=${c:-0}
+            case "$kind" in
               major) a=$((a+1)); b=0; c=0 ;;
               minor) b=$((b+1)); c=0 ;;
               patch|*) c=$((c+1)) ;;
-          esac
-          printf "%d.%d.%d" "$a" "$b" "$c"
+            esac
+            printf "%d.%d.%d" "$a" "$b" "$c"
           }
 
           if [ "$EVENT" = "schedule" ]; then
-          NEW=$(bump_semver "$CURR" "patch")
+            NEW=$(bump_semver "$CURR" "patch")
           elif [ -n "$INPUT" ]; then
-          if [[ "$INPUT" =~ ^(major|minor|patch)$ ]]; then
+            if [[ "$INPUT" =~ ^(major|minor|patch)$ ]]; then
               NEW=$(bump_semver "$CURR" "$INPUT")
-          elif [[ "$INPUT" =~ ^[0-9]+(\.[0-9]+){2}(-[0-9A-Za-z.-]+)?$ ]]; then
+            elif [[ "$INPUT" =~ ^[0-9]+(\.[0-9]+){2}(-[0-9A-Za-z.-]+)?$ ]]; then
               NEW="$INPUT"
+            else
+              echo "Invalid version input: $INPUT" >&2; exit 1
+            fi
           else
-              echo "Invalid version input: $INPUT" >&2
-              exit 1
-          fi
-          else
-          echo "No version specified for manual trigger." >&2
-          exit 1
+            echo "No version specified for manual trigger." >&2; exit 1
           fi
 
           echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
-          echo "release_branch=release/v$NEW" >> "$GITHUB_OUTPUT"
 
-      - name: Seed empty commit (for PR creation)
+      - name: Prepare placeholder change for PR
+        shell: bash
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --allow-empty -m "chore(release): open PR for v${{ steps.compute_version.outputs.new_version }}"
+          set -euo pipefail
+          mkdir -p .github
+          echo "release init for v${{ steps.compute_version.outputs.new_version }}" > .github/release-init.txt
 
       - name: Check diff against master
         id: check_diff
@@ -142,24 +138,20 @@ jobs:
 
       - name: Create Release Branch and Pull Request
         id: release_pr
-        if: ${{ steps.check_diff.outputs.skip_pr != 'true' }}
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore(release): Prepare release v${{ steps.versioning.outputs.new_version }}"
-          title: "Release ${{ steps.versioning.outputs.new_version }}"
+          token: ${{ secrets.GITHUB_TOKEN }} # or PAT if policy requires
+          title: "Release ${{ steps.compute_version.outputs.new_version }}"
+          commit-message: "chore(release): init PR for v${{ steps.compute_version.outputs.new_version }}"
           body: |
-            ## Release Notes
-            This PR prepares the release for version `${{ steps.versioning.outputs.new_version }}`.
-
-            ### Changes since last release:
-            ${{ steps.release_notes.outputs.release_notes }}
-
-            ---
-            _**NOTE:** If this PR has conflicts, the `auto-merge-and-tag` workflow will fail. Please resolve conflicts manually._
-          branch: "release/v${{ steps.versioning.outputs.new_version }}"
+            ## Release ${{ steps.compute_version.outputs.new_version }}
+            This PR will bump version and include release notes.
+          branch: "release/v${{ steps.compute_version.outputs.new_version }}"
           base: master
           labels: "release, automated"
+          # optionally keep the placeholder out of future PRs
+          add-paths: |
+            .github/release-init.txt
 
       - name: Check if PR was created
         if: ${{ steps.release_pr.outputs.pull-request-number != '' }}
@@ -175,26 +167,26 @@ jobs:
           set -euo pipefail
           echo "PR branch is: $PR_BRANCH"
 
-          # Checkout the PR branch
+          # Check out the PR branch the action just created
           git fetch origin "$PR_BRANCH:$PR_BRANCH"
           git checkout "$PR_BRANCH"
 
-          # Perform the actual version write
+          # Remove placeholder, bump, commit
+          rm -f .github/release-init.txt || true
+
           NEW="${{ steps.compute_version.outputs.new_version }}"
-          echo "Bumping package.json to $NEW"
           npm version "$NEW" --no-git-tag-version
 
-          # Commit and push the bump
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json 2>/dev/null || true
+          git add package.json package-lock.json .github/release-init.txt 2>/dev/null || true
+
           if git diff --cached --quiet; then
-            echo "No changes to commit after npm version (unexpected)."
+            echo "No changes to commit (unexpected)."
           else
             git commit -m "chore(release): bump version to v$NEW"
             git push origin "$PR_BRANCH"
           fi
-              # (Optional) Update PR title/body to ensure version is visible after bump
       - name: Update PR title after bump (optional)
         if: ${{ steps.release_pr.outputs.pull-request-number != '' }}
         env:
