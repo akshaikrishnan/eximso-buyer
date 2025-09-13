@@ -63,27 +63,34 @@ jobs:
           EVENT="${{ github.event_name }}"
 
           bump_semver () {
-            # bump_semver <x.y.z> <kind>
-            node -e "const s=process.argv[1].split('.'); const k=process.argv[2];
-              let [a,b,c]=s.map(n=>parseInt(n,10));
-              if(k==='major'){a+=1;b=0;c=0}
-              else if(k==='minor'){b+=1;c=0}
-              else {c+=1}
-              process.stdout.write([a,b,c].join('.'));"
+          # bump_semver <x.y.z[-prerelease]> <major|minor|patch>
+          local ver="$1" kind="$2"
+          # strip any pre-release/build
+          ver_base="${ver%%-*}"
+          IFS='.' read -r a b c <<< "$ver_base"
+          a=${a:-0}; b=${b:-0}; c=${c:-0}
+          case "$kind" in
+              major) a=$((a+1)); b=0; c=0 ;;
+              minor) b=$((b+1)); c=0 ;;
+              patch|*) c=$((c+1)) ;;
+          esac
+          printf "%d.%d.%d" "$a" "$b" "$c"
           }
 
           if [ "$EVENT" = "schedule" ]; then
-            NEW=$(bump_semver "$CURR" "patch")
+          NEW=$(bump_semver "$CURR" "patch")
           elif [ -n "$INPUT" ]; then
-            if [[ "$INPUT" =~ ^(major|minor|patch)$ ]]; then
+          if [[ "$INPUT" =~ ^(major|minor|patch)$ ]]; then
               NEW=$(bump_semver "$CURR" "$INPUT")
-            elif [[ "$INPUT" =~ ^[0-9]+(\.[0-9]+){2}(-[0-9A-Za-z.-]+)?$ ]]; then
+          elif [[ "$INPUT" =~ ^[0-9]+(\.[0-9]+){2}(-[0-9A-Za-z.-]+)?$ ]]; then
               NEW="$INPUT"
-            else
-              echo "Invalid version input: $INPUT" >&2; exit 1
-            fi
           else
-            echo "No version specified for manual trigger." >&2; exit 1
+              echo "Invalid version input: $INPUT" >&2
+              exit 1
+          fi
+          else
+          echo "No version specified for manual trigger." >&2
+          exit 1
           fi
 
           echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
