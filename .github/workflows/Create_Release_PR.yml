@@ -1,178 +1,196 @@
 name: Create Release Branch and PR
 
+# This workflow runs automatically every Saturday at 12:00 PM IST (06:30 UTC)
+# and can also be run manually with an optional version input.
 on:
   schedule:
-    # 06:30 UTC = 12:00 IST on Saturdays
-    - cron: "30 6 * * 6"
+    - cron: "30 6 * * 6" # 06:30 UTC on Saturday (12:00 PM IST)
   workflow_dispatch:
     inputs:
-      bump:
-        description: "Semver bump: patch | minor | major (ignored if version is provided)"
-        required: false
-        default: "patch"
       version:
-        description: "Optional explicit version (must be > max(master, develop))"
+        description: "The semantic version to use (e.g., 1.2.3)"
         required: false
-
-env:
-  BASE_BRANCH: develop
-  TARGET_BRANCH: master
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout develop branch
+        uses: actions/checkout@v4
         with:
-          ref: ${{ env.BASE_BRANCH }}
-          fetch-depth: 0
-      - name: Print Node & npm
-        run: |
-          node -v
-          npm -v
-      - name: Lint
-        run: |
-          if [ -f package.json ]; then
-            if jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
-              npm ci
-              npm run lint
-            else
-              echo "No lint script; skipping."
-            fi
-          else
-            echo "No package.json found; skipping lint."
-          fi
+          ref: develop
 
-  create_release_pr:
-    needs: lint
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+  create-pr:
+    needs: lint # Run only if 'lint' succeeds
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     steps:
-      - name: Checkout full repo
+      - name: Checkout develop branch (full history for tags)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: develop
+          fetch-depth: 0 # crucial to fetch all history and tags
 
-      - name: Ensure both branches exist locally
-        run: |
-          git fetch origin ${{ env.BASE_BRANCH }}:${{ env.BASE_BRANCH }} --update-head-ok || true
-          git fetch origin ${{ env.TARGET_BRANCH }}:${{ env.TARGET_BRANCH }} --update-head-ok || true
-          git checkout ${{ env.BASE_BRANCH }}
-          git pull --ff-only origin ${{ env.BASE_BRANCH }}
-          git checkout ${{ env.TARGET_BRANCH }}
-          git pull --ff-only origin ${{ env.TARGET_BRANCH }}
-          git checkout ${{ env.BASE_BRANCH }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-      - name: Compute next version (max(master, develop) -> bump)
-        id: ver
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compute version (no write)
+        id: compute_version
         shell: bash
         run: |
           set -euo pipefail
-          PKG_FILE="package.json"
-          get_ver () { branch="$1"; git show "$branch:$PKG_FILE" | jq -r '.version'; }
 
-          DEV_VER=$(get_ver "${{ env.BASE_BRANCH }}")
-          MAS_VER=$(get_ver "${{ env.TARGET_BRANCH }}")
+          CURR=$(node -p "require('./package.json').version")
+          INPUT="${{ github.event.inputs.version || '' }}"
+          EVENT="${{ github.event_name }}"
 
-          echo "develop version: $DEV_VER"
-          echo "master  version: $MAS_VER"
+          bump_semver () {
+            local ver="$1" kind="$2"
+            ver_base="${ver%%-*}"
+            IFS='.' read -r a b c <<< "$ver_base"
+            a=${a:-0}; b=${b:-0}; c=${c:-0}
+            case "$kind" in
+              major) a=$((a+1)); b=0; c=0 ;;
+              minor) b=$((b+1)); c=0 ;;
+              patch|*) c=$((c+1)) ;;
+            esac
+            printf "%d.%d.%d" "$a" "$b" "$c"
+          }
 
-          # Pick max version
-          cmp() { npx semver -r ">$2" "$1" >/dev/null 2>&1; }
-          if cmp "$DEV_VER" "$MAS_VER"; then BASE="$DEV_VER"; else BASE="$MAS_VER"; fi
-
-          BUMP_KIND="${{ inputs.bump || 'patch' }}"
-          NEXT=$(npx semver "$BASE" -i "$BUMP_KIND")
-
-          echo "base_version=$BASE"       >> "$GITHUB_OUTPUT"
-          echo "new_version=$NEXT"        >> "$GITHUB_OUTPUT"
-          echo "develop_version=$DEV_VER" >> "$GITHUB_OUTPUT"
-          echo "master_version=$MAS_VER"  >> "$GITHUB_OUTPUT"
-          echo "New version: $NEXT"
-
-      - name: Check if there are diffs from develop -> master
-        id: diff
-        run: |
-          set -euo pipefail
-          # If there are no differences, we skip creating a PR to avoid empty releases.
-          if git rev-list --no-merges --left-only --count ${{ env.TARGET_BRANCH }}...${{ env.BASE_BRANCH }} | grep -q '^0$'; then
-            echo "has_diff=false" >> "$GITHUB_OUTPUT"
-            echo "No new commits in develop compared to master."
+          if [ "$EVENT" = "schedule" ]; then
+            NEW=$(bump_semver "$CURR" "patch")
+          elif [ -n "$INPUT" ]; then
+            if [[ "$INPUT" =~ ^(major|minor|patch)$ ]]; then
+              NEW=$(bump_semver "$CURR" "$INPUT")
+            elif [[ "$INPUT" =~ ^[0-9]+(\.[0-9]+){2}(-[0-9A-Za-z.-]+)?$ ]]; then
+              NEW="$INPUT"
+            else
+              echo "Invalid version input: $INPUT" >&2; exit 1
+            fi
           else
-            echo "has_diff=true" >> "$GITHUB_OUTPUT"
-            echo "There are new commits to release."
+            echo "No version specified for manual trigger." >&2; exit 1
           fi
 
-      - name: Create release branch from develop
-        if: steps.diff.outputs.has_diff == 'true'
-        id: br
+          echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare placeholder change for PR
+        shell: bash
         run: |
           set -euo pipefail
-          REL="release/v${{ steps.ver.outputs.new_version }}"
-          # If branch already exists, suffix with -rN
-          NAME="$REL"
-          n=1
-          while git ls-remote --heads origin "$NAME" >/dev/null 2>&1 && git ls-remote --heads origin "$NAME" | grep -q "$NAME"; do
-            NAME="${REL}-r$n"
-            n=$((n+1))
-          done
-          git checkout -B "$NAME" ${{ env.BASE_BRANCH }}
-          echo "branch=$NAME" >> "$GITHUB_OUTPUT"
-          echo "Created branch: $NAME"
+          mkdir -p .github
+          echo "release init for v${{ steps.compute_version.outputs.new_version }}" > .github/release-init.txt
 
-      - name: Bump version in package.json (no git tag)
-        if: steps.diff.outputs.has_diff == 'true'
-        run: |
-          npm pkg set version=${{ steps.ver.outputs.new_version }}
-          cat package.json | jq -r '.version'
-          echo "version_bumped=${{ steps.ver.outputs.new_version }}" >> "$GITHUB_OUTPUT"
-
-      - name: Commit version bump
-        if: steps.diff.outputs.has_diff == 'true'
+      - name: Check diff against master
+        id: check_diff
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json 2>/dev/null || true
-          if git diff --cached --quiet; then
-            echo "No changes after bump (unexpected)."
+          git fetch origin master
+          if git diff --quiet origin/master...HEAD -- package.json; then
+            echo "No changes in package.json compared to master. Exiting."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
-            git commit -m "chore(release): v${{ steps.ver.outputs.new_version }}"
+            echo "Changes detected in package.json compared to master."
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Push branch
-        if: steps.diff.outputs.has_diff == 'true'
-        run: git push --set-upstream origin "${{ steps.br.outputs.branch }}"
+      - name: Generate release notes
+        id: release_notes
+        shell: bash
+        run: |
+          # Find the last tag on the master branch
+          LAST_TAG=$(git describe --tags --abbrev=0 master 2>/dev/null || echo "")
 
-      - name: Create PR to master
-        if: steps.diff.outputs.has_diff == 'true'
-        id: pr
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous tag found. Generating release notes from all commits on develop."
+            LOG_RANGE="HEAD"
+          else
+            echo "Found last tag: $LAST_TAG. Generating notes from new commits."
+            LOG_RANGE="$LAST_TAG..HEAD"
+          fi
+
+          # Bulleted list of commit messages (oldest first)
+          RELEASE_NOTES=$(git log --pretty=format:'- %s' --reverse $LOG_RANGE)
+
+          # Escape for GitHub Actions output
+          RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
+
+          echo "release_notes=$RELEASE_NOTES" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release Branch and Pull Request
+        id: release_pr
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "Release v${{ steps.ver.outputs.new_version }}"
+          token: ${{ secrets.GITHUB_TOKEN }} # or PAT if policy requires
+          title: "Release ${{ steps.compute_version.outputs.new_version }}"
+          commit-message: "chore(release): init PR for v${{ steps.compute_version.outputs.new_version }}"
           body: |
-            This PR prepares release **v${{ steps.ver.outputs.new_version }}**.
+            ## Release ${{ steps.compute_version.outputs.new_version }}
+            This PR will bump version and include release notes.
+          branch: "release/v${{ steps.compute_version.outputs.new_version }}"
+          base: master
+          labels: "release, automated"
+          # optionally keep the placeholder out of future PRs
+          add-paths: |
+            .github/release-init.txt
 
-            - Base branch: `${{ env.BASE_BRANCH }}`
-            - Target branch: `${{ env.TARGET_BRANCH }}`
-            - develop version: `${{ steps.ver.outputs.develop_version }}`
-            - master version: `${{ steps.ver.outputs.master_version }}`
-            - new version: `${{ steps.ver.outputs.new_version }}`
-          labels: release
-          base: ${{ env.TARGET_BRANCH }}
-          branch: ${{ steps.br.outputs.branch }}
-          draft: false
-          signoff: false
-
-      - name: Echo outputs
-        if: steps.diff.outputs.has_diff == 'true'
+      - name: Check if PR was created
+        if: ${{ steps.release_pr.outputs.pull-request-number != '' }}
         run: |
-          echo "PR_NUMBER=${{ steps.pr.outputs.pull-request-number }}"
-          echo "PR_URL=${{ steps.pr.outputs.pull-request-url }}"
-          echo "RELEASE_BRANCH=${{ steps.br.outputs.branch }}"
-          echo "NEW_VERSION=${{ steps.ver.outputs.new_version }}"
-          echo "MASTER_VERSION=${{ steps.ver.outputs.master_version }}"
-          echo "DEVELOP_VERSION=${{ steps.ver.outputs.develop_version }}"
+          echo "Pull Request created successfully!"
+          echo "PR URL: ${{ steps.release_pr.outputs.pull-request-url }}"
+      - name: Bump version on PR branch and push
+        if: ${{ steps.release_pr.outputs.pull-request-branch != '' }}
+        env:
+          PR_BRANCH: ${{ steps.release_pr.outputs.pull-request-branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "PR branch is: $PR_BRANCH"
+
+          # Check out the PR branch the action just created
+          git fetch origin "$PR_BRANCH:$PR_BRANCH"
+          git checkout "$PR_BRANCH"
+
+          # Remove placeholder, bump, commit
+          rm -f .github/release-init.txt || true
+
+          NEW="${{ steps.compute_version.outputs.new_version }}"
+          npm version "$NEW" --no-git-tag-version
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json .github/release-init.txt 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit (unexpected)."
+          else
+            git commit -m "chore(release): bump version to v$NEW"
+            git push origin "$PR_BRANCH"
+          fi
+      - name: Update PR title after bump (optional)
+        if: ${{ steps.release_pr.outputs.pull-request-number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr edit "${{ steps.release_pr.outputs.pull-request-number }}" \
+            --title "Release ${{ steps.compute_version.outputs.new_version }}"
