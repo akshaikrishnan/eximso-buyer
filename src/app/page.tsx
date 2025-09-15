@@ -1,5 +1,5 @@
 import Container from "@/components/layout/container";
-import BannerSection from "@/components/layout/home/bannerSection";
+// import BannerSection from "@/components/layout/home/bannerSection";
 import CollectionGroups from "@/components/layout/home/collection-groups";
 import FullwidthSingleBgBanner from "@/components/layout/home/fullwidth-single-bg-banner";
 import HeroWithCategories from "@/components/layout/home/hero-with-categories";
@@ -8,6 +8,7 @@ import ThreeGridCollection from "@/components/layout/home/three-grid-collection"
 import { EmblaOptionsType } from "embla-carousel";
 import React, { Suspense } from "react";
 import { endpoints } from "@/lib/data/endpoints";
+import BannerSectionClient from "@/components/layout/home/banner-client";
 
 // Type interfaces
 interface Banner {
@@ -90,8 +91,15 @@ export default async function Home() {
         <HeroWithCategories />
       </Container>
 
-      {/* <Suspense> */}
-      <BannerSection slides={SLIDES} options={OPTIONS} />
+      <Suspense
+        fallback={
+          <div className="h-40 w-full animate-pulse rounded-lg bg-muted/40" />
+        }
+      >
+        {SLIDES.length > 0 && (
+          <BannerSectionClient slides={SLIDES} options={OPTIONS} />
+        )}
+      </Suspense>
       <Container>
         <CollectionGroups data={collectionData} />
       </Container>
@@ -100,9 +108,8 @@ export default async function Home() {
 
       <Container>
         <ThreeGridCollection />
-        {/* <ProductsGrid disableInfiniteScroll={true} limit={10} /> */}
+        <ProductsGrid disableInfiniteScroll={true} limit={10} />
       </Container>
-      {/* </Suspense> */}
     </main>
   );
 }
