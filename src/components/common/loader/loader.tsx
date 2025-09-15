@@ -37,19 +37,15 @@ export default function Loader({
       >
         <div>
           <div
-            className="spinner "
-            style={
-              {
-                "--clr": color || "rgb(188, 159, 247)",
-              } as React.CSSProperties
-            }
+            className="-translate-x-1/2"
+            // className="spinner "
+            // style={
+            //   {
+            //     "--clr": color || "rgb(188, 159, 247)",
+            //   } as React.CSSProperties
+            // }
           >
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+            <div className="loader-square-14"></div>
           </div>
           <div className="text-center text-gray-500 mt-14">{text}</div>
         </div>

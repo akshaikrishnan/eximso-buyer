@@ -62,3 +62,43 @@
     transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
   }
 }
+
+.loader-square-14 {
+  width: 25px;
+  height: 25px;
+  position: relative;
+  perspective: 200px;
+}
+.loader-square-14::after,
+.loader-square-14::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 25px;
+  width: 25px;
+  background: #4dadf1;
+  animation: anm-sq-14-flip 2s linear infinite;
+  transform-origin: right bottom;
+  border-radius: 4px;
+}
+.loader-square-14::after {
+  animation-delay: 1s;
+  background: #521dd3;
+}
+@keyframes anm-sq-14-flip {
+  0% {
+    transform: rotateX(0) rotateY(0);
+  }
+  25% {
+    transform: rotateX(0) rotateY(180deg);
+  }
+  50% {
+    transform: rotateX(180deg) rotateY(180deg);
+  }
+  75% {
+    transform: rotateX(180deg) rotateY(0);
+  }
+  100% {
+    transform: rotateX(0) rotateY(0);
+  }
+}

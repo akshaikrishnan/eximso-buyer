@@ -8,6 +8,7 @@ import ProductCard from "@/components/common/product-card";
 import { useSearchParams } from "next/navigation";
 import { endpoints } from "@/lib/data/endpoints";
 import { getSearchParamsObject } from "@/lib/getSearchParamsObj";
+import Loader from "@/components/common/loader/loader";
 
 export default function ProductsGrid({
   params,
@@ -98,7 +99,8 @@ export default function ProductsGrid({
       {/* Initial Loading */}
       {isLoading && showLoader && (
         <div className="flex flex-col justify-center items-center h-48">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
+          {/* <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div> */}
+          <Loader />
           <p className="mt-2 text-gray-600">Loading products...</p>
         </div>
       )}
@@ -152,23 +154,21 @@ export default function ProductsGrid({
           >
             <div className="flex items-center gap-2 text-gray-600">
               <p>Loading...</p>
-              <div
-                role="status"
-                aria-live="polite"
-                className="animate-spin rounded-full h-4 w-4 border-t-4 border-blue-500"
-              ></div>
+              <Loader />
             </div>
           </div>
         </InView>
       )}
 
       {/* End Message */}
-      {!hasNextPage && displayedProducts.length > 0 && (
-        <div className="text-center text-gray-500 mt-6">
-          🎉 <span className="font-medium">You’ve reached the end!</span> No
-          more products to load.
-        </div>
-      )}
+      {!hasNextPage &&
+        displayedProducts.length > 0 &&
+        !disableInfiniteScroll && (
+          <div className="text-center text-gray-500 mt-6">
+            🎉 <span className="font-medium">You’ve reached the end!</span> No
+            more products to load.
+          </div>
+        )}
     </div>
   );
 }
