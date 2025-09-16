@@ -13,16 +13,16 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
   });
 
   if (isLoading) {
-    return <div className="p-6 bg-gray-50 min-h-screen flex justify-center items-center">
-      <div className="bg-white shadow-lg rounded-xl p-8">
+    return <div className="p-4 md:p-6 bg-gray-50 min-h-screen flex justify-center items-center">
+      <div className="bg-white shadow-lg rounded-xl p-4 md:p-8">
         <p>Loading invoice details...</p>
       </div>
     </div>;
   }
 
   if (isError) {
-    return <div className="p-6 bg-gray-50 min-h-screen flex justify-center items-center">
-      <div className="bg-white shadow-lg rounded-xl p-8">
+    return <div className="p-4 md:p-6 bg-gray-50 min-h-screen flex justify-center items-center">
+      <div className="bg-white shadow-lg rounded-xl p-4 md:p-8">
         <p>Error loading invoice details</p>
       </div>
     </div>;
@@ -34,8 +34,8 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
     : orderData;
 
   if (!order) {
-    return <div className="p-6 bg-gray-50 min-h-screen flex justify-center items-center">
-      <div className="bg-white shadow-lg rounded-xl p-8">
+    return <div className="p-4 md:p-6 bg-gray-50 min-h-screen flex justify-center items-center">
+      <div className="bg-white shadow-lg rounded-xl p-4 md:p-8">
         <p>No order data found</p>
       </div>
     </div>;
@@ -55,10 +55,10 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen flex justify-center items-center">
-      <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-5xl">
+    <div className="p-4 md:p-6 bg-gray-50 min-h-screen flex justify-center items-center">
+      <div className="bg-white shadow-lg rounded-xl p-4 md:p-8 w-full max-w-5xl">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6 border-b-2 border-gray-200 pb-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b-2 border-gray-200 pb-4">
           <div>
             <div className="flex items-center space-x-4">
               <img
@@ -66,7 +66,7 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
                 alt="EXIMSO Logo"
                 className="h-10 w-auto"
               />
-              <h1 className="text-2xl font-extrabold text-blue-600">
+              <h1 className="text-xl md:text-2xl font-extrabold text-blue-600">
                 EXIMSO PRIVATE LIMITED
               </h1>
             </div>
@@ -82,15 +82,15 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
             <p className="text-sm text-gray-700">CIN: U46909KL2023PTC084715</p>
           </div>
           <div>
-            <h2 className="text-2xl font-semibold text-gray-400">
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-400">
               EXPORT INVOICE
             </h2>
-            <h5 className="text-2xl font-semibold text-gray-800">#{orderId}</h5>
+            <h5 className="text-xl md:text-2xl font-semibold text-gray-800">#{orderId}</h5>
           </div>
         </div>
 
         {/* Shipper and Customer */}
-        <div className="grid grid-cols-2 gap-8 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
           <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
             <h3 className="font-bold text-gray-800 mb-2">SHIPPER</h3>
             <p className="text-sm text-gray-700">
@@ -127,7 +127,7 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
         </div>
 
         {/* Invoice Info */}
-        <div className="grid grid-cols-2 gap-8 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
           <div>
             <p className="text-sm text-gray-700">
               <span className="font-bold">Invoice Number & Date:</span>{" "}
@@ -156,7 +156,7 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="table-auto w-full border-collapse border border-gray-300">
+          <table className="table-auto w-full min-w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-blue-50">
                 <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">
@@ -241,14 +241,6 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
           </p>
         </div>
 
-        {/* Download Button */}
-        <div className="mt-8 flex justify-end">
-          <button 
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
-          >
-            Download Invoice
-          </button>
-        </div>
       </div>
     </div>
   );
