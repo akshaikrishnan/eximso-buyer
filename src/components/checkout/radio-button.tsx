@@ -67,7 +67,7 @@ export default function RadioSelector<T extends RadioItem>({
                       {(item.icon || item.image) && (
                         <Image
                           src={item.icon || item.image}
-                          alt={item.title}
+                          alt={item.title || item.name}
                           width={50}
                           height={50}
                           className="w-12 h-12 rounded-full"
