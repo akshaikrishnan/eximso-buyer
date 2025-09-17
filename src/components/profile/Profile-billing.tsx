@@ -104,14 +104,6 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
 
   return (
     <div className="p-4 md:p-6 bg-gray-50 min-h-screen flex flex-col justify-center items-center space-y-4">
-      <div className="w-full flex justify-end">
-        <button
-          onClick={handlePrint}
-          className="px-4 py-2 bg-eximblue-600 text-white rounded-md hover:bg-eximblue-700 transition"
-        >
-          Download Invoice
-        </button>
-      </div>
       <div ref={componentRef} className="bg-white shadow-lg rounded-xl p-4 md:p-8 w-full max-w-5xl">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b-2 border-gray-200 pb-4">
@@ -290,11 +282,20 @@ export default function ExportInvoice({ orderId }: { orderId: string }) {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-sm text-gray-700">
+        <div className="mt-8 text-sm text-gray-700 flex justify-between items-center">
           {/* <p>Amount Inwords: <Price amount={totalAmount} /></p> */}
           <p className="text-blue-600 font-medium mt-4">
             eximso.com - shop global feel local
           </p>
+          
+        </div>
+        <div className="mt-8 text-sm text-gray-700 flex justify-end items-center">
+          <button
+            onClick={handlePrint}
+            className="px-4 py-2 bg-eximblue-600 text-white rounded-md hover:bg-eximblue-700 transition print:hidden"
+          >
+            Download Invoice
+          </button>
         </div>
 
       </div>
