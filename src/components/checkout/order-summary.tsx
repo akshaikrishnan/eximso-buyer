@@ -66,7 +66,7 @@ export default function OrderSummaryDetails({
                         <a href={item.product.slug}>{item.product.name}</a>
                       </h3>
                       <p className="text-gray-900">
-                        <Price amount={item.product.price} />
+                        <Price amount={item.product.offerPrice && item.product.offerPrice > 0 ? item.product.offerPrice : item.product.price} />
                       </p>
 
                       <div className=" text-gray-500 ">

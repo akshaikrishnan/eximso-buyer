@@ -55,7 +55,7 @@ export default function Footer() {
                 {/* Customer Service */}
                 <div className="flex flex-col items-start text-left">
                   <h3 className="text-sm font-medium text-gray-900">Customer Service</h3>
-                  <ul role="list" className="mt-6 space-y-4">
+                  <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.customerService.map((item) => (
                       <li key={item.name} className="text-sm">
                         <a
@@ -72,7 +72,7 @@ export default function Footer() {
                 {/* Company */}
                 <div className="flex flex-col items-start text-left">
                   <h3 className="text-sm font-medium text-gray-900">Company</h3>
-                  <ul role="list" className="mt-6 space-y-4">
+                  <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.company.map((item) => (
                       <li key={item.name} className="text-sm">
                         <a
@@ -89,7 +89,7 @@ export default function Footer() {
                 {/* Legal */}
                 <div className="flex flex-col items-start text-left">
                   <h3 className="text-sm font-medium text-gray-900">Legal</h3>
-                  <ul role="list" className="mt-6 space-y-4">
+                  <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.legal.map((item) => (
                       <li key={item.name} className="text-sm">
                         <a
@@ -106,14 +106,14 @@ export default function Footer() {
                 {/* Social Media */}
               <div className="flex flex-col items-start text-left">
                 <h3 className="text-sm font-medium text-gray-900">Follow Us</h3>
-                <ul role="list" className="mt-6 flex flex-col space-y-4">
+                <ul role="list" className="flex flex-col mt-2 space-y-3">
                   {footerNavigation.social.map((item) => (
-                    <li key={item.name}>
+                    <li key={item.name} className="text-sm">
                     <a
                         href={item.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center text-gray-500 hover:text-blue-600"
+                        className="flex items-center text-gray-500 hover:text-gray-600"
                       >
                         <item.icon className="h-5 w-5 mr-2" aria-hidden="true" />
                         {item.name}
@@ -142,7 +142,7 @@ export default function Footer() {
                     </a>
                   ))}
                 </div>
-                <div className="ml-6 border-l border-gray-200 pl-6">
+                {/* <div className="ml-6 border-l border-gray-200 pl-6">
                   <a
                     href="#"
                     className="flex items-center text-gray-500 hover:text-gray-600"
@@ -155,7 +155,7 @@ export default function Footer() {
                     <span className="ml-3 text-sm">Change</span>
                     <span className="sr-only">location and currency</span>
                   </a>
-                </div>
+                </div> */}
               </div>
             </div>
 
