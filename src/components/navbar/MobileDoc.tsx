@@ -17,7 +17,7 @@ const MobileDoc = () => {
     });
 
     return (
-        <div className="fixed bottom-0 left-0 w-full bg-white shadow-md sm:hidden">
+        <div className="fixed bottom-0 left-0 w-full bg-white shadow-md sm:hidden z-50">
             <div className="flex justify-around py-2 text-gray-700">
                 <Link
                     href="/"

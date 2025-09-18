@@ -18,7 +18,7 @@ export function CurrencySelector() {
   const queryClient = useQueryClient();
 
   const formatOptionLabel = ({ code, flag, countryCode }: CurrencyOption) => (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center ">
       <img
         src={flag}
         alt={countryCode}
@@ -30,7 +30,35 @@ export function CurrencySelector() {
       </span>
     </div>
   );
-
+const customStyles = {
+    control: (provided: any) => ({
+      ...provided,
+      minHeight: '28px',
+      height: '28px',
+      fontSize: '0.875rem', // text-sm size
+    }),
+    dropdownIndicator: (provided: any) => ({
+      ...provided,
+      padding: 4,
+    }),
+    clearIndicator: (provided: any) => ({
+      ...provided,
+      padding: 4,
+    }),
+    valueContainer: (provided: any) => ({
+      ...provided,
+      padding: '0 6px',
+    }),
+    input: (provided: any) => ({
+      ...provided,
+      margin: 0,
+      padding: 0,
+    }),
+    indicatorsContainer: (provided: any) => ({
+      ...provided,
+      height: '28px',
+    }),
+  };
   const options: CurrencyOption[] = currencies.map((curr) => ({
     value: curr.code,
     label: curr.name,
@@ -54,9 +82,17 @@ export function CurrencySelector() {
       formatOptionLabel={formatOptionLabel}
       isSearchable
       placeholder="Select currency..."
-      className="currency-selector text-sm"
+      className="currency-selector text-sm "
       classNamePrefix="select"
       components={{ IndicatorSeparator: () => null }}
+      //  styles={{
+      //     menuList: (base) => ({
+      //       ...base,
+      //       maxHeight: "200px",
+      //       customStyles
+      //     }),
+      //   }}
+        styles={customStyles}
     />
   );
 }
