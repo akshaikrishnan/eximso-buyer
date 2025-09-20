@@ -186,11 +186,10 @@ const Navbar = (props: any) => {
             ) : (
               <div className="space-y-0 leading-5">
                 <div className="upper text-gray-400 text-xs">
-                  {geo?.city ? geo.city : "Select your"}
+                  {geo?.ui ? "Location" : "Select your"}
                 </div>
                 <div className="lower font-medium flex gap-1">
-                  <MapPinIcon className="w-5" />{" "}
-                  {geo?.country ? geo.country : "Location"}
+                  <MapPinIcon className="w-5" /> {geo?.ui ? geo.ui : "Location"}
                 </div>
               </div>
             )}

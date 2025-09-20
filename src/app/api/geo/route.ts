@@ -29,7 +29,6 @@ function normalizeFloat(v: string | number | null | undefined): string | null {
 }
 
 function readGeo(req: NextRequest) {
-  // Prefer headers, fall back to req.geo (available on Vercel)
   const city = req.headers.get("x-vercel-ip-city") ?? null;
   const countryCode = req.headers.get("x-vercel-ip-country") ?? null;
   const region = req.headers.get("x-vercel-ip-country-region") ?? null;
@@ -57,6 +56,9 @@ export async function GET(req: NextRequest) {
     latitude: geo.latitude,
     longitude: geo.longitude,
     default_currency,
+    ui: geo.city
+      ? geo.city
+      : `${geo.countryCode}${geo.region ? "-" + geo.region : ""}`,
   };
 
   const res = NextResponse.json(payload);
