@@ -28,13 +28,28 @@ function normalizeFloat(v: string | number | null | undefined): string | null {
   return n.toFixed(6);
 }
 
+function safeDecode(v: string | null | undefined) {
+  if (!v) return null;
+  try {
+    return decodeURIComponent(v);
+  } catch {
+    return v;
+  }
+}
+
 function readGeo(req: NextRequest) {
-  const city = req.headers.get("x-vercel-ip-city") ?? null;
-  const countryCode = req.headers.get("x-vercel-ip-country") ?? null;
-  const region = req.headers.get("x-vercel-ip-country-region") ?? null;
-  const tz = req.headers.get("x-vercel-ip-timezone") ?? null;
-  const latitude = normalizeFloat(req.headers.get("x-vercel-ip-latitude"));
-  const longitude = normalizeFloat(req.headers.get("x-vercel-ip-longitude"));
+  const city = safeDecode(req.headers.get("x-vercel-ip-city")) ?? null;
+  const countryCode =
+    safeDecode(req.headers.get("x-vercel-ip-country")) ?? null;
+  const region =
+    safeDecode(req.headers.get("x-vercel-ip-country-region")) ?? null;
+  const tz = safeDecode(req.headers.get("x-vercel-ip-timezone")) ?? null;
+  const latitude = safeDecode(
+    normalizeFloat(req.headers.get("x-vercel-ip-latitude"))
+  );
+  const longitude = safeDecode(
+    normalizeFloat(req.headers.get("x-vercel-ip-longitude"))
+  );
 
   return { city, countryCode, region, tz, latitude, longitude };
 }
