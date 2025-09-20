@@ -50,8 +50,9 @@ function readGeo(req: NextRequest) {
   const longitude = safeDecode(
     normalizeFloat(req.headers.get("x-vercel-ip-longitude"))
   );
+  const postal = safeDecode(req.headers.get("x-vercel-ip-postal-code")) ?? null;
 
-  return { city, countryCode, region, tz, latitude, longitude };
+  return { city, countryCode, region, tz, latitude, longitude, postal };
 }
 
 export async function GET(req: NextRequest) {
@@ -71,6 +72,7 @@ export async function GET(req: NextRequest) {
     latitude: geo.latitude,
     longitude: geo.longitude,
     default_currency,
+    postal: geo.postal,
     ui: geo.city
       ? geo.city
       : `${geo.countryCode}${geo.region ? "-" + geo.region : ""}`,
@@ -97,6 +99,7 @@ export async function GET(req: NextRequest) {
   if (payload.timezone) res.cookies.set("loc_tz", payload.timezone, cookieOpts);
   if (payload.default_currency)
     res.cookies.set("default_currency", payload.default_currency, cookieOpts);
+  if (payload.postal) res.cookies.set("loc_postal", payload.postal, cookieOpts);
 
   return res;
 }
