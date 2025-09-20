@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Searchbar from "./searchbar";
 import { toast } from "@/hooks/use-toast";
 import axios from "axios";
+import AnnouncementBar from "./announcement-bar";
 
 const Navbar = (props: any) => {
   const { data: categories, isLoading } = useQuery({
@@ -109,6 +110,7 @@ const Navbar = (props: any) => {
 
   return (
     <>
+      <AnnouncementBar />
       <TopBar className="px-5 container mx-auto" />
       <nav className="sticky top-0 left-0 right-0 bg-gray-100 text-black z-30 w-full">
         {/* Upper part */}
