@@ -24,11 +24,20 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Searchbar from "./searchbar";
 import { toast } from "@/hooks/use-toast";
+import axios from "axios";
+import AnnouncementBar from "./announcement-bar";
 
 const Navbar = (props: any) => {
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: () => api.get(endpoints.categories).then((res) => res.data.result),
+  });
+
+  const { data: geo, isLoading: geoLoading } = useQuery({
+    queryKey: ["geo"],
+    queryFn: () => axios.get("/api/geo").then((res) => res.data),
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
 
   const path = usePathname();
@@ -101,6 +110,7 @@ const Navbar = (props: any) => {
 
   return (
     <>
+      <AnnouncementBar />
       <TopBar className="px-5 container mx-auto" />
       <nav className="sticky top-0 left-0 right-0 bg-gray-100 text-black z-30 w-full">
         {/* Upper part */}
@@ -173,12 +183,18 @@ const Navbar = (props: any) => {
             <div className="text-xl">
               <i className="fa-solid fa-location-dot"></i>
             </div>
-            <div className="space-y-0 leading-5">
-              <div className="upper text-gray-400 text-xs">Select your</div>
-              <div className="lower font-medium flex gap-1">
-                <MapPinIcon className="w-5" /> Location
+            {geoLoading ? (
+              <div>Loading...</div>
+            ) : (
+              <div className="space-y-0 leading-5">
+                <div className="upper text-gray-400 text-xs">
+                  {geo?.ui ? "Location" : "Select your"}
+                </div>
+                <div className="lower font-medium flex gap-1">
+                  <MapPinIcon className="w-5" /> {geo?.ui ? geo.ui : "Location"}
+                </div>
               </div>
-            </div>
+            )}
           </li>
           <li className="nav-item country cursor-pointer lg:flex hidden items-center gap-2 md:order-4">
             {/* <div className="w-5">

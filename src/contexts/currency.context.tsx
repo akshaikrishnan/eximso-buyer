@@ -7,7 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useCookies } from "react-cookie";
 import api from "@/lib/api/axios.interceptor";
 
@@ -36,26 +36,47 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(
   undefined
 );
 
+const ONE_WEEK = 60 * 60 * 24 * 7;
+
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [cookies, setCookie] = useCookies(["currency"]);
-  const [baseCurrency, setBaseCurrency] = useState("INR");
+  // read BOTH cookies: explicit user "currency" and geo-derived "default_currency"
+  const [cookies, setCookie] = useCookies(["currency", "default_currency"]);
   const [isMounted, setIsMounted] = useState(false);
-  const [currentCurrency, setCurrentCurrency] = useState("INR"); // Default value
 
-  // Get initial currency from cookies AFTER mount
+  // base you query against (keep INR unless you have a reason to change)
+  const [baseCurrency] = useState("INR");
+
+  // the currency you display/convert to
+  const [currentCurrency, setCurrentCurrency] = useState("INR");
+
+  // initialize currentCurrency with precedence: currency -> default_currency -> INR
   useEffect(() => {
-    const savedCurrency = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("currency="))
-      ?.split("=")[1];
+    // normalize to 3-letter uppercase if present
+    const normalize = (v?: string) =>
+      (v || "").trim().toUpperCase().slice(0, 3) || undefined;
 
-    if (savedCurrency) {
-      setCurrentCurrency(savedCurrency);
+    const cookieCurrency = normalize(cookies.currency);
+    const cookieDefault = normalize(cookies.default_currency);
+
+    const initial = cookieCurrency || cookieDefault || "INR";
+    setCurrentCurrency(initial);
+
+    // if user didn't have an explicit currency, persist what we chose
+    if (!cookieCurrency) {
+      setCookie("currency", initial, { path: "/", maxAge: ONE_WEEK });
     }
-    setIsMounted(true);
-  }, []);
 
-  // ... rest of your context logic
+    setIsMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cookies.currency, cookies.default_currency]);
+
+  // optional: if you want to ensure default_currency exists in dev,
+  // you can ping your /api/geo once on mount (safe to omit in prod)
+  // useEffect(() => {
+  //   if (!cookies.default_currency) {
+  //     fetch("/api/geo", { cache: "no-store" }).catch(() => {});
+  //   }
+  // }, [cookies.default_currency]);
 
   const { data, isLoading, error } = useQuery<CurrencyApiResponse>({
     queryKey: ["exchangeRates", baseCurrency],
@@ -71,13 +92,22 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   const convertPrice = (amount: number): number => {
     if (!data || isLoading || error) return amount;
-    const rate = data.rates[currentCurrency];
-    return amount * rate;
+
+    // if the currentCurrency equals the base, price is unchanged
+    if (currentCurrency === (data.base || baseCurrency)) return amount;
+
+    const rate = data.rates?.[currentCurrency];
+    if (typeof rate === "number" && !Number.isNaN(rate)) {
+      return amount * rate;
+    }
+    // graceful fallback when rate missing
+    return amount;
   };
 
   const handleSetCurrency = (currency: string) => {
-    setCurrentCurrency(currency);
-    setCookie("currency", currency, { path: "/", maxAge: 604800 }); // 1 week
+    const normalized = currency.trim().toUpperCase().slice(0, 3) || "INR";
+    setCurrentCurrency(normalized);
+    setCookie("currency", normalized, { path: "/", maxAge: ONE_WEEK });
   };
 
   if (!isMounted) return null;
@@ -85,14 +115,15 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   return (
     <CurrencyContext.Provider
       value={{
-        baseCurrency: data?.base || "INR",
+        baseCurrency: data?.base || baseCurrency,
         currentCurrency,
         rates: data?.rates || {},
-        symbol: "", // You can add symbol mapping
+        // TODO: wire a symbol map if you have one
+        symbol: "",
         setCurrency: handleSetCurrency,
         convertPrice,
         isLoading,
-        error: error as Error | null,
+        error: (error as Error) ?? null,
       }}
     >
       {children}

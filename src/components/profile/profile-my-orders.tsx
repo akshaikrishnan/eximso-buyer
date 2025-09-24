@@ -62,7 +62,9 @@ const MyOrders = () => {
   if (isError || !orders?.length) {
     return (
       <div className="text-center py-10 text-red-600">
-        {isError ? "An error occurred while fetching orders." : "No orders found."}
+        {isError
+          ? "An error occurred while fetching orders."
+          : "No orders found."}
       </div>
     );
   }
