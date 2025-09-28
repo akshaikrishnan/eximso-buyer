@@ -136,33 +136,17 @@ jobs:
 
           echo "release_notes=$RELEASE_NOTES" >> "$GITHUB_OUTPUT"
 
-      - name: Create release branch and bump version
+      - name: Bump package version
         if: steps.check_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          
-          RELEASE_BRANCH="release/v${{ steps.compute_version.outputs.new_version }}"
           NEW_VERSION="${{ steps.compute_version.outputs.new_version }}"
           
-          # Create and checkout new release branch from current develop
-          git checkout -b "$RELEASE_BRANCH"
-          
-          # Bump version in package.json
+          # Bump version in package.json (without git operations)
           npm version "$NEW_VERSION" --no-git-tag-version
           
-          # Configure git for commits
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          # Stage version changes
-          git add package.json package-lock.json
-          
-          # Commit version bump
-          git commit -m "chore(release): bump version to v$NEW_VERSION"
-          
-          # Push the release branch
-          git push origin "$RELEASE_BRANCH"
+          echo "Version bumped to $NEW_VERSION"
 
       - name: Create Pull Request
         if: steps.check_changes.outputs.has_changes == 'true'
@@ -171,7 +155,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: "Release v${{ steps.compute_version.outputs.new_version }}"
-          commit-message: "chore(release): prepare release v${{ steps.compute_version.outputs.new_version }}"
+          commit-message: "chore(release): bump version to v${{ steps.compute_version.outputs.new_version }}"
           body: |
             ## Release v${{ steps.compute_version.outputs.new_version }}
             
@@ -181,14 +165,14 @@ jobs:
             ${{ steps.release_notes.outputs.release_notes }}
             
             ### Version Bump
-            - Updated version from current to v${{ steps.compute_version.outputs.new_version }}
+            - Updated version to v${{ steps.compute_version.outputs.new_version }}
             
             ---
             *This PR was created automatically by the release workflow.*
           branch: "release/v${{ steps.compute_version.outputs.new_version }}"
           base: master
           labels: "release,automated"
-          # Don't specify add-paths to include ALL changes from develop
+          delete-branch: false
 
       - name: Output results
         if: steps.check_changes.outputs.has_changes == 'true'
