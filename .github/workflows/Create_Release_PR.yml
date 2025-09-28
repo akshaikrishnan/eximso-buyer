@@ -43,6 +43,7 @@ jobs:
         with:
           ref: develop
           fetch-depth: 0 # crucial to fetch all history and tags
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Compute version (no write)
+      - name: Compute version
         id: compute_version
         shell: bash
         run: |
@@ -119,7 +120,7 @@ jobs:
           LAST_TAG=$(git describe --tags --abbrev=0 origin/master 2>/dev/null || echo "")
 
           if [ -z "$LAST_TAG" ]; then
-            echo "No previous tag found. Generating release notes from all commits on develop."
+            echo "No previous tag found. Generating release notes from commits since master."
             LOG_RANGE="origin/master..HEAD"
           else
             echo "Found last tag: $LAST_TAG. Generating notes from new commits."
@@ -127,66 +128,105 @@ jobs:
           fi
 
           # Bulleted list of commit messages (oldest first)
-          RELEASE_NOTES=$(git log --pretty=format:'- %s' --reverse $LOG_RANGE)
+          RELEASE_NOTES=$(git log --pretty=format:'- %s (%h)' --reverse $LOG_RANGE)
 
           # Escape for GitHub Actions output
           RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
           RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
           RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
 
-          echo "release_notes=$RELEASE_NOTES" >> "$GITHUB_OUTPUT"
+          echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$RELEASE_NOTES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
-      - name: Bump package version
+      - name: Create release branch with all changes
         if: steps.check_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -euo pipefail
+          
+          RELEASE_BRANCH="release/v${{ steps.compute_version.outputs.new_version }}"
           NEW_VERSION="${{ steps.compute_version.outputs.new_version }}"
           
-          # Bump version in package.json (without git operations)
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Delete existing release branch if it exists
+          git push origin --delete "$RELEASE_BRANCH" || true
+          git branch -D "$RELEASE_BRANCH" || true
+          
+          # Create new release branch from develop
+          git checkout -b "$RELEASE_BRANCH"
+          
+          # Bump version
           npm version "$NEW_VERSION" --no-git-tag-version
           
-          echo "Version bumped to $NEW_VERSION"
+          # Commit version bump
+          git add package.json package-lock.json
+          git commit -m "chore(release): bump version to v$NEW_VERSION"
+          
+          # Push the release branch
+          git push origin "$RELEASE_BRANCH"
 
-      - name: Create Pull Request
+      - name: Create Pull Request using GitHub CLI
         if: steps.check_changes.outputs.has_changes == 'true'
-        id: release_pr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "Release v${{ steps.compute_version.outputs.new_version }}"
-          commit-message: "chore(release): bump version to v${{ steps.compute_version.outputs.new_version }}"
-          body: |
-            ## Release v${{ steps.compute_version.outputs.new_version }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          RELEASE_BRANCH="release/v${{ steps.compute_version.outputs.new_version }}"
+          NEW_VERSION="${{ steps.compute_version.outputs.new_version }}"
+          
+          # Create PR body
+          cat > pr_body.md << 'EOF'
+          ## Release v${{ steps.compute_version.outputs.new_version }}
+          
+          This release includes the following changes from develop branch:
+          
+          ### Changes
+          ${{ steps.release_notes.outputs.release_notes }}
+          
+          ### Version Bump
+          - Updated version to v${{ steps.compute_version.outputs.new_version }}
+          
+          ---
+          *This PR was created automatically by the release workflow.*
+          EOF
+          
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --base master --head "$RELEASE_BRANCH" --json number --jq '.[0].number' || echo "")
+          
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            echo "PR #$EXISTING_PR already exists. Updating it."
+            gh pr edit "$EXISTING_PR" --title "Release v$NEW_VERSION" --body-file pr_body.md
+            PR_URL=$(gh pr view "$EXISTING_PR" --json url --jq '.url')
+            echo "pr_number=$EXISTING_PR" >> "$GITHUB_OUTPUT"
+            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          else
+            echo "Creating new PR."
+            PR_URL=$(gh pr create \
+              --title "Release v$NEW_VERSION" \
+              --body-file pr_body.md \
+              --base master \
+              --head "$RELEASE_BRANCH" \
+              --label "release,automated")
             
-            This release includes the following changes:
-            
-            ### Changes
-            ${{ steps.release_notes.outputs.release_notes }}
-            
-            ### Version Bump
-            - Updated version to v${{ steps.compute_version.outputs.new_version }}
-            
-            ---
-            *This PR was created automatically by the release workflow.*
-          branch: "release/v${{ steps.compute_version.outputs.new_version }}"
-          base: master
-          labels: "release,automated"
-          delete-branch: false
+            PR_NUMBER=$(gh pr view "$PR_URL" --json number --jq '.number')
+            echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Output results
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
-          if [ "${{ steps.release_pr.outputs.pull-request-number }}" != "" ]; then
-            echo "✅ Pull Request created successfully!"
-            echo "📋 PR Number: ${{ steps.release_pr.outputs.pull-request-number }}"
-            echo "🔗 PR URL: ${{ steps.release_pr.outputs.pull-request-url }}"
-            echo "🌿 Branch: ${{ steps.release_pr.outputs.pull-request-branch }}"
-            echo "📦 Version: v${{ steps.compute_version.outputs.new_version }}"
-          else
-            echo "❌ Failed to create pull request"
-            exit 1
-          fi
+          echo "✅ Pull Request created/updated successfully!"
+          echo "📋 PR Number: ${{ steps.create_pr.outputs.pr_number }}"
+          echo "🔗 PR URL: ${{ steps.create_pr.outputs.pr_url }}"
+          echo "🌿 Branch: release/v${{ steps.compute_version.outputs.new_version }}"
+          echo "📦 Version: v${{ steps.compute_version.outputs.new_version }}"
 
       - name: No changes to release
         if: steps.check_changes.outputs.has_changes == 'false'
