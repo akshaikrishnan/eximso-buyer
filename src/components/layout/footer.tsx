@@ -1,5 +1,6 @@
 import React from "react";
 import IncentivesFooter from "./incentives-footer";
+import { FaFacebookF, FaYoutube, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
 const footerNavigation = {
   customerService: [
@@ -8,7 +9,6 @@ const footerNavigation = {
     { name: "Secure Payments", href: "/secure-payment" },
     { name: "What drives us everyday", href: "/drives-us-everyday" },
     { name: "Why Sell with Eximso", href: "/whysellwitheximso" },
-   
   ],
   company: [
     { name: "About", href: "/about-us" },
@@ -23,6 +23,12 @@ const footerNavigation = {
     { name: "Terms & Conditions", href: "/policy/terms-and-conditions" },
     { name: "Privacy Policy", href: "/policy/privacy-policy" },
     { name: "Shipping Policy", href: "/policy/shipping-policy" },
+  ],
+   social: [
+    { name: "Facebook", href: "#", icon: FaFacebookF },
+    { name: "YouTube", href: "#", icon: FaYoutube },
+    { name: "Instagram", href: "#", icon: FaInstagram },
+    { name: "LinkedIn", href: "#", icon: FaLinkedinIn },
   ],
   bottomLinks: [
     { name: "Accessibility", href: "#" },
@@ -41,42 +47,32 @@ export default function Footer() {
         </h2>
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="border-t border-gray-200">
-            {/* <div className="flex justify-center">
-              <img
-                src="/images/common/logo.png
-                "
-                alt="Eximso"
-                className="h-8 w-auto"
-              />
-            </div> */}
 
             {/* Centered Grid Columns */}
             <div className="mt-16 flex justify-center">
-              <div className="grid w-full max-w-6xl  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 px-4">
+              <div className="grid w-full max-w-6xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 px-4">
+                
                 {/* Customer Service */}
-               <div className="flex flex-col items-start text-left">
-                 <h3 className="text-sm font-medium text-gray-900">
-                    Customer Service
-                      </h3>
-                       <ul role="list" className="mt-6 space-y-4">
-                          {footerNavigation.customerService.map((item) => (
-                             <li key={item.name} className="text-sm">
-                                <a
-                                  href={item.href}
-                                 className="text-gray-500 hover:text-gray-600"
-                                 >
-                             {item.name}
-                           </a>
-                         </li>
-                        ))}
-                    </ul>
+                <div className="flex flex-col items-start text-left">
+                  <h3 className="text-sm font-medium text-gray-900">Customer Service</h3>
+                  <ul role="list" className="mt-2 space-y-3">
+                    {footerNavigation.customerService.map((item) => (
+                      <li key={item.name} className="text-sm">
+                        <a
+                          href={item.href}
+                          className="text-gray-500 hover:text-gray-600"
+                        >
+                          {item.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
 
                 {/* Company */}
                 <div className="flex flex-col items-start text-left">
                   <h3 className="text-sm font-medium text-gray-900">Company</h3>
-                  <ul role="list" className="mt-6 space-y-4">
+                  <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.company.map((item) => (
                       <li key={item.name} className="text-sm">
                         <a
@@ -93,7 +89,7 @@ export default function Footer() {
                 {/* Legal */}
                 <div className="flex flex-col items-start text-left">
                   <h3 className="text-sm font-medium text-gray-900">Legal</h3>
-                  <ul role="list" className="mt-6 space-y-4">
+                  <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.legal.map((item) => (
                       <li key={item.name} className="text-sm">
                         <a
@@ -106,6 +102,26 @@ export default function Footer() {
                     ))}
                   </ul>
                 </div>
+
+                {/* Social Media */}
+              <div className="flex flex-col items-start text-left">
+                <h3 className="text-sm font-medium text-gray-900">Follow Us</h3>
+                <ul role="list" className="flex flex-col mt-2 space-y-3">
+                  {footerNavigation.social.map((item) => (
+                    <li key={item.name} className="text-sm">
+                    <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center text-gray-500 hover:text-gray-600"
+                      >
+                        <item.icon className="h-5 w-5 mr-2" aria-hidden="true" />
+                        {item.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
               </div>
             </div>
 
@@ -126,7 +142,7 @@ export default function Footer() {
                     </a>
                   ))}
                 </div>
-                <div className="ml-6 border-l border-gray-200 pl-6">
+                {/* <div className="ml-6 border-l border-gray-200 pl-6">
                   <a
                     href="#"
                     className="flex items-center text-gray-500 hover:text-gray-600"
@@ -139,9 +155,10 @@ export default function Footer() {
                     <span className="ml-3 text-sm">Change</span>
                     <span className="sr-only">location and currency</span>
                   </a>
-                </div>
+                </div> */}
               </div>
             </div>
+
           </div>
         </div>
       </footer>

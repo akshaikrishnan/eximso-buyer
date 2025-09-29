@@ -15,7 +15,7 @@ export function CartItem({ item, onRemove }: CartItemProps) {
         <img
           src={item.product.thumbnail}
           alt={item.product.name}
-          className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48"
+          className="h-24 w-24 rounded-md object-contain object-center sm:h-48 sm:w-48"
         />
       </div>
 

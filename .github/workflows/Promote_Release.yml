@@ -1,0 +1,377 @@
+name: Promote Release PR (Merge, Tag, Release, Sync Back)
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to promote (targets master)"
+        required: false
+      tag:
+        description: "Optional tag to create (defaults to package.json version on master after merge)"
+        required: false
+  pull_request:
+    types: [labeled]
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  maybe_promote:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release')) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ACTIONS_PAT }}
+
+      - name: Force PAT for pushes (optional but robust)
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.ACTIONS_PAT }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "release-automation"
+          git config --global user.email "release-automation@users.noreply.github.com"
+
+      - name: Resolve PR number
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          PR_INPUT="${{ inputs.pr_number || '' }}"
+          if [ -n "$PR_INPUT" ]; then
+            PR="$PR_INPUT"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            PR="${{ github.event.pull_request.number }}"
+          else
+            echo "No pr_number input and not a PR event; discovering latest open release PR to master..."
+            PR=$(gh pr list --state open --base master --json number,headRefName,title,labels,updatedAt | \
+              jq -r '[ .[]
+                | select(
+                    ( (.labels|map(.name)|index("release")) != null )
+                    or (.headRefName|startswith("release/"))
+                    or (.title|test("(?i)\\brelease\\b"))
+                  )
+              ] | sort_by(.updatedAt) | reverse | (.[0].number // empty)')
+          fi
+
+          if [ -z "${PR:-}" ]; then
+            echo "::error::No open release PR targeting master found. Provide 'pr_number' when dispatching."
+            exit 1
+          fi
+          echo "pr=$PR" >> "$GITHUB_OUTPUT"
+          echo "::notice::Found PR #$PR for promotion"
+
+          # Validate PR details
+          gh pr view "$PR" --json number,state,baseRefName,headRefName,isCrossRepository,mergeable > pr.json
+          BASE=$(jq -r '.baseRefName' pr.json)
+          STATE=$(jq -r '.state' pr.json)
+          HEAD_REF=$(jq -r '.headRefName' pr.json)
+
+          if [ "$BASE" != "master" ]; then
+            echo "::error::PR base is '$BASE', expected 'master'"
+            exit 1
+          fi
+          if [ "$STATE" != "OPEN" ]; then
+            echo "::error::PR is not open: $STATE"
+            exit 1
+          fi
+
+          echo "head_ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Check mergeability & conflicts
+        id: mergeable
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Wait a moment for GitHub to compute mergeability
+          sleep 5
+
+          # Check mergeability via GraphQL
+          query='query($owner: String!, $name: String!, $number: Int!) {
+            repository(owner: $owner, name: $name) {
+              pullRequest(number: $number) {
+                mergeable
+                mergeStateStatus
+                state
+              }
+            }
+          }'
+
+          response=$(gh api graphql -f query="$query" \
+            -f owner="${{ github.repository_owner }}" \
+            -f name="${{ github.event.repository.name }}" \
+            -F number=${{ steps.resolve.outputs.pr }})
+
+          echo "$response" | jq .
+
+          MERGEABLE=$(echo "$response" | jq -r '.data.repository.pullRequest.mergeable')
+          MERGE_STATE=$(echo "$response" | jq -r '.data.repository.pullRequest.mergeStateStatus')
+          PR_STATE=$(echo "$response" | jq -r '.data.repository.pullRequest.state')
+
+          echo "mergeable=$MERGEABLE" >> "$GITHUB_OUTPUT"
+          echo "merge_state=$MERGE_STATE" >> "$GITHUB_OUTPUT"
+          echo "pr_state=$PR_STATE" >> "$GITHUB_OUTPUT"
+
+          if [ "$MERGEABLE" = "CONFLICTING" ]; then
+            echo "::error::PR has merge conflicts. Resolve conflicts before promoting."
+            exit 1
+          fi
+
+          if [ "$MERGE_STATE" = "DIRTY" ]; then
+            echo "::error::PR cannot be merged due to failing status checks."
+            exit 1
+          fi
+
+      - name: Get pre-merge version info
+        id: pre_merge_version
+        run: |
+          set -euo pipefail
+
+          # Get current master version
+          git checkout master
+          git pull --ff-only origin master
+
+          MASTER_VERSION=""
+          if [ -f "package.json" ]; then
+            MASTER_VERSION=$(jq -r '.version' package.json)
+          fi
+
+          # Get release branch version
+          git checkout "${{ steps.resolve.outputs.head_ref }}"
+
+          RELEASE_VERSION=""
+          if [ -f "package.json" ]; then
+            RELEASE_VERSION=$(jq -r '.version' package.json)
+          fi
+
+          echo "master_version=$MASTER_VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+
+          echo "::notice::Master version: $MASTER_VERSION"
+          echo "::notice::Release branch version: $RELEASE_VERSION"
+
+      - name: Merge PR (squash)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Switch back to master for merge
+          git checkout master
+
+          echo "::notice::Merging PR #${{ steps.resolve.outputs.pr }}"
+          gh pr merge "${{ steps.resolve.outputs.pr }}" \
+            --squash \
+            --delete-branch \
+            --admin \
+            --subject "chore(release): merge release PR #${{ steps.resolve.outputs.pr }}"
+
+      - name: Determine tag version
+        id: tagv
+        run: |
+          set -euo pipefail
+
+          # Ensure we're on latest master after merge
+          git checkout master
+          git pull --ff-only origin master
+
+          if [ -n "${{ inputs.tag || '' }}" ]; then
+            TAG="${{ inputs.tag }}"
+            echo "::notice::Using provided tag: $TAG"
+          else
+            if [ -f "package.json" ]; then
+              VERSION=$(jq -r '.version' package.json)
+              TAG="v$VERSION"
+              echo "::notice::Using package.json version: $TAG"
+            else
+              echo "::error::package.json not found and no tag provided"
+              exit 1
+            fi
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+          # Validate tag format
+          if ! echo "$TAG" | grep -E '^v?[0-9]+\.[0-9]+\.[0-9]+' > /dev/null; then
+            echo "::warning::Tag '$TAG' doesn't follow semantic versioning"
+          fi
+
+      - name: Create tag and push
+        id: create_tag
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.tagv.outputs.tag }}"
+
+          # Check if tag already exists
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG$"; then
+            echo "::warning::Tag $TAG already exists on origin; skipping tag creation"
+            echo "created=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Creating tag $TAG"
+            git tag -a "$TAG" -m "Release $TAG"
+            git push origin "$TAG"
+            echo "created=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.tagv.outputs.tag }}"
+
+          # Find previous tag
+          PREV=$(git describe --tags --abbrev=0 --match "v*" HEAD~1 2>/dev/null || true)
+
+          if [ -n "$PREV" ]; then
+            RANGE="${PREV}..HEAD"
+            echo "::notice::Generating notes for range: $RANGE"
+          else
+            RANGE="HEAD"
+            echo "::notice::No previous tag found, generating notes for all commits"
+          fi
+
+          echo "prev_tag=${PREV:-none}" >> "$GITHUB_OUTPUT"
+          echo "range=$RANGE" >> "$GITHUB_OUTPUT"
+
+          # Generate release notes
+          {
+            echo "## What's Changed"
+            echo ""
+            
+            if [ -n "$PREV" ]; then
+              # Get commits between tags, excluding merge commits
+              git log --pretty=format:"- %s (%h)" --no-merges "$RANGE" || echo "- Initial release"
+            else
+              # Get all commits if no previous tag
+              git log --pretty=format:"- %s (%h)" --no-merges || echo "- Initial release"
+            fi
+            
+            echo ""
+            echo ""
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV:-$(git rev-list --max-parents=0 HEAD)}...$TAG"
+          } > RELEASE_NOTES.md
+
+          echo "::group::Generated release notes"
+          cat RELEASE_NOTES.md
+          echo "::endgroup::"
+
+      - name: Create GitHub Release
+        id: create_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.tagv.outputs.tag }}"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::warning::Release $TAG already exists; skipping release creation"
+            echo "created=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Creating GitHub release for $TAG"
+            RELEASE_URL=$(gh release create "$TAG" \
+              --title "Release $TAG" \
+              --notes-file RELEASE_NOTES.md \
+              --verify-tag)
+            echo "created=true" >> "$GITHUB_OUTPUT"
+            echo "url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+            echo "::notice::Created release: $RELEASE_URL"
+          fi
+
+      - name: Bump version in develop branch
+        id: version_bump
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Get the current version from master (after merge)
+          git checkout master
+          git pull --ff-only origin master
+
+          if [ ! -f "package.json" ]; then
+            echo "::warning::No package.json found, skipping version sync"
+            echo "status=no_package_json" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          MASTER_VERSION=$(jq -r '.version' package.json)
+          echo "::notice::Master version: $MASTER_VERSION"
+
+          # Switch to develop and check current version
+          git fetch origin develop:develop --update-head-ok
+          git checkout develop
+          git pull --ff-only origin develop
+
+          if [ ! -f "package.json" ]; then
+            echo "::warning::No package.json in develop branch"
+            echo "status=no_package_json_develop" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          DEVELOP_VERSION=$(jq -r '.version' package.json)
+          echo "::notice::Develop version: $DEVELOP_VERSION"
+
+          # Check if versions are already in sync
+          if [ "$MASTER_VERSION" = "$DEVELOP_VERSION" ]; then
+            echo "::notice::Versions already in sync ($MASTER_VERSION)"
+            echo "status=in_sync" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "::notice::Updating develop version from $DEVELOP_VERSION to $MASTER_VERSION"
+
+          # Update package.json version
+          jq ".version = \"$MASTER_VERSION\"" package.json > package.json.tmp && mv package.json.tmp package.json
+
+          # Update package-lock.json version if it exists
+          if [ -f "package-lock.json" ]; then
+            jq ".version = \"$MASTER_VERSION\"" package-lock.json > package-lock.json.tmp && mv package-lock.json.tmp package-lock.json
+          fi
+
+          # Check if there are any changes to commit
+          if git diff --quiet; then
+            echo "::notice::No changes needed"
+            echo "status=no_changes" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Commit and push the version bump
+          git add package.json
+          [ -f "package-lock.json" ] && git add package-lock.json
+
+          git commit -m "chore: bump version to $MASTER_VERSION after release"
+          git push origin develop
+
+          echo "status=updated" >> "$GITHUB_OUTPUT"
+          echo "old_version=$DEVELOP_VERSION" >> "$GITHUB_OUTPUT"
+          echo "new_version=$MASTER_VERSION" >> "$GITHUB_OUTPUT"
+          echo "::notice::Successfully updated develop branch version to $MASTER_VERSION"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "::group::Workflow Summary"
+          echo "✅ PR: #${{ steps.resolve.outputs.pr }}"
+          echo "✅ Tag: ${{ steps.tagv.outputs.tag }}"
+          echo "✅ Previous Tag: ${{ steps.notes.outputs.prev_tag }}"
+          echo "✅ Release Created: ${{ steps.create_release.outputs.created || 'false' }}"
+          echo "✅ Version Sync: ${{ steps.version_bump.outputs.status || 'failed' }}"
+
+          if [ "${{ steps.create_release.outputs.created }}" = "true" ]; then
+            echo "🎉 Release URL: ${{ steps.create_release.outputs.url }}"
+          fi
+
+          if [ "${{ steps.version_bump.outputs.status }}" = "updated" ]; then
+            echo "🔄 Updated develop version: ${{ steps.version_bump.outputs.old_version }} → ${{ steps.version_bump.outputs.new_version }}"
+          elif [ "${{ steps.version_bump.outputs.status }}" = "in_sync" ]; then
+            echo "✅ Develop already in sync with master version"
+          fi
+          echo "::endgroup::"

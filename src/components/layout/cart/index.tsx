@@ -1,11 +1,11 @@
- "use client";
+"use client";
 import Loader from "@/components/common/loader/loader";
 import EmptyCart from "./empty-cart";
 import { useCart } from "@/hooks/use-cart";
 import { CartItem } from "./cart-item";
 import {
   CheckIcon,
-  ClockIcon, 
+  ClockIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/20/solid";
 import Link from "next/link";
@@ -69,7 +69,8 @@ export function OrderSummary({
         <div className="flex items-center justify-between border-t border-gray-200 pt-4">
           <dt className="text-base font-medium text-gray-900">Order total</dt>
           <dd className="text-base font-medium text-gray-900">
-            <Price amount={Math.ceil(subTotal + subTotal * 0.05 + 5)} />
+            <Price amount={Math.ceil(subTotal + subTotal * 0.05 + (Number(process.env.shippingesstimate) || 40))} />
+
           </dd>
         </div>
       </dl>

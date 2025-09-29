@@ -7,9 +7,8 @@ export default function TopBar({ className }: { className: string }) {
   return (
     <>
       <div
-        className={`w-full bg-white h-10 border-b border-gray-200 ${
-          className || ""
-        }`}
+        className={`w-full bg-white h-10 border-b border-gray-200 ${className || ""
+          }`}
       >
         <div className="container-x mx-auto h-full">
           <div className="flex justify-between items-center h-full ">
@@ -46,9 +45,10 @@ export default function TopBar({ className }: { className: string }) {
               </ul>
             </div>
 
-            <div className="topbar-dropdowns sm:block relative z-50 hidden xl:block">
+            <div className="topbar-dropdowns relative z-50 block lg:hidden xl:block">
               <CurrencySelector />
             </div>
+
           </div>
         </div>
       </div>

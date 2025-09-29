@@ -17,7 +17,7 @@ const MobileDoc = () => {
     });
 
     return (
-        <div className="fixed bottom-0 left-0 w-full bg-white shadow-md sm:hidden">
+        <div className="fixed bottom-0 left-0 w-full bg-white shadow-md sm:hidden z-50">
             <div className="flex justify-around py-2 text-gray-700">
                 <Link
                     href="/"
@@ -37,14 +37,17 @@ const MobileDoc = () => {
 
                 <Link
                     href="/cart"
-                    className={`flex flex-col items-center ${pathname === "/cart" ? "text-indigo-600 font-bold" : "text-gray-500"}`}
+                    className={`relative flex flex-col items-center ${pathname === "/cart" ? "text-indigo-600 font-bold" : "text-gray-500"
+                        }`}
                 >
-                    <span className="absolute -top-1 left-60 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {/* Badge positioned relative to the icon */}
+                    <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 min-w-[1.25rem] flex items-center justify-center text-xs">
                         {cart?.items?.length || 0}
                     </span>
-
-                    <ShoppingCartIcon className={`w-6 h-6 ${pathname === "/cart" ? "text-indigo-600 fill-indigo-600" : "text-gray-500"}`} />
-
+                    <ShoppingCartIcon
+                        className={`w-6 h-6 ${pathname === "/cart" ? "text-indigo-600 fill-indigo-600" : "text-gray-500"
+                            }`}
+                    />
                     <span className="text-xs">Cart</span>
                 </Link>
 

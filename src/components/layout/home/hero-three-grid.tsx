@@ -17,10 +17,17 @@ interface BannerItem {
 // ✅ Fetch banners with better handling
 async function fetchBanners(): Promise<BannerItem[]> {
   try {
-    const res = await api.get(endpoints.banner);
+    // const res = await api.get(endpoints.banner);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/${endpoints.banner}`,
+      {
+        cache: "force-cache",
+        next: { revalidate: 3600, tags: ["cache", "banners"] },
+      } // revalidate every hour
+    ).then((res) => res.json());
 
     // Ensure the response data is in the correct format
-    let banners = res.data?.result || res.data || [];
+    let banners = res.result || res || [];
 
     // Sort banners by latest, handling missing `createdAt`
     banners = banners.sort(
