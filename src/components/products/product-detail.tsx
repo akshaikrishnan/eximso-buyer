@@ -1,4 +1,3 @@
-// product details.tsx
 "use client";
 
 import {
@@ -8,7 +7,7 @@ import {
   TabPanel,
   TabPanels,
 } from "@headlessui/react";
-import { HeartIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { StarIcon } from "@heroicons/react/20/solid";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
@@ -18,43 +17,59 @@ import AddToWishlistBtn from "./add-to-wishlist";
 import { RelatedProduct } from "./related-products";
 import { Price } from "../common/price";
 
-function classNames(...classes: any) {
+function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+// --- helpers (inlined so you don't add new files)
+function toSlug(s?: string) {
+  if (!s) return "";
+  return s
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+function pickProducts(payload: any) {
+  return payload?.result?.data ?? payload?.data ?? payload ?? [];
+}
+// ---
+
 export default function ProductDetail({ product }: any) {
-  console.log("product", product);
+  const images: string[] = Array.isArray(product?.images)
+    ? product.images
+    : product?.thumbnail
+    ? [product.thumbnail]
+    : [];
+
+  const categoryName: string | undefined =
+    product?.category?.name ?? product?.categoryName;
+  const subcategoryName: string | undefined =
+    product?.subcategory?.name ?? product?.subcategoryName;
+
   const productDetail = [
     {
       name: "Dimensions",
       data: [
-        `Length: ${product.dimensions.length} cm`,
-        `Width: ${product.dimensions.width} cm`,
-        `Height: ${product.dimensions.height} cm`,
-        `Weight: ${product.dimensions.weight} kg`,
+        `Length: ${product?.dimensions?.length ?? "—"} cm`,
+        `Width: ${product?.dimensions?.width ?? "—"} cm`,
+        `Height: ${product?.dimensions?.height ?? "—"} cm`,
+        `Weight: ${product?.dimensions?.weight ?? "—"} kg`,
       ],
     },
-    {
-      name: "Category",
-      data: [product.category.name],
-    },
-    {
-      name: "Sub Category",
-      data: [product.subcategory.name],
-    },
-    { name: "Brand", data: [product.brand] },
-  ];
+    ...(categoryName ? [{ name: "Category", data: [categoryName] }] : []),
+    ...(subcategoryName ? [{ name: "Sub Category", data: [subcategoryName] }] : []),
+    ...(product?.brand ? [{ name: "Brand", data: [product.brand] }] : []),
+  ] as { name: string; data: string[] }[];
+
   if (product?.description) {
-    productDetail.push({
-      name: "Description",
-      data: [product.description],
-    });
+    productDetail.push({ name: "Description", data: [product.description] });
   }
   if (product?.material) {
-    productDetail.push({
-      name: "Material",
-      data: [product.material],
-    });
+    productDetail.push({ name: "Material", data: [product.material] });
   }
   if (product?.countryOfOrigin) {
     productDetail.push({
@@ -63,22 +78,28 @@ export default function ProductDetail({ product }: any) {
     });
   }
 
+  // ✅ FIX: use category slug (backend expects slug, not ObjectId)
+  const catSlug = toSlug(categoryName);
+
   const { data: related, isLoading } = useQuery({
-    queryKey: ["products", product.category._id],
+    queryKey: ["products", "related", catSlug, product?._id],
+    enabled: !!catSlug,
     queryFn: () =>
       api
         .get(endpoints.products, {
           params: {
-            category: product.category._id,
+            category: catSlug, // <-- slug, not _id
             limit: 4,
           },
         })
         .then((res) =>
-          res.data.result.data.filter((p: any) => p._id !== product._id)
+          pickProducts(res.data).filter((p: any) => p._id !== product._id)
         )
-        .catch((err) => console.log(err)),
+        .catch((err) => {
+          console.error("Related fetch error:", err);
+          return [];
+        }),
   });
-  console.log(related);
 
   return (
     <div className="bg-white">
@@ -87,29 +108,25 @@ export default function ProductDetail({ product }: any) {
           {/* Product */}
           <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
             {/* Image gallery */}
-            <Tab.Group
-              as="div"
-              className="flex flex-col-reverse lg:sticky top-10"
-            >
+            <Tab.Group as="div" className="flex flex-col-reverse lg:sticky top-10">
               {/* Image selector */}
               <div className="mx-auto mt-6 w-full max-w-2xl sm:block lg:max-w-none">
                 <TabList className="grid grid-cols-4 gap-6">
-                  {product.images.map((image: string, index: number) => (
+                  {images.map((image: string, index: number) => (
                     <Tab
                       key={index}
                       className="relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium uppercase text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-opacity-50 focus:ring-offset-4"
                     >
                       {({ selected }) => (
                         <>
-                          {/* <span className="sr-only">{image.name}</span> */}
                           <span className="absolute inset-0 overflow-hidden rounded-md flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={image}
-                              alt=""
+                              alt={product?.name ?? "Product image"}
                               className="max-h-full max-w-full object-contain"
                             />
                           </span>
-
                           <span
                             className={classNames(
                               selected ? "ring-indigo-500" : "ring-transparent",
@@ -125,23 +142,23 @@ export default function ProductDetail({ product }: any) {
               </div>
 
               <TabPanels className="w-full">
-                {product.images.map((image: string, idx: number) => (
+                {images.map((image: string, idx: number) => (
                   <TabPanel key={idx} className="flex justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={image}
-                      alt=""
+                      alt={product?.name ?? "Product image"}
                       className="max-w-full max-h-[80vh] object-contain sm:rounded-lg"
                     />
                   </TabPanel>
                 ))}
               </TabPanels>
-
             </Tab.Group>
 
             {/* Product info */}
             <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
               <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                {product.name}
+                {product?.name}
               </h1>
 
               <div className="mt-3">
@@ -155,7 +172,7 @@ export default function ProductDetail({ product }: any) {
                     amount={
                       product?.discountPercentage > 0
                         ? product?.offerPrice
-                        : product.price
+                        : product?.price
                     }
                   />
                 </p>
@@ -163,7 +180,7 @@ export default function ProductDetail({ product }: any) {
                   <p className="text-sm">
                     M.R.P :{" "}
                     <del>
-                      <Price amount={product.price} />
+                      <Price amount={product?.price} />
                     </del>
                   </p>
                 )}
@@ -178,7 +195,7 @@ export default function ProductDetail({ product }: any) {
                       <StarIcon
                         key={rating}
                         className={classNames(
-                          product.rating > rating
+                          (product?.rating ?? 0) > rating
                             ? "text-indigo-500"
                             : "text-gray-300",
                           "h-5 w-5 flex-shrink-0"
@@ -187,62 +204,21 @@ export default function ProductDetail({ product }: any) {
                       />
                     ))}
                   </div>
-                  <p className="sr-only">{product.rating} out of 5 stars</p>
+                  <p className="sr-only">{product?.rating} out of 5 stars</p>
                 </div>
               </div>
 
               <div className="mt-6">
                 <h3 className="sr-only">Description</h3>
-
                 <div
                   className="space-y-6 text-base text-gray-700"
-                  dangerouslySetInnerHTML={{ __html: product.shortDescription }}
+                  dangerouslySetInnerHTML={{
+                    __html: product?.shortDescription ?? "",
+                  }}
                 />
               </div>
 
               <div className="mt-6">
-                {/* Colors */}
-                <div>
-                  {/* <h3 className="text-sm text-gray-600">Color</h3> */}
-
-                  {/* <RadioGroup
-                    value={selectedColor}
-                    onChange={setSelectedColor}
-                    className="mt-2"
-                  >
-                    <RadioGroupLabel className="sr-only">
-                      Choose a color
-                    </RadioGroupLabel>
-                    <div className="flex items-center space-x-3">
-                      {product.colors.map((color) => (
-                        <RadioGroupOption
-                          key={color.name}
-                          value={color}
-                          className={({ active, checked }) =>
-                            classNames(
-                              color.selectedColor,
-                              active && checked ? "ring ring-offset-1" : "",
-                              !active && checked ? "ring-2" : "",
-                              "relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 focus:outline-none"
-                            )
-                          }
-                        >
-                          <RadioGroupLabel as="span" className="sr-only">
-                            {color.name}
-                          </RadioGroupLabel>
-                          <span
-                            aria-hidden="true"
-                            className={classNames(
-                              color.bgColor,
-                              "h-8 w-8 rounded-full border border-black border-opacity-10"
-                            )}
-                          />
-                        </RadioGroupOption>
-                      ))}
-                    </div>
-                  </RadioGroup> */}
-                </div>
-
                 <div className="mt-10 flex ">
                   <AddToBagBtn product={product} />
                   <button
@@ -264,11 +240,10 @@ export default function ProductDetail({ product }: any) {
                 </h2>
                 <div className="mt-6">
                   <h3 className="sr-only">Description</h3>
-
                   <div
                     className="space-y-6 text-base text-gray-700"
                     dangerouslySetInnerHTML={{
-                      __html: product.detailedDescription,
+                      __html: product?.detailedDescription ?? "",
                     }}
                   />
                 </div>
@@ -341,8 +316,8 @@ export default function ProductDetail({ product }: any) {
 
               {!isLoading && (
                 <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-                  {related.map((product: any) => (
-                    <RelatedProduct product={product} key={product._id} />
+                  {related.map((rp: any) => (
+                    <RelatedProduct product={rp} key={rp._id} />
                   ))}
                 </div>
               )}
