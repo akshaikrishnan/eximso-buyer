@@ -32,7 +32,12 @@ export default function RadioSelector<T extends RadioItem>({
   isGrid = false,
 }: RadioSelectorProps<T>) {
   return (
-    <RadioGroup value={selectedItem} onChange={onChange} className={className}>
+    <RadioGroup
+      value={selectedItem}
+      onChange={onChange}
+      className={className}
+      key={selectedItem?._id}
+    >
       {label && (
         <Label className="text-base font-medium text-gray-900">{label}</Label>
       )}

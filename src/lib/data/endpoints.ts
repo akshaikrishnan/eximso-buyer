@@ -15,4 +15,5 @@ export const endpoints = {
   filters: "products/filters",
   categoryPage: "category/page",
   upload: "media/s3-upload",
+  paymentProviders: "payment-providers",
 };

@@ -44,6 +44,20 @@ const config: Config = {
           "900": "#1e3a8a",
           "950": "#172554",
         },
+        eximaccent: {
+          "50": "#f1f8fe",
+          "100": "#e1effd",
+          "200": "#bddefa",
+          "300": "#82c4f7",
+          "400": "#4dadf1",
+          "500": "#178ce0",
+          "600": "#0a6ebf",
+          "700": "#0a589a",
+          "800": "#0c4b80",
+          "900": "#103f6a",
+          "950": "#0b2846",
+        },
+
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -129,12 +143,24 @@ const config: Config = {
       },
       animation: {
         shine: "shine 1s",
+        "checkmark-stroke":
+          "checkmark-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards",
+        "checkmark-scale": "checkmark-scale 0.3s ease-in-out 0.6s forwards",
       },
       keyframes: {
         shine: {
           "100%": {
             left: "125%",
           },
+        },
+        "checkmark-stroke": {
+          "0%": { "stroke-dashoffset": "100" },
+          "100%": { "stroke-dashoffset": "0" },
+        },
+        "checkmark-scale": {
+          "0%": { transform: "scale(0.8)", opacity: "0" },
+          "50%": { transform: "scale(1.1)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
         },
       },
     },

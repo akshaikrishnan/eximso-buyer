@@ -9,10 +9,10 @@ import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api/axios.interceptor";
 import { sample } from "@/lib/data/checkoutdata";
 import { endpoints } from "@/lib/data/endpoints";
-import { razorPay } from "@/lib/razorpay";
+// import { razorPay } from "@/lib/razorpay";
 import { LockClosedIcon } from "@heroicons/react/20/solid";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Loader2Icon } from "lucide-react";
 import React from "react";
@@ -26,20 +26,46 @@ interface CheckoutData {
 }
 
 export default function CheckoutPage() {
+  const { data: paymentProviders, isLoading } = useQuery({
+    queryKey: ["payment-providers"],
+    queryFn: () =>
+      api.get(endpoints.paymentProviders).then((res) => {
+        const defaultProvider = res.data.find(
+          (item: any) => item.slug === "payu"
+        );
+        console.log({ defaultProvider });
+        setCheckOutData((prev: any) => ({
+          ...prev,
+          paymentMethod: defaultProvider || res.data[0],
+        }));
+        return res.data;
+      }),
+    refetchOnWindowFocus: false,
+  });
+
   const [checkOutData, setCheckOutData] = React.useState<any>({
     shippingAddress: null,
     billingAddress: null,
     isSameAddress: true,
     shippingMethod: sample.shippimngMethods.find((item) => item.isActive),
-    paymentMethod: sample.paymentMethods.find((item) => item.isActive),
+    paymentMethod: paymentProviders?.find((item: any) => item.isActive),
   });
   const { subTotal } = useCart();
 
   const paymentMutation = useMutation({
     mutationFn: (data: any) =>
       api.post(endpoints.checkout, data).then((res) => res.data),
-    onSuccess: (data) => {
-      razorPay(data);
+    onSuccess: async (data) => {
+      console.log(data);
+      if (data.paymentMethod === "razorpay") {
+        const { razorPay } = await import("@/lib/razorpay");
+        razorPay(data);
+      }
+      if (data.payu) {
+        console.log("Initiating PayU checkout with data:", data);
+        const { payuCheckout } = await import("@/lib/payu");
+        payuCheckout(data);
+      }
     },
     onError: (data: any) => {
       console.error(data);
@@ -72,7 +98,7 @@ export default function CheckoutPage() {
         ? checkOutData.shippingAddress._id
         : checkOutData.billingAddress._id,
       shippingMethod: checkOutData.shippingMethod._id,
-      paymentMethod: checkOutData.paymentMethod._id,
+      paymentMethod: checkOutData.paymentMethod.slug,
     });
   };
   return (
@@ -127,7 +153,8 @@ export default function CheckoutPage() {
 
               <CheckoutBlock>
                 <RadioSelector
-                  items={sample.paymentMethods}
+                  key={checkOutData.paymentMethod?._id}
+                  items={paymentProviders || []}
                   selectedItem={checkOutData.paymentMethod}
                   onChange={(item) => {
                     handleCheckoutData({ paymentMethod: item });
