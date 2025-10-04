@@ -70,7 +70,7 @@ export default function ProductDetail({ product }: any) {
         .get(endpoints.products, {
           params: {
             category: product.category._id,
-            limit: 5,
+            limit: 4,
           },
         })
         .then((res) =>
@@ -103,12 +103,12 @@ export default function ProductDetail({ product }: any) {
                         <>
                           {/* <span className="sr-only">{image.name}</span> */}
                           <span className="absolute inset-0 overflow-hidden rounded-md flex items-center justify-center">
-  <img
-    src={image}
-    alt=""
-    className="max-h-full max-w-full object-contain"
-  />
-</span>
+                            <img
+                              src={image}
+                              alt=""
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          </span>
 
                           <span
                             className={classNames(

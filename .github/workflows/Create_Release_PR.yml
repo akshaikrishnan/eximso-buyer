@@ -43,6 +43,7 @@ jobs:
         with:
           ref: develop
           fetch-depth: 0 # crucial to fetch all history and tags
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,7 +53,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Compute version (no write)
+      - name: Compute version
         id: compute_version
         shell: bash
         run: |
@@ -91,106 +92,143 @@ jobs:
 
           echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
 
-      - name: Prepare placeholder change for PR
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p .github
-          echo "release init for v${{ steps.compute_version.outputs.new_version }}" > .github/release-init.txt
-
-      - name: Check diff against master
-        id: check_diff
+      - name: Check if there are changes to release
+        id: check_changes
         run: |
           set -euo pipefail
           git fetch origin master
-          if git diff --quiet origin/master...HEAD -- package.json; then
-            echo "No changes in package.json compared to master. Exiting."
+          
+          # Check if develop has commits ahead of master
+          AHEAD_COUNT=$(git rev-list --count origin/master..HEAD)
+          echo "Commits ahead of master: $AHEAD_COUNT"
+          
+          if [ "$AHEAD_COUNT" -eq 0 ]; then
+            echo "No new commits to release. Develop is up to date with master."
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
           else
-            echo "Changes detected in package.json compared to master."
+            echo "Found $AHEAD_COUNT commits to release."
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Generate release notes
         id: release_notes
+        if: steps.check_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           # Find the last tag on the master branch
-          LAST_TAG=$(git describe --tags --abbrev=0 master 2>/dev/null || echo "")
+          LAST_TAG=$(git describe --tags --abbrev=0 origin/master 2>/dev/null || echo "")
 
           if [ -z "$LAST_TAG" ]; then
-            echo "No previous tag found. Generating release notes from all commits on develop."
-            LOG_RANGE="HEAD"
+            echo "No previous tag found. Generating release notes from commits since master."
+            LOG_RANGE="origin/master..HEAD"
           else
             echo "Found last tag: $LAST_TAG. Generating notes from new commits."
             LOG_RANGE="$LAST_TAG..HEAD"
           fi
 
           # Bulleted list of commit messages (oldest first)
-          RELEASE_NOTES=$(git log --pretty=format:'- %s' --reverse $LOG_RANGE)
+          RELEASE_NOTES=$(git log --pretty=format:'- %s (%h)' --reverse $LOG_RANGE)
 
           # Escape for GitHub Actions output
           RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
           RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
           RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
 
-          echo "release_notes=$RELEASE_NOTES" >> "$GITHUB_OUTPUT"
+          echo "release_notes<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$RELEASE_NOTES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
-      - name: Create Release Branch and Pull Request
-        id: release_pr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }} # or PAT if policy requires
-          title: "Release ${{ steps.compute_version.outputs.new_version }}"
-          commit-message: "chore(release): init PR for v${{ steps.compute_version.outputs.new_version }}"
-          body: |
-            ## Release ${{ steps.compute_version.outputs.new_version }}
-            This PR will bump version and include release notes.
-          branch: "release/v${{ steps.compute_version.outputs.new_version }}"
-          base: master
-          labels: "release, automated"
-          # optionally keep the placeholder out of future PRs
-          add-paths: |
-            .github/release-init.txt
-
-      - name: Check if PR was created
-        if: ${{ steps.release_pr.outputs.pull-request-number != '' }}
-        run: |
-          echo "Pull Request created successfully!"
-          echo "PR URL: ${{ steps.release_pr.outputs.pull-request-url }}"
-      - name: Bump version on PR branch and push
-        if: ${{ steps.release_pr.outputs.pull-request-branch != '' }}
-        env:
-          PR_BRANCH: ${{ steps.release_pr.outputs.pull-request-branch }}
+      - name: Create release branch with all changes
+        if: steps.check_changes.outputs.has_changes == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          echo "PR branch is: $PR_BRANCH"
-
-          # Check out the PR branch the action just created
-          git fetch origin "$PR_BRANCH:$PR_BRANCH"
-          git checkout "$PR_BRANCH"
-
-          # Remove placeholder, bump, commit
-          rm -f .github/release-init.txt || true
-
-          NEW="${{ steps.compute_version.outputs.new_version }}"
-          npm version "$NEW" --no-git-tag-version
-
-          git config user.name  "github-actions[bot]"
+          
+          RELEASE_BRANCH="release/v${{ steps.compute_version.outputs.new_version }}"
+          NEW_VERSION="${{ steps.compute_version.outputs.new_version }}"
+          
+          # Configure git
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json .github/release-init.txt 2>/dev/null || true
+          
+          # Delete existing release branch if it exists
+          git push origin --delete "$RELEASE_BRANCH" || true
+          git branch -D "$RELEASE_BRANCH" || true
+          
+          # Create new release branch from develop
+          git checkout -b "$RELEASE_BRANCH"
+          
+          # Bump version
+          npm version "$NEW_VERSION" --no-git-tag-version
+          
+          # Commit version bump
+          git add package.json package-lock.json
+          git commit -m "chore(release): bump version to v$NEW_VERSION"
+          
+          # Push the release branch
+          git push origin "$RELEASE_BRANCH"
 
-          if git diff --cached --quiet; then
-            echo "No changes to commit (unexpected)."
-          else
-            git commit -m "chore(release): bump version to v$NEW"
-            git push origin "$PR_BRANCH"
-          fi
-      - name: Update PR title after bump (optional)
-        if: ${{ steps.release_pr.outputs.pull-request-number != '' }}
+      - name: Create Pull Request using GitHub CLI
+        if: steps.check_changes.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
-          gh pr edit "${{ steps.release_pr.outputs.pull-request-number }}" \
-            --title "Release ${{ steps.compute_version.outputs.new_version }}"
+          set -euo pipefail
+          
+          RELEASE_BRANCH="release/v${{ steps.compute_version.outputs.new_version }}"
+          NEW_VERSION="${{ steps.compute_version.outputs.new_version }}"
+          
+          # Create PR body
+          cat > pr_body.md << 'EOF'
+          ## Release v${{ steps.compute_version.outputs.new_version }}
+          
+          This release includes the following changes from develop branch:
+          
+          ### Changes
+          ${{ steps.release_notes.outputs.release_notes }}
+          
+          ### Version Bump
+          - Updated version to v${{ steps.compute_version.outputs.new_version }}
+          
+          ---
+          *This PR was created automatically by the release workflow.*
+          EOF
+          
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --base master --head "$RELEASE_BRANCH" --json number --jq '.[0].number' || echo "")
+          
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            echo "PR #$EXISTING_PR already exists. Updating it."
+            gh pr edit "$EXISTING_PR" --title "Release v$NEW_VERSION" --body-file pr_body.md
+            PR_URL=$(gh pr view "$EXISTING_PR" --json url --jq '.url')
+            echo "pr_number=$EXISTING_PR" >> "$GITHUB_OUTPUT"
+            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          else
+            echo "Creating new PR."
+            PR_URL=$(gh pr create \
+              --title "Release v$NEW_VERSION" \
+              --body-file pr_body.md \
+              --base master \
+              --head "$RELEASE_BRANCH" \
+              --label "release,automated")
+            
+            PR_NUMBER=$(gh pr view "$PR_URL" --json number --jq '.number')
+            echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Output results
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          echo "✅ Pull Request created/updated successfully!"
+          echo "📋 PR Number: ${{ steps.create_pr.outputs.pr_number }}"
+          echo "🔗 PR URL: ${{ steps.create_pr.outputs.pr_url }}"
+          echo "🌿 Branch: release/v${{ steps.compute_version.outputs.new_version }}"
+          echo "📦 Version: v${{ steps.compute_version.outputs.new_version }}"
+
+      - name: No changes to release
+        if: steps.check_changes.outputs.has_changes == 'false'
+        run: |
+          echo "ℹ️  No new changes to release. Develop branch is up to date with master."
