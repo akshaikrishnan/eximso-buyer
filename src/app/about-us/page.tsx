@@ -99,7 +99,8 @@ const brandOnDemandSteps = [
   "Global Reach:  opportunities in new markets with ease.",
   "Customer-Centric Approach:  A hassle-free shopping experience for buyers around the globe.",
   "Tech-Driven Solutions: We use advanced tools to simplify logistics, payments, and operations.",
-  "Support for Small Businesses: Helping local sellers go global and thrive.Whether you're exploring international products or scaling your business globally, eximso here to make cross-border trade simple, reliable, and efficient.",
+  "Support for Small Businesses: Helping local sellers go global and thrive.",
+  "Whether you're exploring international products or scaling your business globally, eximso here to make cross-border trade simple, reliable, and efficient.",
 ];
 
 export default function AboutUs() {
