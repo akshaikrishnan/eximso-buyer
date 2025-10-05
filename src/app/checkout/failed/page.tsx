@@ -87,8 +87,8 @@ export default function PaymentFailurePage({
         Payment Failed
       </h1>
       <p className="mt-2 text-center text-sm text-muted-foreground">
-        We couldn't process your payment. If funds were deducted, they'll be
-        auto‑refunded.
+        We couldn&apos;t process your payment. If funds were deducted,
+        they&apos;ll be auto‑refunded.
       </p>
 
       {/* Order summary card */}
@@ -137,10 +137,10 @@ export default function PaymentFailurePage({
       {/* CTA buttons */}
       <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
         <Link
-          href="/account/orders"
+          href="/checkout"
           className="inline-flex flex-1 items-center justify-center rounded-xl bg-rose-600 px-4 py-3 text-sm font-medium text-white shadow transition hover:bg-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600/60"
         >
-          Go to Orders
+          Go to Cart
         </Link>
         <Link
           href="/"
