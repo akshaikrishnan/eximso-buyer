@@ -11,6 +11,7 @@ export interface CartItem {
     offerPrice?: number;
     thumbnail: string;
     slug: string;
+    stock: number;
   };
   quantity: number;
   color?: string;

@@ -16,7 +16,7 @@ import clsx from "clsx";
 export default function Cart() {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
   const isAnyOfItemsOutOfStock = cart?.items?.some(
-    (item: any) => item.stock <= 0
+    (item: any) => item.product.stock <= 0
   );
 
   if (isLoading) return <Loader fullScreen />;
@@ -37,7 +37,7 @@ export default function Cart() {
               {cart.items.map((item) => (
                 <CartItem
                   key={item.id}
-                  item={{ ...item, inStock: item.stock > 0 }}
+                  item={{ ...item, inStock: item.product.stock > 0 }}
                   onRemove={removeMutation.mutate}
                 />
               ))}

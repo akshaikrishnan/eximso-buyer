@@ -18,7 +18,7 @@ export function CartItem({ item, onRemove }: CartItemProps) {
           alt={item.product.name}
           className={clsx(
             "h-24 w-24 rounded-md object-contain object-center sm:h-48 sm:w-48",
-            item.stock <= 0 && "filter grayscale"
+            item.product.stock <= 0 && "filter grayscale"
           )}
         />
       </div>
@@ -83,7 +83,7 @@ export function CartItem({ item, onRemove }: CartItemProps) {
               aria-hidden="true"
             />
           )}
-          <span>{item.stock === 0 ? "Out of Stock" : "In Stock"}</span>
+          <span>{item.product.stock === 0 ? "Out of Stock" : "In Stock"}</span>
         </p>
       </div>
     </li>
