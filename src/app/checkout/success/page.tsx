@@ -131,7 +131,7 @@ export default function PaymentSuccessPage() {
       <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
         <Link
           href={
-            "/account/my-orders" +
+            "/profile/my-orders" +
             (details.orderId ? `/${details.orderId}` : "")
           }
           className="inline-flex flex-1 items-center justify-center rounded-xl bg-eximblue-600 px-4 py-3 text-sm font-medium text-white shadow transition hover:bg-eximblue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/60"
