@@ -40,7 +40,7 @@ export default function ProductDetail({ product }: any) {
     },
     {
       name: "Sub Category",
-      data: [product.subcategory.name],
+      data: [product?.subcategory?.name],
     },
     { name: "Brand", data: [product.brand] },
   ];
@@ -79,6 +79,11 @@ export default function ProductDetail({ product }: any) {
         .catch((err) => console.log(err)),
   });
   console.log(related);
+
+  const isOutOfStock =
+    product?.stock < product?.minimumOrderQuantity ||
+    !product?.isActive ||
+    product?.stock <= 0;
 
   return (
     <div className="bg-white">
@@ -135,7 +140,6 @@ export default function ProductDetail({ product }: any) {
                   </TabPanel>
                 ))}
               </TabPanels>
-
             </Tab.Group>
 
             {/* Product info */}
@@ -242,7 +246,11 @@ export default function ProductDetail({ product }: any) {
                     </div>
                   </RadioGroup> */}
                 </div>
-
+                {isOutOfStock && (
+                  <p className="text-sm text-red-600 font-medium">
+                    Out of Stock
+                  </p>
+                )}
                 <div className="mt-10 flex ">
                   <AddToBagBtn product={product} />
                   <button

@@ -11,9 +11,13 @@ import {
 import Link from "next/link";
 import { ReactNode } from "react";
 import { Price } from "@/components/common/price";
+import clsx from "clsx";
 
 export default function Cart() {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
+  const isAnyOfItemsOutOfStock = cart?.items?.some(
+    (item: any) => item.stock <= 0
+  );
 
   if (isLoading) return <Loader fullScreen />;
   if (cart?.items?.length === 0 || isError || !cart) return <EmptyCart />;
@@ -33,14 +37,17 @@ export default function Cart() {
               {cart.items.map((item) => (
                 <CartItem
                   key={item.id}
-                  item={item}
+                  item={{ ...item, inStock: item.stock > 0 }}
                   onRemove={removeMutation.mutate}
                 />
               ))}
             </ul>
           </section>
 
-          <OrderSummary subTotal={subTotal} />
+          <OrderSummary
+            subTotal={subTotal}
+            isAnyOfItemsOutOfStock={isAnyOfItemsOutOfStock}
+          />
         </form>
       </div>
     </div>
@@ -50,8 +57,10 @@ export default function Cart() {
 export function OrderSummary({
   subTotal,
   children,
+  isAnyOfItemsOutOfStock = false,
 }: {
   subTotal: number;
+  isAnyOfItemsOutOfStock?: boolean;
   children?: ReactNode;
 }) {
   return (
@@ -69,12 +78,21 @@ export function OrderSummary({
         <div className="flex items-center justify-between border-t border-gray-200 pt-4">
           <dt className="text-base font-medium text-gray-900">Order total</dt>
           <dd className="text-base font-medium text-gray-900">
-            <Price amount={Math.ceil(subTotal + subTotal * 0.05 + (Number(process.env.shippingesstimate) || 40))} />
-
+            <Price
+              amount={Math.ceil(
+                subTotal +
+                  subTotal * 0.05 +
+                  (Number(process.env.shippingesstimate) || 40)
+              )}
+            />
           </dd>
         </div>
       </dl>
-      {children ? children : <CheckoutButton />}
+      {children ? (
+        children
+      ) : (
+        <CheckoutButton disabled={isAnyOfItemsOutOfStock} />
+      )}
     </section>
   );
 }
@@ -117,12 +135,18 @@ function TaxEstimate({ subTotal }: { subTotal: number }) {
   );
 }
 
-function CheckoutButton() {
+function CheckoutButton({ disabled = false }: { disabled: boolean }) {
   return (
     <div className="mt-6">
       <Link
-        href={"/checkout"}
-        className="w-full rounded-md border inline-block text-center border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+        href={disabled ? "#" : "/checkout"}
+        title={
+          disabled ? "Please remove out of stock items" : "Proceed to Checkout"
+        }
+        className={clsx(
+          "w-full rounded-md border inline-block text-center border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50",
+          disabled && "cursor-not-allowed bg-gray-400 hover:bg-gray-400"
+        )}
       >
         Checkout
       </Link>

@@ -15,6 +15,7 @@ export function payuCheckout(order: any) {
     surl: order.surl,
     furl: order.furl,
     hash: order.hash,
+    udf1: order.user || "",
   };
   for (let field in fields) {
     const input = document.createElement("input");
