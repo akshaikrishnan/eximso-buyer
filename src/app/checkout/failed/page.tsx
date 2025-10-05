@@ -1,8 +1,8 @@
-// app/payment/failure/page.tsx
 "use client";
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 
 type OrderDetails = {
   orderId: string;
@@ -23,16 +23,11 @@ function formatAmount(amount: number, currency: string) {
   }
 }
 
-export default function PaymentFailurePage({
-  searchParams,
-}: {
-  searchParams?: Record<string, string | string[]>;
-}) {
+export default function PaymentFailurePage() {
+  const sp = useSearchParams();
+
   const details: OrderDetails = useMemo(() => {
-    const get = (k: string) =>
-      Array.isArray(searchParams?.[k])
-        ? (searchParams?.[k] as string[])[0]
-        : (searchParams?.[k] as string | undefined);
+    const get = (k: string) => sp.get(k) ?? undefined;
 
     const amount = Number(get("amount")) || 0;
     const currency = (get("currency") || "INR").toUpperCase();
@@ -40,7 +35,7 @@ export default function PaymentFailurePage({
     const orderId = get("orderId") || "ORD-FAILED";
 
     return { orderId, amount, currency, items };
-  }, [searchParams]);
+  }, [sp]);
 
   return (
     <main className="mx-auto flex min-h-[80dvh] w-full max-w-3xl flex-col items-center justify-center px-4 py-10">
@@ -128,8 +123,7 @@ export default function PaymentFailurePage({
           </dl>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            You can retry your payment from the orders page or continue
-            shopping.
+            You can retry your payment from the cart or continue shopping.
           </p>
         </div>
       </section>

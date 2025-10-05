@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 // If you're on Next.js 13/14 App Router, this file lives under /app.
@@ -28,17 +29,10 @@ function formatAmount(amount: number, currency: string) {
   }
 }
 
-export default function PaymentSuccessPage({
-  // Next.js App Router passes query via searchParams in Page component props
-  searchParams,
-}: {
-  searchParams?: Record<string, string | string[]>;
-}) {
+export default function PaymentSuccessPage() {
+  const sp = useSearchParams();
   const details: OrderDetails = useMemo(() => {
-    const get = (k: string) =>
-      Array.isArray(searchParams?.[k])
-        ? (searchParams?.[k] as string[])[0]
-        : (searchParams?.[k] as string | undefined);
+    const get = (k: string) => sp.get(k) ?? undefined;
 
     const amount = Number(get("amount")) || 0;
     const currency = (get("currency") || "INR").toUpperCase();
@@ -46,7 +40,7 @@ export default function PaymentSuccessPage({
     const orderId = get("orderId") || "ORD-XXXX-XXXX";
 
     return { orderId, amount, currency, items };
-  }, [searchParams]);
+  }, [sp]);
 
   return (
     <main className="mx-auto flex min-h-[80dvh] w-full max-w-3xl flex-col items-center justify-center px-4 py-10">
