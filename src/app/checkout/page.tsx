@@ -172,12 +172,18 @@ export default function CheckoutPage() {
               </div>
             </div>
           </div>
-          <div className="lg:hidden sticky bottom-0 left-0 right-0 bg-white p-4 flex justify-center items-center gap-2 border-t border-gray-200">
+          <div className="lg:hidden sticky bottom-14 left-0 right-0 bg-white p-4 flex justify-center items-center gap-2 border-t border-gray-200">
             <div
               onClick={() => scrollTo({ top: 0, behavior: "smooth" })}
               className="flex-1 flex items-center justify-center cursor-pointer gap-2"
             >
-              <Price amount={subTotal} />
+              <Price
+                amount={Math.ceil(
+                  subTotal +
+                    subTotal * 0.05 +
+                    (Number(process.env.shippingesstimate) || 40)
+                )}
+              />
               <InformationCircleIcon
                 className="h-5 w-5 text-eximso-500"
                 aria-hidden="true"

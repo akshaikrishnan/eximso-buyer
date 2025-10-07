@@ -7,26 +7,26 @@ import { Price } from "./price";
 const getLabel = (product: any) => {
   if (product.label) return product.label;
   const inputDate = new Date(product.createdAt);
-  
+
   // Get today's date
   const today = new Date();
-  
+
   // Calculate the difference in milliseconds
   const timeDiff = today.getTime() - inputDate.getTime();
-  
+
   // Convert milliseconds to days
   const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-  
+
   // If the difference is within a week (7 days), return "new"
   if (daysDiff <= 7) {
     return "New Launch";
   }
-  
+
   const priceDifference = product.price - product.offerPrice;
-  
+
   // Calculate 40% of the original price
   const fortyPercent = product.price * 0.4;
-  
+
   // If the difference is greater than 40%, return "Offer"
   if (priceDifference > fortyPercent) {
     return "Offer";
@@ -53,9 +53,9 @@ export default function ProductCard({ product }: any) {
       >
         <span className="sr-only">View {product.name}</span>
       </Link>
-      
+
       {/* Responsive image container */}
-      <div className="relative w-full bg-gray-50" style={{ height: '200px' }}>
+      <div className="relative w-full bg-gray-50" style={{ height: "200px" }}>
         <Image
           src={product.thumbnail}
           alt={product.name}
@@ -65,7 +65,7 @@ export default function ProductCard({ product }: any) {
           priority={false}
         />
       </div>
-      
+
       <div className="p-4 bg-background">
         <h3 className="text-md font-semibold line-clamp-1">{product.name}</h3>
         <div className="flex items-center gap-2 text-sm">
