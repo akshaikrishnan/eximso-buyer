@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
+import clsx from "clsx";
 
 export default function CartBtn({ product }: any) {
   const { product: productData, quantity: initialQuantity } = product;
@@ -33,6 +34,10 @@ export default function CartBtn({ product }: any) {
   });
 
   const handleIncrement = () => {
+    if (inputValue >= productData.stock) {
+      setError("Cannot exceed available stock");
+      return;
+    }
     const newQuantity = quantity + 1;
     setInputValue(newQuantity);
     updateMutation.mutate(newQuantity);
@@ -100,7 +105,12 @@ export default function CartBtn({ product }: any) {
         />
         <span
           onClick={handleIncrement}
-          className="cursor-pointer rounded-r bg-gray-100 py-1 px-3 duration-100 hover:bg-eximblue-500 hover:text-blue-50"
+          className={clsx(
+            "cursor-pointer rounded-r bg-gray-100 py-1 px-3 duration-100 hover:bg-eximblue-500 hover:text-blue-50",
+            inputValue < productData.stock
+              ? ""
+              : "opacity-50 cursor-not-allowed"
+          )}
         >
           +
         </span>

@@ -101,6 +101,11 @@ export default function ProductDetail({ product }: any) {
         }),
   });
 
+  const isOutOfStock =
+    product?.stock < product?.minimumOrderQuantity ||
+    !product?.isActive ||
+    product?.stock <= 0;
+
   return (
     <div className="bg-white">
       <main className="mx-auto max-w-7xl sm:px-6 sm:pt-16 lg:px-8">
