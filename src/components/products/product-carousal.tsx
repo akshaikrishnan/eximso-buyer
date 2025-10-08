@@ -96,7 +96,7 @@ const ThumbButton = ({
   <button
     className={classNames(
       selected ? "ring-indigo-500" : "ring-transparent hover:ring-gray-300",
-      "relative flex h-24 cursor-pointer items-center justify-center rounded-lg bg-white text-sm font-medium uppercase text-gray-900 focus:outline-none ring-2 ring-offset-2 transition-shadow duration-200"
+      "w-full relative flex h-24 cursor-pointer items-center justify-center rounded-lg bg-white text-sm font-medium uppercase text-gray-900 focus:outline-none ring-2 ring-offset-2 transition-shadow duration-200"
     )}
     onClick={onClick}
     type="button"
@@ -176,9 +176,9 @@ export default function ProductGallery({
   const isZoomEnabled = images.length > 0;
 
   return (
-    <div className="flex flex-col-reverse lg:sticky top-10 self-start">
+    <div className="flex flex-col-reverse lg:sticky top-10 self-start overflow-hidden">
       {/* Thumbnail Container */}
-      <div className="mx-auto mt-6 w-full max-w-2xl sm:block lg:max-w-none">
+      <div className="mx-auto mt-6 w-full max-w-2xl sm:block lg:max-w-none  ">
         {enableThumbCarousel ? (
           // Thumbnail Carousel (Embla) for 5+ images
           <div className="embla" ref={thumbEmblaRef}>
