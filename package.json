@@ -1,6 +1,6 @@
 {
   "name": "eximso-buyer",
-  "version": "0.2.13",
+  "version": "0.2.11",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
