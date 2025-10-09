@@ -44,7 +44,7 @@ const Magnifier = ({
   const handleMouseEnter = () => setIsHovering(true);
   const handleMouseLeave = () => setIsHovering(false);
 
-  const backgroundPosition = `${position.x}% ${position.y}%`;
+  // Background size set to 2.5 times the image size for the zoom effect
   const backgroundSize = `${width * 2.5}px ${height * 2.5}px`;
 
   return (
@@ -64,17 +64,18 @@ const Magnifier = ({
         priority // Consider priority loading for the main image
       />
       {/* Magnifier Overlay for Desktop */}
-      {isHovering && (
-        <div
-          className="hidden lg:block absolute inset-0 border-4 border-indigo-500 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={{
-            backgroundImage: `url(${src})`,
-            backgroundPosition,
-            backgroundSize,
-            backgroundRepeat: "no-repeat",
-          }}
-        />
-      )}
+      {isHovering &&
+        isZoomEnabled && ( // Only show zoom if enabled
+          <div
+            className="hidden lg:block absolute inset-0 border-4 border-indigo-500 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{
+              backgroundImage: `url(${src})`,
+              backgroundPosition: `${position.x}% ${position.y}%`,
+              backgroundSize,
+              backgroundRepeat: "no-repeat",
+            }}
+          />
+        )}
     </div>
   );
 };
@@ -125,13 +126,16 @@ export default function ProductGallery({
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [mainEmblaRef, mainEmblaApi] = useEmblaCarousel({ loop: false });
-  // 💡 Fix 1: Removed Embla for thumbnails if there are 4 or fewer images
+
+  // Decide whether to use the vertical Embla carousel for thumbnails
   const enableThumbCarousel = images.length > 4;
   const [thumbEmblaRef, thumbEmblaApi] = useEmblaCarousel({
     containScroll: "keepSnaps",
     dragFree: true,
     slidesToScroll: 1,
     align: "start",
+    // 💡 Change: Set axis to 'x' for mobile (default for Embla is 'x')
+    // We conditionally apply 'axis: "y"' in CSS for large screens
   });
 
   const scrollPrev = useCallback(() => {
@@ -154,7 +158,9 @@ export default function ProductGallery({
     if (!mainEmblaApi) return;
     const newIndex = mainEmblaApi.selectedScrollSnap();
     setSelectedIndex(newIndex);
+    // Auto-scroll the thumbnail carousel
     if (enableThumbCarousel && thumbEmblaApi) {
+      // 💡 Improvement: Scroll to selected index only if the main embla is available
       thumbEmblaApi.scrollTo(newIndex);
     }
   }, [mainEmblaApi, thumbEmblaApi, setSelectedIndex, enableThumbCarousel]);
@@ -164,6 +170,7 @@ export default function ProductGallery({
     onSelect();
     mainEmblaApi.on("select", onSelect);
     mainEmblaApi.on("reInit", onSelect);
+    // Cleanup function
     return () => {
       mainEmblaApi.off("select", onSelect);
       mainEmblaApi.off("reInit", onSelect);
@@ -172,22 +179,30 @@ export default function ProductGallery({
 
   if (images.length === 0) return null;
 
-  // Magnifier is enabled for single image or for the main carousel
+  // Magnifier is enabled if there are images
   const isZoomEnabled = images.length > 0;
 
   return (
-    <div className="flex flex-col-reverse lg:sticky top-10 self-start overflow-hidden">
-      {/* Thumbnail Container */}
-      <div className="mx-auto mt-6 w-full max-w-2xl sm:block lg:max-w-none  ">
+    // 1. Grid setup: Mobile is 1 column (main image on top, thumbs below), Desktop is 8 columns.
+    <div className="grid grid-cols-1 lg:grid-cols-8 lg:sticky top-32 self-start overflow-hidden lg:gap-4">
+      {/* Thumbnail Container - Goes first on desktop, second on mobile */}
+      {/* 2. Layout: Mobile uses col-span-1/8 for full width, Desktop uses lg:col-span-1 */}
+      {/* 3. Spacing/Alignment: Use mt-6 for mobile, lg:mt-0 to remove top margin on desktop */}
+      <div className="order-2 lg:order-1 col-span-1 lg:col-span-1 mx-auto mt-6 lg:mt-0 max-w-2xl w-full sm:block lg:max-w-none">
         {enableThumbCarousel ? (
           // Thumbnail Carousel (Embla) for 5+ images
-          <div className="embla" ref={thumbEmblaRef}>
-            <div className="embla__container flex space-x-4">
+          // 4. Embla Layout: Mobile is horizontal, Desktop is vertical with a fixed height and overflow
+          <div
+            className="embla overflow-hidden lg:h-[600px] lg:overflow-y-scroll px-3"
+            ref={thumbEmblaRef}
+          >
+            {/* The lg:flex-col and lg:space-y-2 are key for vertical stacking */}
+            <div className="embla__container flex space-x-2 lg:flex-col lg:space-y-2 lg:space-x-0 ">
               {images.map((image: string, index: number) => (
+                // Important for vertical layout: min-width: 0 and full width on desktop
                 <div
                   key={index}
-                  className="embla__slide flex-shrink-0"
-                  style={{ minWidth: "25%" }}
+                  className="embla__slide flex-shrink-0 min-w-[25%] lg:min-w-full"
                 >
                   <ThumbButton
                     selected={index === selectedIndex}
@@ -200,8 +215,9 @@ export default function ProductGallery({
             </div>
           </div>
         ) : (
-          // 💡 Fix 1: Simple grid/flex layout for 4 or fewer images
-          <div className="grid grid-cols-4 gap-4">
+          // Simple grid/flex layout for 4 or fewer images
+          // 5. Grid Layout: Mobile is grid-cols-4, Desktop is lg:grid-cols-1
+          <div className="grid grid-cols-4 gap-4 lg:grid-cols-1 lg:gap-2">
             {images.map((image: string, index: number) => (
               <ThumbButton
                 key={index}
@@ -216,8 +232,8 @@ export default function ProductGallery({
       </div>
 
       {/* Main Image Carousel */}
-      {/* 💡 Fix 3: Removed shadow from this container */}
-      <div className="w-full h-auto mt-6 lg:mt-0 rounded-lg overflow-hidden bg-white relative">
+      {/* 6. Main Image Layout: Order-1 (top) on mobile, lg:col-span-7 on desktop */}
+      <div className="order-1 lg:order-2 col-span-1 lg:col-span-7 w-full h-auto mt-6 lg:mt-0 rounded-lg overflow-hidden bg-white relative">
         <div className="embla" ref={mainEmblaRef}>
           <div className="embla__container flex">
             {images.map((image: string, idx: number) => (
@@ -259,11 +275,25 @@ export default function ProductGallery({
     </div>
   );
 }
+
 // Export a placeholder for Next.js dynamic import loading state
 export const ProductGalleryPlaceholder = () => (
-  <div className="lg:sticky top-10 self-start">
-    <div className="w-full h-[600px] bg-gray-200 rounded-lg animate-pulse" />
-    <div className="mt-6 flex space-x-4">
+  <div className="lg:sticky top-10 self-start grid grid-cols-1 lg:grid-cols-8 lg:gap-4">
+    {/* Desktop Thumbnail Placeholder (lg:col-span-1) */}
+    <div className="hidden lg:block lg:col-span-1 space-y-2">
+      <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
+      <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
+      <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
+      <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
+    </div>
+
+    {/* Main Image Placeholder (lg:col-span-7) */}
+    <div className="col-span-1 lg:col-span-7">
+      <div className="w-full h-[600px] bg-gray-200 rounded-lg animate-pulse" />
+    </div>
+
+    {/* Mobile Thumbnail Placeholder (full width below main image) */}
+    <div className="mt-6 flex space-x-4 lg:hidden col-span-1">
       <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
       <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
       <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
