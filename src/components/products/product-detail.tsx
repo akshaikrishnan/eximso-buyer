@@ -70,7 +70,7 @@ export default function ProductDetail({ product }: any) {
         .get(endpoints.products, {
           params: {
             category: product.category._id,
-            limit: 5,
+            limit: 4,
           },
         })
         .then((res) =>
