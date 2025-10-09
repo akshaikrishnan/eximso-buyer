@@ -66,7 +66,7 @@ export default function drivesuseveryday() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreValues.map((value) => (
-              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-xs hover:shadow-md transition-shadow">
                 <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600">
                   <value.icon className="h-6 w-6" />
                 </div>

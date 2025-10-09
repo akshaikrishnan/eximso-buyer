@@ -122,7 +122,7 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
 
         {/* Shipper and Customer */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-          <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+          <div className="bg-gray-100 p-4 rounded-lg shadow-xs">
             <h3 className="font-bold text-gray-800 mb-2">SHIPPER</h3>
             <p className="text-sm text-gray-700">EXIMSO INTERNATIONAL PVT LTD,</p>
             <p className="text-sm text-gray-700">PM Kareem Centre, No 15/1031 Wonderla Road,</p>
@@ -130,7 +130,7 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
               Athani Junction, Kakkanad, Ernakulam, PIN 682030, Kerala India
             </p>
           </div>
-          <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+          <div className="bg-gray-100 p-4 rounded-lg shadow-xs">
             <h3 className="font-bold text-gray-800 mb-2">CUSTOMER</h3>
             <p className="text-sm text-gray-700">{order?.user?.name || "N/A"},</p>
             <p className="text-sm text-gray-700">{order?.shippingAddress?.addressLine1 || "N/A"}</p>

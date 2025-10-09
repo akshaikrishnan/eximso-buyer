@@ -97,7 +97,7 @@ const ThumbButton = ({
   <button
     className={classNames(
       selected ? "ring-indigo-500" : "ring-transparent hover:ring-gray-300",
-      "w-full relative flex h-24 cursor-pointer items-center justify-center rounded-lg bg-white text-sm font-medium uppercase text-gray-900 focus:outline-none ring-2 ring-offset-2 transition-shadow duration-200"
+      "w-full relative flex h-24 cursor-pointer items-center justify-center rounded-lg bg-white text-sm font-medium uppercase text-gray-900 focus:outline-hidden ring-2 ring-offset-2 transition-shadow duration-200"
     )}
     onClick={onClick}
     type="button"
@@ -193,16 +193,16 @@ export default function ProductGallery({
           // Thumbnail Carousel (Embla) for 5+ images
           // 4. Embla Layout: Mobile is horizontal, Desktop is vertical with a fixed height and overflow
           <div
-            className="embla overflow-hidden lg:h-[600px] lg:overflow-y-scroll px-3"
+            className="embla overflow-hidden lg:h-[600px] lg:overflow-y-scroll px-3 py-2"
             ref={thumbEmblaRef}
           >
             {/* The lg:flex-col and lg:space-y-2 are key for vertical stacking */}
-            <div className="embla__container flex space-x-2 lg:flex-col lg:space-y-2 lg:space-x-0 ">
+            <div className="embla__container flex space-x-2 lg:flex-col lg:space-y-4 lg:space-x-0 ">
               {images.map((image: string, index: number) => (
                 // Important for vertical layout: min-width: 0 and full width on desktop
                 <div
                   key={index}
-                  className="embla__slide flex-shrink-0 min-w-[25%] lg:min-w-full"
+                  className="embla__slide shrink-0 min-w-[25%] lg:min-w-full"
                 >
                   <ThumbButton
                     selected={index === selectedIndex}
@@ -217,7 +217,7 @@ export default function ProductGallery({
         ) : (
           // Simple grid/flex layout for 4 or fewer images
           // 5. Grid Layout: Mobile is grid-cols-4, Desktop is lg:grid-cols-1
-          <div className="grid grid-cols-4 gap-4 lg:grid-cols-1 lg:gap-2">
+          <div className="grid grid-cols-4 gap-4 lg:grid-cols-1 lg:gap-6 px-2 py-2 ">
             {images.map((image: string, index: number) => (
               <ThumbButton
                 key={index}
@@ -239,7 +239,7 @@ export default function ProductGallery({
             {images.map((image: string, idx: number) => (
               <div
                 key={idx}
-                className="embla__slide flex-shrink-0 flex justify-center items-center w-full"
+                className="embla__slide shrink-0 flex justify-center items-center w-full"
                 style={{ minWidth: "100%" }}
               >
                 <Magnifier

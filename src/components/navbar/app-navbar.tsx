@@ -121,13 +121,13 @@ const Navbar = (props: any) => {
           <li className="nav-item flex items-center gap-4">
             <button
               className="hamburger cursor-pointer text-2xl md:hidden"
-            // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
+              // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
             >
               <i className="fa-solid fa-bars"></i>
             </button>
             <Link
               href={"/"}
-              className="Eximso-logo cursor-pointer mt-1 w-10 h-10 md:w-15 md:h-15"
+              className="Eximso-logo cursor-pointer mt-1 w-10 h-10"
             >
               <img
                 className="h-full w-full object-contain"
@@ -155,7 +155,7 @@ const Navbar = (props: any) => {
                       {user?.name
                         ? user?.name.split(" ").length > 1
                           ? user?.name.split(" ")[0].charAt(0) +
-                          user?.name.split(" ")[1].charAt(0)
+                            user?.name.split(" ")[1].charAt(0)
                           : user?.name.charAt(0) // If there is only one word, take the first letter
                         : ""}
                     </AvatarFallback>
@@ -249,7 +249,7 @@ const Navbar = (props: any) => {
           </button>
           <HeaderMenu
             data={menu}
-            className="hidden lg:flex ltr:md:ml-6 ltr:xl:ml-10 rtl:md:mr-6 rtl:xl:mr-10"
+            className="hidden lg:flex md:ltr:ml-6 xl:ltr:ml-10 md:rtl:mr-6 xl:rtl:mr-10"
           />
           <Link
             href={process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login"}
@@ -260,7 +260,6 @@ const Navbar = (props: any) => {
             <BuildingStorefrontIcon className="w-6 h-6" />
             Become a Seller
           </Link>
-
         </div>
       </nav>
     </>

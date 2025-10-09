@@ -123,7 +123,7 @@ export default function AnnouncementBar() {
           >
             <div
               key={index}
-              className={`inline-block [backface-visibility:hidden] will-change-transform
+              className={`inline-block backface-hidden will-change-transform
                 ${phase === "in" ? "cube-in" : "cube-out"}
               `}
             >
@@ -156,7 +156,7 @@ export default function AnnouncementBar() {
             <button
               aria-label="Close announcement"
               onClick={handleClose}
-              className="p-1 rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/40"
+              className="p-1 rounded-md hover:bg-white/10 focus:outline-hidden focus:ring-2 focus:ring-white/40"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>

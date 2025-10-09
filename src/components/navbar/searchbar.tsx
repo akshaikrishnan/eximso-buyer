@@ -16,7 +16,7 @@ export default function Searchbar({ categories }: any) {
   return (
     <form
       action="/search"
-      className="search flex items-center  text-black md:order-3 md:mx-3"
+      className="search flex items-center  text-black md:order-3 md:mx-3 border border-gray-200 rounded-lg bg-white"
     >
       <select
         onChange={(e) => setSelected(e.target.value)}
@@ -42,7 +42,7 @@ export default function Searchbar({ categories }: any) {
         })}
       </select>
       <input
-        className="w-full rounded-l-lg border-none outline-none px-2 py-2.5 lg:py-2 lg:rounded-none"
+        className="w-full rounded-l-lg border-none outline-hidden px-2 py-2.5 lg:py-2 lg:rounded-none bg-gray-50 focus:ring-4 focus:ring-eximblue-300 md:py-2.5 md:px-3.5 md:text-sm lg:rounded-l-lg"
         type="search"
         name="q"
         id="search"
@@ -51,7 +51,7 @@ export default function Searchbar({ categories }: any) {
         onChange={(e) => setSearch(e.target.value)}
       />
       <div className="bg-white rounded-r-lg focus:outline-4 md:rounded-r-lg">
-        <button className="cursor-pointer rounded-r-lg outline-none border-none px-4 py-2 bg-eximblue-600 rounded-md hover:bg-eximblue-700 text-white md:py-[7px] lg:py-[5.5px] md:px-3.5 md:text-xl md:rounded-l-none">
+        <button className="cursor-pointer rounded-r-lg outline-hidden border-none px-4 py-2 bg-eximblue-600 rounded-md hover:bg-eximblue-700 text-white md:py-[7px] lg:py-[5.5px] md:px-3.5 md:text-xl md:rounded-l-none">
           <MagnifyingGlassIcon className="h-7 w-7" />
         </button>
       </div>

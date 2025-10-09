@@ -52,7 +52,7 @@ const Drawer: React.FC<DrawerProps> = ({
                 />
                 <div
                   className={cn(
-                    "absolute inset-y-0 flex max-w-full outline-none",
+                    "absolute inset-y-0 flex max-w-full outline-hidden",
                     variant === "right"
                       ? "ltr:right-0 rtl:right-0"
                       : "ltr:left-0 rtl:left-0"

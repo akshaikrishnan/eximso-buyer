@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const NotFoundPage = () => {
   return (
-    <div className="grid min-h-screen grid-cols-1 grid-rows-[1fr,auto,1fr] bg-white lg:grid-cols-[max(50%,36rem),1fr]">
+    <div className="grid min-h-screen grid-cols-1 grid-rows-[1fr_auto_1fr] bg-white lg:grid-cols-[max(50%,36rem)_1fr]">
       <header className="mx-auto w-full px-6 pt-6 sm:pt-10 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:px-8">
         <Link href="/">
           <span className="sr-only">Eximso</span>

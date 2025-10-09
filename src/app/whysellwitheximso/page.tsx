@@ -112,7 +112,7 @@ export default function whysellwitheximso() {
   return (
     <div className="bg-white scroll-smooth md:scroll-auto">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-indigo-500 via-indigo-500 to-purple-500 overflow-hidden">
+      <div className="relative bg-linear-to-r from-indigo-500 via-indigo-500 to-purple-500 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="md:w-1/2">
             <h1 className="text-3xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
@@ -164,7 +164,7 @@ export default function whysellwitheximso() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreValues.map((value) => (
-              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-xs hover:shadow-md transition-shadow">
                 <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600">
                   <value.icon className="h-6 w-6" />
                 </div>
@@ -185,7 +185,7 @@ export default function whysellwitheximso() {
               <div>
                 {brandOnChallengeSteps.map((step, index) => (
                   <div key={index} className="flex mb-4 pb-4 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 shrink-0">
                       {index + 1}
                     </div>
                     <p className="text-gray-700">{step}</p>
@@ -200,7 +200,7 @@ export default function whysellwitheximso() {
               <div>
                 {brandOnDemandSteps.map((step, index) => (
                   <div key={index} className="flex mb-4 pb-4 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 shrink-0">
                       {index + 1}
                     </div>
                     <p className="text-gray-700">{step}</p>
@@ -222,7 +222,7 @@ export default function whysellwitheximso() {
           </p>
         </div>
          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+          <div className="bg-white p-8 rounded-xl shadow-xs border border-gray-100">
            <ul className="space-y-3 text-gray-600">
               <li className="flex items-start">
                 <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -257,7 +257,7 @@ export default function whysellwitheximso() {
             </ul>
            </div>
 
-          <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+          <div className="bg-white p-8 rounded-xl shadow-xs border border-gray-100">
             <ul className="space-y-3 text-gray-600">
               <li className="flex items-start">
                 <svg className="h-5 w-5 text-indigo-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -291,7 +291,7 @@ export default function whysellwitheximso() {
     
       {/* CTA Section */}
       {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-linear-to-r from-indigo-600 to-indigo-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="px-6 py-12 md:p-12 md:flex items-center justify-between">
             <div className="md:w-2/3 mb-8 md:mb-0">
               <h2 className="text-3xl font-bold text-white md:text-4xl">Ready to expand your business globally?</h2>

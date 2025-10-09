@@ -24,7 +24,7 @@ export default function Loader({
   return (
     <div
       className={clsx(
-        overlay && "h-[100dvh] w-[100dvw] fixed inset-0 z-[1000] bg-black/30"
+        overlay && "h-dvh w-dvw fixed inset-0 z-1000 bg-black/30"
       )}
     >
       <div

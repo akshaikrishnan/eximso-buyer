@@ -12,7 +12,7 @@ interface CartItemProps {
 export function CartItem({ item, onRemove }: CartItemProps) {
   return (
     <li className="flex py-6 sm:py-10">
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <img
           src={item.product.thumbnail}
           alt={item.product.name}
@@ -74,12 +74,12 @@ export function CartItem({ item, onRemove }: CartItemProps) {
         <p className="mt-4 flex space-x-2 text-sm text-gray-700">
           {item.inStock ? (
             <CheckIcon
-              className="h-5 w-5 flex-shrink-0 text-green-500"
+              className="h-5 w-5 shrink-0 text-green-500"
               aria-hidden="true"
             />
           ) : (
             <ClockIcon
-              className="h-5 w-5 flex-shrink-0 text-gray-300"
+              className="h-5 w-5 shrink-0 text-gray-300"
               aria-hidden="true"
             />
           )}

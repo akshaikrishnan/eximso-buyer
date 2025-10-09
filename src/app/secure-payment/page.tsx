@@ -91,7 +91,7 @@ export default function SecurePayment() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreValues.map((value) => (
-              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-xs hover:shadow-md transition-shadow">
                 <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600">
                   <value.icon className="h-6 w-6" />
                 </div>
@@ -121,7 +121,7 @@ export default function SecurePayment() {
               <div>
                 {brandOnDemandSteps.map((step, index) => (
                   <div key={index} className="flex mb-4 pb-4 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 shrink-0">
                       {index + 1}
                     </div>
                     <p className="text-gray-700">{step}</p>

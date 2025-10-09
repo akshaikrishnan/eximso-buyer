@@ -45,7 +45,7 @@ export default function PaymentFailurePage() {
         aria-hidden
       >
         <svg
-          className="h-16 w-16 text-rose-600 drop-shadow-sm"
+          className="h-16 w-16 text-rose-600 drop-shadow-xs"
           viewBox="0 0 72 72"
           role="img"
           aria-label="Payment failed"
@@ -88,7 +88,7 @@ export default function PaymentFailurePage() {
 
       {/* Order summary card */}
       <section className="mt-8 w-full">
-        <div className="rounded-2xl border border-rose-100 bg-white/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/60">
+        <div className="rounded-2xl border border-rose-100 bg-white/80 p-5 shadow-xs backdrop-blur-sm supports-backdrop-filter:bg-white/60">
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-wider text-rose-600">
@@ -132,13 +132,13 @@ export default function PaymentFailurePage() {
       <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
         <Link
           href="/checkout"
-          className="inline-flex flex-1 items-center justify-center rounded-xl bg-rose-600 px-4 py-3 text-sm font-medium text-white shadow transition hover:bg-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600/60"
+          className="inline-flex flex-1 items-center justify-center rounded-xl bg-rose-600 px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-rose-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-600/60"
         >
           Go to Cart
         </Link>
         <Link
           href="/"
-          className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-foreground shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/50"
+          className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-foreground shadow-xs transition hover:bg-slate-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-slate-400/50"
         >
           Continue Shopping
         </Link>
