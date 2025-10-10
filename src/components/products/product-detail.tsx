@@ -210,7 +210,7 @@ export default function ProductDetail({ product }: any) {
                           (product?.rating ?? 0) > rating
                             ? "text-yellow-400"
                             : "text-gray-300",
-                          "h-5 w-5 flex-shrink-0"
+                          "h-5 w-5 shrink-0"
                         )}
                         aria-hidden="true"
                       />
@@ -357,7 +357,7 @@ export default function ProductDetail({ product }: any) {
               {reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="border p-6 rounded-xl bg-white shadow-sm hover:shadow-md transition duration-300"
+                  className="border p-6 rounded-xl bg-white shadow-xs hover:shadow-md transition duration-300"
                 >
                   <div className="flex items-center mb-2">
                     {[0, 1, 2, 3, 4].map((rating) => (
@@ -367,7 +367,7 @@ export default function ProductDetail({ product }: any) {
                           review.rating > rating
                             ? "text-yellow-500"
                             : "text-gray-300",
-                          "h-5 w-5 flex-shrink-0"
+                          "h-5 w-5 shrink-0"
                         )}
                         aria-hidden="true"
                       />

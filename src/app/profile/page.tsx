@@ -158,7 +158,7 @@ export default function UserProfile() {
 
           <form
             onSubmit={handleSubmit}
-            className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2"
+            className="bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2"
           >
             <div className="px-4 py-6 sm:p-8">
               <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -167,7 +167,7 @@ export default function UserProfile() {
                     <img
                       src={formData.logo || "/images/common/user.png"}
                       alt="Profile"
-                      className="h-25 w-20 rounded-full text-gray-300"
+                      className="h-25 w-25 rounded-full text-gray-300 object-cover"
                     />
                     <label className="block text-sm font-medium leading-6 text-gray-900">
                       Photo
@@ -175,7 +175,7 @@ export default function UserProfile() {
                     <button
                       type="button"
                       onClick={handleLogoChangeButtonClick} // Trigger file input click
-                      className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                      className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     >
                       Change
                     </button>
@@ -198,7 +198,7 @@ export default function UserProfile() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
                 </div>
 
@@ -211,7 +211,7 @@ export default function UserProfile() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
                 </div>
 
@@ -224,7 +224,7 @@ export default function UserProfile() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
                 </div>
 
@@ -277,7 +277,7 @@ export default function UserProfile() {
                     rows={4}
                     value={formData.address}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                     placeholder="Enter your address here..."
                   />
                 </div>
@@ -293,7 +293,7 @@ export default function UserProfile() {
               </button>
               <button
                 type="submit"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500"
               >
                 {updating ? "Saving..." : "Save"}
               </button>

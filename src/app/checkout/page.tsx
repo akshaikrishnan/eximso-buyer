@@ -219,7 +219,7 @@ const PlaceOrderButton = ({
       type="submit"
       onClick={action}
       className={clsx(
-        "w-full flex items-center cursor-pointer font-bold justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base  text-white shadow-sm hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60",
+        "w-full flex items-center cursor-pointer font-bold justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base  text-white shadow-xs hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60",
         className
       )}
     >

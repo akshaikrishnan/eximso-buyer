@@ -104,7 +104,7 @@ function ShippingEstimate() {
         <span>Shipping estimate</span>
         <a
           href="#"
-          className="ml-2 flex-shrink-0 text-gray-400 hover:text-gray-500"
+          className="ml-2 shrink-0 text-gray-400 hover:text-gray-500"
         >
           <QuestionMarkCircleIcon className="h-5 w-5" aria-hidden="true" />
         </a>
@@ -123,7 +123,7 @@ function TaxEstimate({ subTotal }: { subTotal: number }) {
         <span>Tax estimate</span>
         <a
           href="#"
-          className="ml-2 flex-shrink-0 text-gray-400 hover:text-gray-500"
+          className="ml-2 shrink-0 text-gray-400 hover:text-gray-500"
         >
           <QuestionMarkCircleIcon className="h-5 w-5" aria-hidden="true" />
         </a>
@@ -144,7 +144,7 @@ function CheckoutButton({ disabled = false }: { disabled: boolean }) {
           disabled ? "Please remove out of stock items" : "Proceed to Checkout"
         }
         className={clsx(
-          "w-full rounded-md border inline-block text-center border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50",
+          "w-full rounded-md border inline-block text-center border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50",
           disabled && "cursor-not-allowed bg-gray-400 hover:bg-gray-400"
         )}
       >

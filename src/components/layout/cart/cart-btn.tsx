@@ -96,7 +96,7 @@ export default function CartBtn({ product }: any) {
           -
         </span>
         <input
-          className="h-8 w-16 border bg-white text-center text-xs outline-none"
+          className="h-8 w-16 border bg-white text-center text-xs outline-hidden"
           type="number"
           value={inputValue}
           onChange={handleInputChange}

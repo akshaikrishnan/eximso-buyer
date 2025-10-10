@@ -12,7 +12,7 @@ export default function AddAddress() {
     <div className="container mx-auto py-4">
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 bg-gray-100 text-gray-800 px-3 py-2 rounded-md shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800"
+        className="flex items-center gap-2 bg-gray-100 text-gray-800 px-3 py-2 rounded-md shadow-xs hover:bg-gray-200 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800"
       >
         <ArrowLeft /> Back
       </button>
@@ -26,7 +26,7 @@ export default function AddAddress() {
               Please provide accurate details to ensure timely delivery.
             </p>
           </div>
-          <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+          <div className="bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
             <AddressForm
               onCancel={() => router.back()}
               onSave={() => router.back()}

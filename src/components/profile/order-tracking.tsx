@@ -85,7 +85,7 @@ function OrderTracking({ orderId, status, onStatusChange }: OrderTrackingProps) 
   return (
     <div className="container">
       <div className="mt-6 grow sm:mt-8 lg:mt-0">
-        <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Order history</h3>
 
           <ol className="relative ms-3 border-s border-gray-200 dark:border-gray-700">
@@ -188,7 +188,7 @@ function OrderTracking({ orderId, status, onStatusChange }: OrderTrackingProps) 
                 <button 
                   type="button" 
                   onClick={handleCancelClick}
-                  className="w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-hidden focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
                 >
                   {showCancelDropdown ? 'Close Cancel Options' : 'Cancel the order'}
                 </button>
@@ -230,7 +230,7 @@ function OrderTracking({ orderId, status, onStatusChange }: OrderTrackingProps) 
                       onChange={(e) => setCustomReason(e.target.value)}
                       placeholder="Enter your reason for cancellation..."
                       rows={3}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-hidden focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
                     />
                   </div>
                 )}
@@ -242,7 +242,7 @@ function OrderTracking({ orderId, status, onStatusChange }: OrderTrackingProps) 
                       type="button"
                       onClick={handleConfirmCancel}
                       disabled={isConfirming || isConfirmDisabled}
-                      className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                      className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-hidden focus:ring-4 focus:ring-red-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                     >
                       {isConfirming ? (
                         <span className="flex items-center">
@@ -259,7 +259,7 @@ function OrderTracking({ orderId, status, onStatusChange }: OrderTrackingProps) 
                     <button
                       type="button"
                       onClick={() => setShowCancelDropdown(false)}
-                      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                      className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-hidden focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
                     >
                       Cancel
                     </button>
