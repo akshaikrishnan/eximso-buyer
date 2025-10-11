@@ -109,7 +109,7 @@ export default function FAQs() {
           {howItWorks.slice(0, 9).map((item) => (
             <div
               key={item.name}
-              className="bg-indigo-100 p-6  rounded-xl border border-indigo-100 shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
+              className="bg-indigo-100 p-6  rounded-xl border border-indigo-100 shadow-xs hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
             >
               <div className="flex items-center mb-4 ">
                 <div className="p-3 bg-indigo-100 rounded-lg text-indigo-600 flex items-center justify-center mr-3">
@@ -117,7 +117,7 @@ export default function FAQs() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
               </div>
-              <p className="text-gray-600 flex-grow">{item.description}</p>
+              <p className="text-gray-600 grow">{item.description}</p>
             </div>
           ))}
         </div>
@@ -140,7 +140,7 @@ export default function FAQs() {
               <div>
                 {brandOnDemandSteps.map((step, index) => (
                   <div key={index} className="flex mb-4 pb-4 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 shrink-0">
                       {index + 1}
                     </div>
                     <p className="text-gray-700">{step}</p>

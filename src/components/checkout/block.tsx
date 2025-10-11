@@ -27,7 +27,7 @@ export default function CheckoutBlock({
       height={height}
       contentClassName=" pb-16"
       contentRef={contentDiv}
-      className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl px-4 py-6 sm:p-8 mb-4"
+      className="bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl px-4 py-6 sm:p-8 mb-4"
     >
       {children}
     </AnimateHeight>

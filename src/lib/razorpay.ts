@@ -35,7 +35,7 @@ function displayGateway(order: any) {
       },
       handler: function (response: any) {
         api
-          .post("/payment/verify", {
+          .post("/payment/verify/razor-pay", {
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
@@ -46,7 +46,7 @@ function displayGateway(order: any) {
               orderId: data.orders?.[0]?._id,
             }).toString();
             // console.log("query", data);
-                        console.log("query", query);
+            console.log("query", query);
             window.location.href = `/payment-success?${query}`;
           })
           .catch((error) => {

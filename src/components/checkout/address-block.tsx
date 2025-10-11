@@ -230,7 +230,7 @@ function AddAddress() {
           setIsOpen(false);
         }}
         title="Add Address"
-        modalClassName="!max-w-7xl"
+        modalClassName="max-w-7xl!"
         hideButton
       >
         <DynamicAddressForm

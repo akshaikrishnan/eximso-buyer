@@ -84,7 +84,7 @@ const MyOrders = () => {
             key={order.id}
             role="button"
             onClick={() => handleOrderClick(order.orderNumber)}
-            className="p-5 shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
+            className="p-5 shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -110,7 +110,7 @@ const MyOrders = () => {
             <div className="mt-4 space-y-4">
               {order.items.map((item, index) => (
                 <div key={index} className="flex items-center space-x-4">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <img
                       src={item.image}
                       alt={item.product}

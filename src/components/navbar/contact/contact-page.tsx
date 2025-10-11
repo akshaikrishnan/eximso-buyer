@@ -29,20 +29,20 @@ function Contact() {
         <h2 className="text-5xl font-bold mb-9">Get in touch</h2>
         <div className="space-y-6 text-gray-700">
           <p className="flex items-start gap-3">
-            <HiLocationMarker className="text-gray-400 text-2xl flex-shrink-0 mt-1" />
+            <HiLocationMarker className="text-gray-400 text-2xl shrink-0 mt-1" />
             <span>
               <span className="font-semibold">Address:</span> No 15/1031, PM KAREEM CENTRE, ATHANI JUNCTION, WONDERLA
               ROAD, KAKKANAD, ERNAKULAM, KERALA PIN 682030, INDIA
             </span>
           </p>
           <p className="flex items-center gap-3">
-            <HiPhone className="text-gray-400 text-2xl flex-shrink-0" />
+            <HiPhone className="text-gray-400 text-2xl shrink-0" />
             <span>
               <span className="font-semibold">Phone:</span> +91 90378 50541
             </span>
           </p>
           <p className="flex items-center gap-3">
-            <HiMail className="text-gray-400 text-2xl flex-shrink-0" />
+            <HiMail className="text-gray-400 text-2xl shrink-0" />
             <span>
               <span className="font-semibold">Email:</span> contact@eximso.com
             </span>
@@ -62,7 +62,7 @@ function Contact() {
                 type="text"
                 {...register("firstName", { required: "First name is required" })}
                 placeholder="Enter your first name"
-                className="w-full p-4 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                className="w-full p-4 pl-12 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 shadow-xs"
               />
             </div>
             {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
@@ -80,7 +80,7 @@ function Contact() {
                   pattern: { value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, message: "Invalid email format" },
                 })}
                 placeholder="Enter your email"
-                className="w-full p-4 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                className="w-full p-4 pl-12 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 shadow-xs"
               />
             </div>
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
@@ -97,7 +97,7 @@ function Contact() {
                   pattern: { value: /^[0-9]{10,14}$/, message: "Invalid phone number" },
                 })}
                 placeholder="Enter your phone number"
-                className="w-full p-4 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                className="w-full p-4 pl-12 border border-gray-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500 shadow-xs"
               />
             </div>
             {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
@@ -111,7 +111,7 @@ function Contact() {
               <textarea
                 {...register("message", { required: "Message is required" })}
                 placeholder="Type your message"
-                className="w-full p-4 pl-12 border border-gray-300 rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                className="w-full p-4 pl-12 border border-gray-300 rounded-lg h-32 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 shadow-xs"
               />
             </div>
             {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message.message}</p>}

@@ -4,6 +4,7 @@ import { endpoints } from "@/lib/data/endpoints";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Script from "next/script";
+import { cookies } from "next/headers";
 
 export const revalidate = 300; // re-gen metadata/page every 5 minutes
 
@@ -37,8 +38,17 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 async function getProduct(slug: string): Promise<Product | null> {
   try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("access_token")?.value;
+    const deviceToken = cookieStore.get("device_token")?.value;
     const res = await fetch(`${API_URL + endpoints.products}/${slug}`, {
       next: { revalidate },
+      headers: {
+        Accept: "application/json",
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...(deviceToken ? { Devicetoken: deviceToken } : {}),
+      },
+      credentials: "include",
     });
     if (!res.ok) return null;
 

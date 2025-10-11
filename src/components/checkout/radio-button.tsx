@@ -32,7 +32,12 @@ export default function RadioSelector<T extends RadioItem>({
   isGrid = false,
 }: RadioSelectorProps<T>) {
   return (
-    <RadioGroup value={selectedItem} onChange={onChange} className={className}>
+    <RadioGroup
+      value={selectedItem}
+      onChange={onChange}
+      className={className}
+      key={selectedItem?._id}
+    >
       {label && (
         <Label className="text-base font-medium text-gray-900">{label}</Label>
       )}
@@ -56,7 +61,7 @@ export default function RadioSelector<T extends RadioItem>({
                     ? "border-transparent ring-2 ring-indigo-500"
                     : "border-gray-300",
                   disabled ? "opacity-50" : "",
-                  "relative bg-white border rounded-lg shadow-sm p-4 flex cursor-pointer focus:outline-none"
+                  "relative bg-white border rounded-lg shadow-xs p-4 flex cursor-pointer focus:outline-hidden"
                 )
               }
             >

@@ -41,7 +41,7 @@ const MobileDoc = () => {
                         }`}
                 >
                     {/* Badge positioned relative to the icon */}
-                    <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 min-w-[1.25rem] flex items-center justify-center text-xs">
+                    <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 min-w-5 flex items-center justify-center text-xs">
                         {cart?.items?.length || 0}
                     </span>
                     <ShoppingCartIcon

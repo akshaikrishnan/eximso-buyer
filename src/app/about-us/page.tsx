@@ -99,14 +99,15 @@ const brandOnDemandSteps = [
   "Global Reach:  opportunities in new markets with ease.",
   "Customer-Centric Approach:  A hassle-free shopping experience for buyers around the globe.",
   "Tech-Driven Solutions: We use advanced tools to simplify logistics, payments, and operations.",
-  "Support for Small Businesses: Helping local sellers go global and thrive.Whether you're exploring international products or scaling your business globally, eximso here to make cross-border trade simple, reliable, and efficient.",
+  "Support for Small Businesses: Helping local sellers go global and thrive.",
+  "Whether you're exploring international products or scaling your business globally, eximso here to make cross-border trade simple, reliable, and efficient.",
 ];
 
 export default function AboutUs() {
   return (
     <div className="bg-white scroll-smooth md:scroll-auto">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-indigo-500 via-indigo-500 to-purple-500 overflow-hidden">
+      <div className="relative bg-linear-to-r from-indigo-500 via-indigo-500 to-purple-500 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="md:w-1/2">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
@@ -168,7 +169,7 @@ export default function AboutUs() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {coreValues.map((value) => (
-              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <div key={value.name} className="bg-indigo-100 p-6 rounded-xl shadow-xs hover:shadow-md transition-shadow">
                 <div className="inline-flex items-center justify-center p-2 bg-indigo-100 rounded-lg text-indigo-600">
                   <value.icon className="h-6 w-6" />
                 </div>
@@ -196,7 +197,7 @@ export default function AboutUs() {
           {howItWorks.slice(0, 9).map((item) => (
             <div
               key={item.name}
-              className="bg-indigo-100 p-6  rounded-xl border border-indigo-100 shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
+              className="bg-indigo-100 p-6  rounded-xl border border-indigo-100 shadow-xs hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
             >
               <div className="flex items-center mb-4 ">
                 <div className="p-3 bg-indigo-100 rounded-lg text-indigo-600 flex items-center justify-center mr-3">
@@ -204,7 +205,7 @@ export default function AboutUs() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
               </div>
-              <p className="text-gray-600 flex-grow">{item.description}</p>
+              <p className="text-gray-600 grow">{item.description}</p>
             </div>
           ))}
         </div>
@@ -227,7 +228,7 @@ export default function AboutUs() {
               <div>
                 {brandOnDemandSteps.map((step, index) => (
                   <div key={index} className="flex mb-4 pb-4 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 shrink-0">
                       {index + 1}
                     </div>
                     <p className="text-gray-700">{step}</p>

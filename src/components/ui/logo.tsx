@@ -10,7 +10,7 @@ export default function Logo({
   return (
     <Link
       href="/"
-      className={cn("inline-flex focus:outline-none shrink-0", className)}
+      className={cn("inline-flex focus:outline-hidden shrink-0", className)}
       {...props}
     >
       <Image

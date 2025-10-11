@@ -11,11 +11,13 @@ export interface CartItem {
     offerPrice?: number;
     thumbnail: string;
     slug: string;
+    stock: number;
   };
   quantity: number;
   color?: string;
   size?: string;
   inStock?: boolean;
+  stock: number;
 }
 
 interface CartData {
@@ -45,16 +47,14 @@ export function useCart() {
   });
 
   const subTotal =
-    cart?.items?.reduce(
-      (acc, item) => {
-        const price =
-          typeof item.product.offerPrice === "number" && item.product.offerPrice !== 0
-            ? item.product.offerPrice
-            : item.product.price;
-        return acc + price * item.quantity;
-      },
-      0
-    ) || 0;
+    cart?.items?.reduce((acc, item) => {
+      const price =
+        typeof item.product.offerPrice === "number" &&
+        item.product.offerPrice !== 0
+          ? item.product.offerPrice
+          : item.product.price;
+      return acc + price * item.quantity;
+    }, 0) || 0;
 
   return {
     cart,

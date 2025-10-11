@@ -107,7 +107,7 @@ export default function MobileMenu() {
         <div className="flex items-center justify-between">
           <Link
             href={item.path}
-            className="w-full text-[15px] menu-item relative py-3 ltr:pl-5 ltr:md:pl-7 rtl:pr-5 rtl:md:pr-7 ltr:pr-4 rtl:pl-4 transition duration-200 ease-in-out flex items-center gap-3"
+            className="w-full text-[15px] menu-item relative py-3 ltr:pl-5 md:ltr:pl-7 rtl:pr-5 md:rtl:pr-7 ltr:pr-4 rtl:pl-4 transition duration-200 ease-in-out flex items-center gap-3"
             onClick={closeSidebar}
           >
             {item.image ? (
@@ -116,7 +116,7 @@ export default function MobileMenu() {
                 alt={item.label}
                 width={28}
                 height={28}
-                className="h-7 w-7 rounded object-cover flex-shrink-0"
+                className="h-7 w-7 rounded object-cover shrink-0"
               />
             ) : null}
             <span className="block w-full">{item.label}</span>
@@ -125,7 +125,7 @@ export default function MobileMenu() {
           {hasSubMenu && (
             <button
               type="button"
-              className="cursor-pointer w-10 md:w-12 h-8 flex-shrink-0 flex items-center justify-center"
+              className="cursor-pointer w-10 md:w-12 h-8 shrink-0 flex items-center justify-center"
               onClick={() => handleArrowClick(menuName)}
               onMouseDown={(e) => e.preventDefault()} // prevent focusing that can sometimes jump
               aria-label="Toggle submenu"
@@ -194,7 +194,7 @@ export default function MobileMenu() {
                         alt={m.label}
                         width={24}
                         height={24}
-                        className="h-6 w-6 rounded object-cover flex-shrink-0"
+                        className="h-6 w-6 rounded object-cover shrink-0"
                       />
                     ) : null}
                     <span className="block w-full">{m.label}</span>
@@ -212,10 +212,10 @@ export default function MobileMenu() {
   return (
     <div className="flex flex-col justify-between w-full h-full">
       {/* Header */}
-      <div className="w-full border-b border-gray-100 flex justify-between items-center relative ltr:pl-5 ltr:md:pl-7 rtl:pr-5 rtl:md:pr-7 flex-shrink-0 py-1">
+      <div className="w-full border-b border-gray-100 flex justify-between items-center relative ltr:pl-5 md:ltr:pl-7 rtl:pr-5 md:rtl:pr-7 shrink-0 py-1">
         <Logo />
         <button
-          className="flex items-center justify-center text-gray-700 px-4 md:px-5 py-5 lg:py-7 focus:outline-none transition-opacity hover:opacity-70"
+          className="flex items-center justify-center text-gray-700 px-4 md:px-5 py-5 lg:py-7 focus:outline-hidden transition-opacity hover:opacity-70"
           onClick={closeSidebar}
           aria-label="Close menu"
         >
@@ -224,7 +224,7 @@ export default function MobileMenu() {
       </div>
 
       {/* Scrollable body - attach ref here to preserve scroll */}
-      <Scrollbar className="menu-scrollbar flex-grow mb-auto">
+      <Scrollbar className="menu-scrollbar grow mb-auto">
         <div
           className="flex flex-col py-5 px-0 lg:px-2 text-heading"
           ref={scrollBodyRef}

@@ -21,7 +21,7 @@ const ListItem = ({
     >
       <div className="flex items-center">
         <Image
-          className="w-50 h-50 rounded-full aspect-1"
+          className="w-12 h-12 rounded-full aspect-1"
           src={data?.image}
           width={50}
           height={50}
@@ -30,7 +30,7 @@ const ListItem = ({
         <p className="text-sm text-gray-600 ml-4">{data?.name}</p>
       </div>
       <div className="flex items-center">
-        <span className="text-xs font-medium w-5 h-5 flex flex-shrink-0 justify-center items-center bg-gray-300 rounded ltr:2xl:mr-2 rtl:2xl:ml-2">
+        <span className="text-xs font-medium w-5 h-5 flex shrink-0 justify-center items-center bg-gray-300 rounded 2xl:ltr:mr-2 2xl:rtl:ml-2">
           {data?.count}
         </span>
         <ChevronRightIcon className="w-5 h-5 text-gray-600" />

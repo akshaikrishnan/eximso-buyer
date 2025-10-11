@@ -76,7 +76,7 @@ const WishlistPage = () => {
           return (
             <div
               key={item.id}
-              className="flex items-center justify-between p-5 shadow-sm ring-1 ring-gray-900/5 sm:rounded pb-4"
+              className="flex items-center justify-between p-5 shadow-xs ring-1 ring-gray-900/5 sm:rounded pb-4"
             >
               <Link
                 href={`/${item.slug}`}

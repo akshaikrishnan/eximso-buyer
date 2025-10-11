@@ -36,10 +36,10 @@ const CollectionGroup: React.FC<{ collectionGroup: CollectionGroupProps }> = ({
           <Link
             key={productIndex}
             href={product.slug ? "/" + product.slug : product.href}
-            className="group flex flex-col bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200"
+            className="group flex flex-col bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
           >
             {/* Product Image */}
-            <div className="w-full aspect-[3/4] relative rounded-lg overflow-hidden bg-gray-100">
+            <div className="w-full aspect-3/4 relative rounded-lg overflow-hidden bg-gray-100">
               <Image
                 src={product.thumbnail || product.image || "/placeholder.png"}
                 alt={product.name || product.title || "Product"}

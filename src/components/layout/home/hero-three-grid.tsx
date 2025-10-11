@@ -68,21 +68,21 @@ export default async function HeroThreeGrid() {
         <BannerItemComponent
           banner={homepageBanner}
           className="col-span-2 w-full h-auto"
-          imageHeight="h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[24rem]"
+          imageHeight="h-48 sm:h-64 md:h-80 lg:h-96 xl:h-96"
         />
       )}
       {footerBanner && (
         <BannerItemComponent
           banner={footerBanner}
           className="col-span-1 w-full"
-          imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-[18rem]"
+          imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-72"
         />
       )}
       {mainBanner && (
         <BannerItemComponent
           banner={mainBanner}
           className="col-span-1 w-full"
-          imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-[18rem]"
+          imageHeight="h-40 sm:h-48 md:h-56 lg:h-64 xl:h-72"
         />
       )}
     </div>
