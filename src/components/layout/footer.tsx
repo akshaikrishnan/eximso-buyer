@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { usePathname } from "next/navigation";
 import IncentivesFooter from "./incentives-footer";
 import { FaFacebookF, FaYoutube, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
@@ -13,7 +16,7 @@ const footerNavigation = {
   company: [
     { name: "About", href: "/about-us" },
     { name: "Mission and Vision", href: "/mission-vision" },
-    { name: "How do we work", href: "#" },
+    // { name: "How do we work", href: "#" },
     { name: "Focus on both B2B & B2C", href: "/B2B-B2C" },
     { name: "Contact Us", href: "/contact" },
   ],
@@ -25,10 +28,10 @@ const footerNavigation = {
     { name: "Shipping Policy", href: "/policy/shipping-policy" },
   ],
    social: [
-    { name: "Facebook", href: "#", icon: FaFacebookF },
-    { name: "YouTube", href: "#", icon: FaYoutube },
-    { name: "Instagram", href: "#", icon: FaInstagram },
-    { name: "LinkedIn", href: "#", icon: FaLinkedinIn },
+    { name: "Facebook", href: "https://www.facebook.com/profile.php?id=61579842334275 ", icon: FaFacebookF },
+    { name: "YouTube", href: "https://www.youtube.com/@eximso", icon: FaYoutube },
+    { name: "Instagram", href: "https://www.instagram.com/eximso_com/", icon: FaInstagram },
+    { name: "LinkedIn", href: "https://www.linkedin.com/company/eximso/?viewAsMember=true ", icon: FaLinkedinIn },
   ],
   bottomLinks: [
     { name: "Accessibility", href: "#" },
@@ -38,9 +41,11 @@ const footerNavigation = {
 };
 
 export default function Footer() {
+  const pathname = usePathname();
+
   return (
     <>
-      <IncentivesFooter />
+      {pathname === '/' && <IncentivesFooter />}
       <footer aria-labelledby="footer-heading" className="bg-white">
         <h2 id="footer-heading" className="sr-only">
           Footer
