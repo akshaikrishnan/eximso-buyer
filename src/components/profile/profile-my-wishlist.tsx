@@ -85,7 +85,7 @@ const WishlistPage = () => {
                 <img
                   src={item.thumbnail}
                   alt={item.name}
-                  className="h-20 w-20 rounded object-cover"
+                  className="h-20 w-20 rounded object-contain object-center sm:h-24 sm:w-24"
                 />
                 <div>
                   <h3 className="text-lg font-medium text-gray-800">
