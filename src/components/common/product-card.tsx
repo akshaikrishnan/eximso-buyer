@@ -5,6 +5,15 @@ import React from "react";
 import { Price } from "./price";
 
 const getLabel = (product: any) => {
+  // Check for out of stock first
+  const isOutOfStock =
+    product?.stock < product?.minimumOrderQuantity ||
+    !product?.isActive ||
+    product?.stock <= 0;
+  if (isOutOfStock) {
+    return "Out of Stock";
+  }
+
   if (product.label) return product.label;
   const inputDate = new Date(product.createdAt);
 
@@ -36,15 +45,32 @@ const getLabel = (product: any) => {
 };
 
 export default function ProductCard({ product }: any) {
+  const isOutOfStock =
+    product?.stock < product?.minimumOrderQuantity ||
+    !product?.isActive ||
+    product?.stock <= 0;
+
   return (
     <div
       key={product._id}
-      className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out hover:shadow-xl hover:-translate-y-2"
+      className={`relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out ${
+        isOutOfStock
+          ? "opacity-50 cursor-not-allowed"
+          : "hover:shadow-xl hover:-translate-y-2"
+      }`}
     >
-      {getLabel(product) && (
-        <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-primary text-white text-xs font-medium bg-gray-600/60 z-20">
+      {isOutOfStock && (
+        <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-red-600 text-white text-xs font-medium z-20 shadow-lg">
+          Out of Stock
+        </div>
+      )}
+      {getLabel(product) && !isOutOfStock && (
+        <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-gray-600/60 text-white text-xs font-medium z-20">
           {getLabel(product)}
         </div>
+      )}
+      {isOutOfStock && (
+        <div className="absolute inset-0 bg-white-500/50 z-10 rounded-lg"></div>
       )}
       <Link
         href={"/" + product.slug}
