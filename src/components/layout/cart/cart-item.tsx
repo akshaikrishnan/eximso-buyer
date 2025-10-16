@@ -2,6 +2,7 @@ import { XMarkIcon, CheckIcon, ClockIcon } from "@heroicons/react/20/solid";
 import CartBtn from "./cart-btn";
 import { CartItem as CartItemType } from "@/hooks/use-cart";
 import { Price } from "@/components/common/price";
+import clsx from "clsx";
 
 interface CartItemProps {
   item: CartItemType;
@@ -11,11 +12,14 @@ interface CartItemProps {
 export function CartItem({ item, onRemove }: CartItemProps) {
   return (
     <li className="flex py-6 sm:py-10">
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <img
           src={item.product.thumbnail}
           alt={item.product.name}
-          className="h-24 w-24 rounded-md object-contain object-center sm:h-48 sm:w-48"
+          className={clsx(
+            "h-24 w-24 rounded-md object-contain object-center sm:h-48 sm:w-48",
+            item.product.stock <= 0 && "filter grayscale"
+          )}
         />
       </div>
 
@@ -43,7 +47,8 @@ export function CartItem({ item, onRemove }: CartItemProps) {
             <p className="mt-1 text-sm font-medium text-gray-900">
               {(() => {
                 const displayPrice =
-                  typeof item.product.offerPrice === "number" && item.product.offerPrice !== 0
+                  typeof item.product.offerPrice === "number" &&
+                  item.product.offerPrice !== 0
                     ? item.product.offerPrice
                     : item.product.price;
                 return <Price amount={displayPrice} />;
@@ -69,20 +74,16 @@ export function CartItem({ item, onRemove }: CartItemProps) {
         <p className="mt-4 flex space-x-2 text-sm text-gray-700">
           {item.inStock ? (
             <CheckIcon
-              className="h-5 w-5 flex-shrink-0 text-green-500"
+              className="h-5 w-5 shrink-0 text-green-500"
               aria-hidden="true"
             />
           ) : (
             <ClockIcon
-              className="h-5 w-5 flex-shrink-0 text-gray-300"
+              className="h-5 w-5 shrink-0 text-gray-300"
               aria-hidden="true"
             />
           )}
-          <span>
-            {item.inStock
-              ? "In stock"
-              : `Ships in ${Math.ceil(10 * Math.random())} days`}
-          </span>
+          <span>{item.product.stock === 0 ? "Out of Stock" : "In Stock"}</span>
         </p>
       </div>
     </li>

@@ -125,7 +125,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                   <img
                     src={imageUrl}
                     alt={p.name || "Product"}
-                    className="h-16 w-16 sm:h-20 sm:w-20 rounded object-cover flex-shrink-0"
+                    className="h-16 w-16 sm:h-20 sm:w-20 rounded object-cover shrink-0"
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = "https://via.placeholder.com/80";
                     }}
@@ -222,7 +222,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
           </div>
 
           <div className="w-full flex justify-center items-center">
-            <button className="hover:bg-black dark:bg-white dark:text-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 py-5 w-96 md:w-full bg-gray-800 text-base font-medium leading-4 text-white">
+            <button className="hover:bg-black dark:bg-white dark:text-gray-800 dark:hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 py-5 w-96 md:w-full bg-gray-800 text-base font-medium leading-4 text-white">
               View Carrier Details
             </button>
           </div>
@@ -230,7 +230,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
           <div>
             <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800 mb-5">Customer</h3>
             <div className="flex flex-col md:flex-row xl:flex-col justify-start items-stretch h-full w-full md:space-x-6 lg:space-x-8 xl:space-x-0">
-              <div className="flex flex-col justify-start items-start flex-shrink-0">
+              <div className="flex flex-col justify-start items-start shrink-0">
                 <div className="flex justify-center text-gray-800 dark:text-white md:justify-start items-center space-x-4 py-4 border-b border-gray-200 w-full">
                   {/* mail icon */}
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -295,7 +295,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                   href={`/profile/my-orders/${orderRes.orderNumber}/invoice`}
                   className="mt-6 md:mt-0 text-center dark:border-white dark:hover:bg-gray-900 
                   dark:bg-transparent dark:text-white py-5 hover:bg-gray-200 
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 
+                  focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 
                   border border-gray-800 font-medium w-96 2xl:w-full text-base 
                   leading-4 text-gray-800"
                 >

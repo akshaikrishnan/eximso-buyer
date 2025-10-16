@@ -150,7 +150,7 @@ export default function Footer() {
                     <img
                       src="https://tailwindui.com/img/flags/flag-canada.svg"
                       alt=""
-                      className="w-5 h-auto flex-shrink-0"
+                      className="w-5 h-auto shrink-0"
                     />
                     <span className="ml-3 text-sm">Change</span>
                     <span className="sr-only">location and currency</span>

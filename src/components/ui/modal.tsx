@@ -50,7 +50,7 @@ const Modal: React.FC<ModalProps> = ({
           <div className="mt-4 flex justify-end">
             {showBackButton && (
               <Button
-                className="mr-2 inline-flex items-center gap-2 rounded-md bg-gray-700 py-1.5 px-3 text-sm font-semibold text-white shadow-inner focus:outline-none hover:bg-gray-600"
+                className="mr-2 inline-flex items-center gap-2 rounded-md bg-gray-700 py-1.5 px-3 text-sm font-semibold text-white shadow-inner focus:outline-hidden hover:bg-gray-600"
                 onClick={onBackClick}
               >
                 Back
@@ -58,7 +58,7 @@ const Modal: React.FC<ModalProps> = ({
             )}
             {secondaryActionText && onSecondaryAction && (
               <Button
-                className="mr-2 inline-flex items-center gap-2 rounded-md bg-gray-300 py-1.5 px-3 text-sm font-semibold text-gray-900 shadow-inner focus:outline-none hover:bg-gray-200"
+                className="mr-2 inline-flex items-center gap-2 rounded-md bg-gray-300 py-1.5 px-3 text-sm font-semibold text-gray-900 shadow-inner focus:outline-hidden hover:bg-gray-200"
                 onClick={onSecondaryAction}
               >
                 {secondaryActionText}
@@ -66,7 +66,7 @@ const Modal: React.FC<ModalProps> = ({
             )}
             {!hideButton && (
               <Button
-                className="inline-flex items-center gap-2 rounded-md bg-indigo-600 py-1.5 px-3 text-sm font-semibold text-white shadow-inner focus:outline-none hover:bg-indigo-500"
+                className="inline-flex items-center gap-2 rounded-md bg-indigo-600 py-1.5 px-3 text-sm font-semibold text-white shadow-inner focus:outline-hidden hover:bg-indigo-500"
                 onClick={onPrimaryAction}
               >
                 {primaryActionText}

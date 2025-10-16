@@ -1,4 +1,5 @@
 "use client";
+
 import { useAddToCart } from "@/hooks/use-add-to-cart";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
@@ -7,6 +8,23 @@ import React from "react";
 import { Price } from "../common/price";
 import Image from "next/image";
 import Link from "next/link";
+
+// --- helpers (inlined so you don't add new files)
+function toSlug(s?: string) {
+  if (!s) return "";
+  return s
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+function pickProducts(payload: any) {
+  return payload?.result?.data ?? payload?.data ?? payload ?? [];
+}
+// ---
 
 export function RelatedProduct({ product }: any) {
   const addToCart = useAddToCart(product);
@@ -32,10 +50,16 @@ export function RelatedProduct({ product }: any) {
           <div className="absolute inset-x-0 top-0 flex h-72 items-end justify-end overflow-hidden rounded-lg p-4">
             <div
               aria-hidden="true"
-              className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black opacity-50"
+              className="absolute inset-x-0 bottom-0 h-36 bg-linear-to-t from-black opacity-50"
             />
             <p className="relative text-lg font-semibold text-white">
-              <Price amount={product.price} />
+              <Price
+                amount={
+                  product?.discountPercentage > 0
+                    ? product?.offerPrice
+                    : product?.price
+                }
+              />
             </p>
           </div>
         </Link>
@@ -56,57 +80,52 @@ export function RelatedProduct({ product }: any) {
 }
 
 export default function RelatedProducts({ product }: any) {
+  const categoryName: string | undefined =
+    product?.category?.name ?? product?.categoryName;
+  const subcategoryName: string | undefined =
+    product?.subcategory?.name ?? product?.subcategoryName;
+
+  const catSlug = toSlug(categoryName);
+  const subSlug = toSlug(subcategoryName);
+
   const { data: related, isLoading, error } = useQuery({
-    queryKey: ["products", product?.category?._id, "related"],
+    queryKey: ["products", "related", catSlug, subSlug, product?._id],
+    enabled: !!catSlug,
     queryFn: async () => {
-      if (!product?.category?._id) {
-        console.log("No category ID found for product:", product);
-        return [];
-      }
-
       try {
-        // First try: Get products from the same category
+        // 1) same category by slug (✅ backend expects slug)
         const categoryRes = await api.get(endpoints.products, {
-          params: {
-            category: product.category._id,
-            limit: 5,
-          },
+          params: { category: catSlug, limit: 5 },
         });
+        const categoryProducts = pickProducts(categoryRes.data).filter(
+          (p: any) => p._id !== product._id
+        );
+        if (categoryProducts.length) return categoryProducts;
 
-        console.log("Category-specific API response:", categoryRes.data);
-
-        const categoryProducts = categoryRes.data?.result?.data || categoryRes.data?.data || categoryRes.data || [];
-        const filteredCategoryProducts = categoryProducts.filter((p: any) => p._id !== product._id);
-
-        // If we found products in the same category, return them
-        if (filteredCategoryProducts.length > 0) {
-          console.log("Found category-specific products:", filteredCategoryProducts);
-          return filteredCategoryProducts;
+        // 2) try subcategory by slug for tighter matches
+        if (subSlug) {
+          const subRes = await api.get(endpoints.products, {
+            params: { subcategory: subSlug, limit: 5 },
+          });
+          const subProducts = pickProducts(subRes.data).filter(
+            (p: any) => p._id !== product._id
+          );
+          if (subProducts.length) return subProducts;
         }
 
-        // Fallback: Get popular/trending products
-        console.log("No category-specific products found, trying fallback...");
-
+        // 3) fallback: newest/popular
         const fallbackRes = await api.get(endpoints.products, {
-          params: {
-            limit: 5,
-            sort: "popular",
-          },
+          params: { limit: 5, sort: "-createdAt" }, // or your "popular" key if supported
         });
-
-        const fallbackProducts = fallbackRes.data?.result?.data || fallbackRes.data?.data || fallbackRes.data || [];
-        const filteredFallbackProducts = fallbackProducts.filter((p: any) => p._id !== product._id);
-
-        console.log("Fallback products:", filteredFallbackProducts);
-        return filteredFallbackProducts;
+        return pickProducts(fallbackRes.data).filter(
+          (p: any) => p._id !== product._id
+        );
       } catch (err) {
         console.error("Error fetching related products:", err);
         return [];
       }
     },
-    enabled: !!product?.category?._id,
   });
-  console.log(related);
 
   return (
     <section
@@ -119,8 +138,8 @@ export default function RelatedProducts({ product }: any) {
 
       {!isLoading && related?.length > 0 && (
         <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-          {related.map((product: any) => (
-            <RelatedProduct product={product} key={product._id} />
+          {related.map((p: any) => (
+            <RelatedProduct product={p} key={p._id} />
           ))}
         </div>
       )}
@@ -139,7 +158,9 @@ export default function RelatedProducts({ product }: any) {
 
       {error && (
         <div className="mt-8 text-center py-8">
-          <p className="text-red-500">Error loading related products. Please try again later.</p>
+          <p className="text-red-500">
+            Error loading related products. Please try again later.
+          </p>
         </div>
       )}
     </section>

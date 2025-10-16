@@ -6,7 +6,7 @@ const ListMenu = ({ dept, data, hasSubMenu, menuIndex }: any) => {
     <li className="relative">
       <Link
         href={data.path}
-        className="flex items-center capitalize justify-between py-2 ltr:pl-5  ltr:xl:pl-7  ltr:pr-3 ltr:xl:pr-3.5  rtl:xl:pl-3.5 hover:text-heading hover:bg-gray-200"
+        className="flex items-center capitalize justify-between py-2 ltr:pl-5  xl:ltr:pl-7  ltr:pr-3 xl:ltr:pr-3.5  xl:rtl:pl-3.5 hover:text-heading hover:bg-gray-200"
       >
         {data.label}
         {data.subMenu && (
@@ -25,7 +25,7 @@ const ListMenu = ({ dept, data, hasSubMenu, menuIndex }: any) => {
 const SubMenu: React.FC<any> = ({ dept, data, menuIndex }) => {
   dept = dept + 1;
   return (
-    <ul className="subMenuChild shadow-subMenu bg-gray-50 absolute z-0 ltr:right-full ltr:2xl:right-auto rtl:left-full rtl:2xl:left-auto ltr:2xl:left-full rtl:2xl:right-full opacity-0 invisible top-4 w-56 py-3">
+    <ul className="subMenuChild shadow-subMenu bg-gray-50 absolute z-0 ltr:right-full 2xl:ltr:right-auto rtl:left-full 2xl:rtl:left-auto 2xl:ltr:left-full 2xl:rtl:right-full opacity-0 invisible top-4 w-56 py-3">
       {data?.map((menu: any, index: number) => {
         const menuName: string = `sidebar-submenu-${dept}-${menuIndex}-${index}`;
 

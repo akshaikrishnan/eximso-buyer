@@ -117,13 +117,13 @@ export default function Missionandvision() {
             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl mb-8">Revolutionizing Cross-Border E-Commerce</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
-              <div className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="bg-white p-6 rounded-xl shadow-xs">
                 <h3 className="text-xl font-semibold text-indigo-600 mb-3">Our Mission</h3>
                 <p className="text-gray-700">
                   &ldquo;Enabling a hassle-free global shopping experience by leveraging  technology.&rdquo;
                 </p>
               </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="bg-white p-6 rounded-xl shadow-xs">
                 <h3 className="text-xl font-semibold text-indigo-600 mb-3">Our Vision</h3>
                 <p className="text-gray-700">
                   &ldquo;To be the most trusted cross border e-commerce platform that makes global trade and shopping easy for business and consumers everywhere .&ldquo;
