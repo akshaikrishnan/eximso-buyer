@@ -16,7 +16,7 @@ export function CartItem({ item, onRemove }: CartItemProps) {
         <a href={`/${item.product.slug}`}>
         <img
           src={item.product.thumbnail}
-          alt={item.product.slug}
+          alt={item.product.name}
           className={clsx(
             "h-24 w-24 rounded-md object-contain object-center sm:h-48 sm:w-48",
             item.product.stock <= 0 && "filter grayscale"
