@@ -1,4 +1,3 @@
-// components/profile/order-details.tsx
 "use client";
 
 import Link from "next/link";
@@ -7,7 +6,7 @@ import OrderTracking from "./order-tracking";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { Price } from "../common/price";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 
 type OrderItem = {
   product?: {
@@ -25,6 +24,12 @@ type OrderItem = {
   quantity?: number;
 };
 
+type ConnectedOrder = {
+  _id: string;
+  orderNumber?: string;
+  createdAt?: string;
+};
+
 type OrderRes = {
   _id: string;
   orderNumber?: string;
@@ -32,11 +37,17 @@ type OrderRes = {
   status?: string;
   orderTotal?: number;
   shippingPrice?: number;
+  shippingAmount?: number;
+  taxAmount?: number;
+  totalAmount?: number;
   itemsTotal?: number;
   user?: { email?: string };
   items: OrderItem[];
   shippingAddress?: any;
   billingAddress?: any;
+  // shippingMethod can be a simple string or an object with a title
+  shippingMethod?: string | { title?: string };
+  connectedOrders?: ConnectedOrder[];
 };
 
 export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
@@ -49,6 +60,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
     queryKey: ["orderNumber", orderNumber],
     queryFn: async () => {
       const res = await api.get(`${endpoints.order}/${orderNumber}`);
+      console.log("dffb", res);
+
       const data = res?.data?.result ?? res?.data;
       if (!data || typeof data !== "object") {
         throw new Error("Unexpected response shape");
@@ -63,6 +76,19 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
   });
 
+  // Fetch connected orders data
+  const connectedOrdersQueries = useQueries({
+    queries: (orderRes?.connectedOrders || []).map((connectedOrder) => ({
+      queryKey: ["connectedOrder", connectedOrder.orderNumber || connectedOrder._id],
+      queryFn: async () => {
+        const res = await api.get(`${endpoints.order}/${connectedOrder.orderNumber || connectedOrder._id}`);
+        const data = res?.data?.result ?? res?.data;
+        return data as OrderRes;
+      },
+      enabled: !!(orderRes?.connectedOrders && orderRes.connectedOrders.length > 0),
+    })),
+  });
+
   if (isLoading) return <div>Loading...</div>;
 
   if (isError || !orderRes) {
@@ -74,28 +100,65 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
       "Error fetching order data";
     return (
       <div className="p-4 rounded border border-red-300 bg-red-50 text-red-800">
-        <p className="font-semibold">Couldn’t load this order.</p>
+        <p className="font-semibold">Couldn&apos;t load this order.</p>
         {status ? <p>Status: {status}</p> : null}
         <p>{msg}</p>
       </div>
     );
   }
 
+  console.log(orderRes);
+
   const placedOn = orderRes.createdAt
     ? new Date(orderRes.createdAt).toLocaleDateString("en-GB")
     : "Unknown date";
 
   // ----- Dynamic calculation -----
-  const subtotal = orderRes.items?.reduce((acc, item) => {
-    const price = item.product?.offerPrice && item.product.offerPrice > 0
-      ? item.product.offerPrice
-      : item.product?.price || 0;
-    const qty = item.quantity || 1;
-    return acc + price * qty;
-  }, 0);
+  // Check if there are connected orders
+  const hasConnectedOrders = orderRes.connectedOrders && orderRes.connectedOrders.length > 0;
 
-  const shipping = orderRes.shippingPrice || 0;
-  const total = (orderRes.orderTotal ?? subtotal + shipping);
+  // Calculate total regular price (sum of all product prices)
+  const totalPrice = orderRes.items?.reduce((acc, item) => {
+    const regularPrice = item.product?.price || 0;
+    const qty = item.quantity || 1;
+    return acc + (regularPrice * qty);
+  }, 0) || 0;
+
+  // Calculate subtotal (after applying offer prices)
+  const subtotal = orderRes.items?.reduce((acc, item) => {
+    const offerPrice = item.product?.offerPrice || 0;
+    const regularPrice = item.product?.price || 0;
+    const finalPrice = offerPrice > 0 ? offerPrice : regularPrice;
+    const qty = item.quantity || 1;
+    return acc + (finalPrice * qty);
+  }, 0) || 0;
+
+  // Calculate total discount (difference between regular price and offer price)
+  const totalDiscount = totalPrice - subtotal;
+
+  // Calculate display price from connected orders if they exist
+  let displayPrice = orderRes.itemsTotal ?? subtotal;
+  
+  if (hasConnectedOrders) {
+    // Sum up all prices from connected orders
+    const connectedOrdersTotalPrice = connectedOrdersQueries.reduce((acc, query) => {
+      if (query.data?.items) {
+        const orderPrice = query.data.items.reduce((itemAcc, item) => {
+          const regularPrice = item.product?.price || 0;
+          const qty = item.quantity || 1;
+          return itemAcc + (regularPrice * qty);
+        }, 0);
+        return acc + orderPrice;
+      }
+      return acc;
+    }, 0);
+    
+    displayPrice = connectedOrdersTotalPrice;
+  }
+
+  const shipping = orderRes.shippingAmount ?? orderRes.shippingPrice ?? 0;
+  const tax = orderRes.taxAmount ?? 0;
+  const total = orderRes.totalAmount ?? orderRes.orderTotal ?? subtotal + shipping + tax;
 
   return (
     <div className="py-14 px-4 md:px-6 2xl:px-6 2xl:container 2xl:mx-auto">
@@ -109,6 +172,45 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
         </p>
       </div>
 
+      {/* Connected Orders */}
+      {orderRes.connectedOrders && orderRes.connectedOrders.length > 0 && (() => {
+        const filteredOrders = orderRes.connectedOrders.filter(
+          (connectedOrder) =>
+            connectedOrder._id !== orderRes._id &&
+            connectedOrder.orderNumber !== orderRes.orderNumber
+        );
+
+        return filteredOrders.length > 0 ? (
+          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">
+              Connected Orders
+            </h2>
+            <div className="space-y-2">
+              {filteredOrders.map((connectedOrder, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-800 dark:text-white">
+                      Order #{connectedOrder.orderNumber || connectedOrder._id}
+                    </p>
+                    {connectedOrder.createdAt && (
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                        {new Date(connectedOrder.createdAt).toLocaleDateString("en-GB")}
+                      </p>
+                    )}
+                  </div>
+                  <Link
+                    href={`/profile/my-orders/${connectedOrder.orderNumber || connectedOrder._id}`}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    View Order →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null;
+      })()}
+
       {/* Order Items */}
       <div className="mt-10">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-white mb-4">
@@ -119,10 +221,12 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
           orderRes.items.map((item, index) => {
             const p = item.product || {};
             const imageUrl =
-              (p.images && p.images[0]) || p.thumbnail || "https://via.placeholder.com/80";
+              (p.images && p.images[0]) ||
+              p.thumbnail ||
+              "https://via.placeholder.com/80";
             const qty = item.quantity || 1;
-            const price = p.offerPrice && p.offerPrice > 0 ? p.offerPrice : p.price || 0;
-            const originalPrice = p.offerPrice && p.offerPrice > 0 ? p.price : price;
+            const price =
+              p.offerPrice && p.offerPrice > 0 ? p.offerPrice : p.price || 0;
 
             return (
               <div
@@ -136,7 +240,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                     alt={p.name || "Product"}
                     className="h-16 w-16 sm:h-20 sm:w-20 rounded object-cover shrink-0"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = "https://via.placeholder.com/80";
+                      (e.currentTarget as HTMLImageElement).src =
+                        "https://via.placeholder.com/80";
                     }}
                   />
                   <div className="min-w-0">
@@ -157,7 +262,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                 {/* Right side */}
                 <div className="sm:text-right mt-2 sm:mt-0 flex">
                   <p className="text-base dark:text-white">
-                    Qty: {qty} &nbsp;  &nbsp; <Price amount={price * qty} />
+                    Qty: {qty} &nbsp; &nbsp; <Price amount={price * qty} />
                   </p>
                 </div>
               </div>
@@ -171,51 +276,115 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
       {/* Summary & Customer */}
       <div className="flex justify-center flex-col md:flex-row items-stretch w-full space-y-4 md:space-y-0 md:space-x-6 xl:space-x-8 mt-10">
         {/* Summary */}
-        {/* Summary */}
         <div className="flex flex-col px-4 py-6 md:p-6 xl:p-8 w-full bg-gray-50 dark:bg-gray-800 space-y-6">
-          <OrderTracking orderId={orderRes._id} status={orderRes.status} />
-          <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800">
+          <OrderTracking
+            orderId={orderRes.orderNumber || orderRes._id}
+            status={orderRes.status}
+          />
+
+          <h3 className="text-2xl dark:text-white font-bold leading-7 text-gray-800 mb-4">
             Summary
           </h3>
 
-          <div className="flex justify-center items-center w-full space-y-4 flex-col border-gray-200 border-b pb-4">
-            <div className="flex justify-between w-full">
-              <p className="text-base dark:text-white leading-4 text-gray-800">Items Total</p>
-              <p className="text-base dark:text-gray-300 leading-4 text-gray-600">
-                <Price amount={orderRes.itemsTotal ?? 0} />
+          <div className="flex justify-center items-center w-full space-y-4 flex-col pb-4">
+            <div className="flex justify-between items-center w-full">
+              <div className="flex items-center gap-2">
+                <p className="text-base dark:text-white leading-5 text-gray-800">
+                  Price ({(() => {
+                    if (hasConnectedOrders) {
+                      // Calculate total items from all connected orders
+                      return connectedOrdersQueries.reduce((acc, query) => {
+                        return acc + (query.data?.items?.length || 0);
+                      }, 0);
+                    }
+                    return orderRes.items?.length || 0;
+                  })()} items)
+                </p>
+              </div>
+              <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
+                <Price amount={displayPrice} />
               </p>
             </div>
+
+            {totalDiscount > 0 && (
+              <div className="flex justify-between items-center w-full">
+                <p className="text-base dark:text-white leading-5 text-gray-800">
+                  Discount
+                </p>
+                <p className="text-base dark:text-green-400 leading-5 text-green-600 font-medium">
+                  - <Price amount={totalDiscount} />
+                </p>
+              </div>
+            )}
 
             <div className="flex justify-between items-center w-full">
-              <p className="text-base dark:text-white leading-4 text-gray-800">Shipping</p>
-              <p className="text-base dark:text-gray-300 leading-4 text-gray-600">
-                <Price amount={orderRes.shippingPrice ?? 0} />
+              <p className="text-base dark:text-white leading-5 text-gray-800">
+                Shipping Amount
+              </p>
+              <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
+                {shipping > 0 ? <Price amount={shipping} /> : 'Free'}
+              </p>
+            </div>
+
+            {tax > 0 && (
+              <div className="flex justify-between items-center w-full">
+                <p className="text-base dark:text-white leading-5 text-gray-800">
+                  Tax Amount
+                </p>
+                <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
+                  <Price amount={tax} />
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t-2 border-gray-200 dark:border-gray-600 pt-4">
+            <div className="flex justify-between items-center w-full">
+              <p className="text-lg dark:text-white font-bold leading-5 text-gray-800">
+                Total Amount
+              </p>
+              <p className="text-lg dark:text-white font-bold leading-5 text-gray-800">
+                <Price amount={total} />
               </p>
             </div>
           </div>
 
-          <div className="flex justify-between items-center w-full mt-4">
-            <p className="text-base dark:text-white font-semibold leading-4 text-gray-800">Total</p>
-            <p className="text-base dark:text-gray-300 font-semibold leading-4 text-gray-600">
-              <Price amount={orderRes.orderTotal ?? 0} />
-            </p>
-          </div>
+          {totalDiscount > 0 && (
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                  You&apos;ll save <Price amount={totalDiscount} /> on this order!
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-
 
         {/* Shipping & Customer */}
         <div className="flex flex-col px-4 py-6 md:p-6 xl:p-8 w-full bg-gray-50 dark:bg-gray-800 space-y-6">
-          <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800">Shipping</h3>
-          <div className="flex justify-between items-start w-full">
+          <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800">
+            Shipping
+          </h3>
+
+       <div className="flex justify-between items-start w-full">
             <div className="flex justify-center items-center space-x-4">
               <div className="w-8 h-8">
-                <img className="w-full h-full" alt="logo" src="https://i.ibb.co/L8KSdNQ/image-3.png" />
+                <img
+                  className="w-full h-full"
+                  alt="logo"
+                  src="https://i.ibb.co/L8KSdNQ/image-3.png"
+                />
               </div>
               <div className="flex flex-col justify-start items-center">
                 <p className="text-lg leading-6 dark:text-white font-semibold text-gray-800">
-                  DPD Delivery
+                  {typeof orderRes?.shippingMethod === 'string' 
+                    ? orderRes.shippingMethod 
+                    : orderRes?.shippingMethod?.title || "Standard Delivery"}
                   <br />
-                  <span className="font-normal">Delivery within 24 Hours</span>
+                  {/* <span className="font-normal">Delivery within 24 Hours</span> */}
                 </p>
               </div>
             </div>
@@ -231,16 +400,36 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
           </div>
 
           <div>
-            <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800 mb-5">Customer</h3>
+            <h3 className="text-xl dark:text-white font-semibold leading-5 text-gray-800 mb-5">
+              Customer
+            </h3>
             <div className="flex flex-col md:flex-row xl:flex-col justify-start items-stretch h-full w-full md:space-x-6 lg:space-x-8 xl:space-x-0">
               {/* Customer email */}
               <div className="flex flex-col justify-start items-start shrink-0">
                 <div className="flex justify-center text-gray-800 dark:text-white md:justify-start items-center space-x-4 py-4 border-b border-gray-200 w-full">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M3 7L12 13L21 7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5Z"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M3 7L12 13L21 7"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
-                  <p className="cursor-pointer text-sm leading-5">{orderRes?.user?.email || "N/A"}</p>
+                  <p className="cursor-pointer text-sm leading-5">
+                    {orderRes?.user?.email || "N/A"}
+                  </p>
                 </div>
               </div>
 
@@ -258,7 +447,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                           <p>{orderRes.shippingAddress.addressLine1 || "N/A"}</p>
                           <p>{orderRes.shippingAddress.addressLine2 || ""}</p>
                           <p>
-                            {orderRes.shippingAddress.city}, {orderRes.shippingAddress.state}
+                            {orderRes.shippingAddress.city},{" "}
+                            {orderRes.shippingAddress.state}
                           </p>
                           <p>{orderRes.shippingAddress.pincode}</p>
                           <p>{orderRes.shippingAddress.country}</p>
@@ -280,7 +470,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                           <p>{orderRes.billingAddress.addressLine1 || "N/A"}</p>
                           <p>{orderRes.billingAddress.addressLine2 || ""}</p>
                           <p>
-                            {orderRes.billingAddress.city}, {orderRes.billingAddress.state}
+                            {orderRes.billingAddress.city},{" "}
+                            {orderRes.billingAddress.state}
                           </p>
                           <p>{orderRes.billingAddress.pincode}</p>
                           <p>{orderRes.billingAddress.country}</p>

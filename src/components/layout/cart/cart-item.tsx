@@ -13,14 +13,16 @@ export function CartItem({ item, onRemove }: CartItemProps) {
   return (
     <li className="flex py-6 sm:py-10">
       <div className="shrink-0">
+        <a href={`/${item.product.slug}`}>
         <img
           src={item.product.thumbnail}
-          alt={item.product.name}
+          alt={item.product.slug}
           className={clsx(
             "h-24 w-24 rounded-md object-contain object-center sm:h-48 sm:w-48",
             item.product.stock <= 0 && "filter grayscale"
           )}
         />
+        </a>
       </div>
 
       <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
