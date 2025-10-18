@@ -1,18 +1,4 @@
-# Implement Out of Stock Theme in Recently Viewed Product Cards
-
-## Tasks
-- [ ] Modify RelatedProduct component to include out of stock styling
-- [ ] Add out of stock label overlay
-- [ ] Apply opacity and cursor-not-allowed for out of stock items
-- [ ] Disable "Add to bag" button for out of stock products
-- [ ] Test the implementation
-
-## Information Gathered
-- ProductCard component already has comprehensive out of stock handling
-- RelatedProduct component is used for Recently Viewed products and lacks out of stock styling
-- Out of stock logic: `product?.stock < product?.minimumOrderQuantity || !product?.isActive || product?.stock <= 0`
-
-## Plan
-- Modify `RelatedProduct` component in `src/components/products/related-products.tsx`
-- Add out of stock theme similar to `ProductCard` component
-- Ensure consistent styling and behavior
+- [x] Decrease margin in collection-groups.tsx: Change gap-4 to gap-2 md:gap-4 in grid
+- [x] Decrease margin in products.tsx: Change gap-4 to gap-2 md:gap-4 in section
+- [x] Remove padding on mobile in collection-groups.tsx: Change p-4 to p-0 md:p-4
+- [x] Remove padding on mobile in products.tsx: Change p-6 to p-0 md:p-6

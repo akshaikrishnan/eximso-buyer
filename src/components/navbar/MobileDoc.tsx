@@ -18,7 +18,7 @@ const MobileDoc = () => {
 
     return (
         <div className="fixed bottom-0 left-0 w-full bg-white shadow-md sm:hidden z-50">
-            <div className="flex justify-around py-2 text-gray-700">
+            <div className="flex justify-around py-2 text-gray-700 pb-6">
                 <Link
                     href="/"
                     className={`flex flex-col items-center ${pathname === "/" ? "text-indigo-600 font-bold" : "text-gray-500"}`}
