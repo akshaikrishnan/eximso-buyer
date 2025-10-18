@@ -16,4 +16,5 @@ export const endpoints = {
   categoryPage: "category/page",
   upload: "media/s3-upload",
   paymentProviders: "payment-providers",
+  tracking: "tracking",
 };

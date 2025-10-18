@@ -226,11 +226,11 @@ export default function ProductDetail({ product }: any) {
 
                 <p
                   className={classNames(
-                    isOutOfStock ? "text-red-600" : "text-green-600",
+                    isOutOfStock ? "text-red-600" : (product?.stock <= 3 ? "text-orange-600" : "text-green-600"),
                     "text-sm font-semibold uppercase"
                   )}
                 >
-                  {isOutOfStock ? "Out of Stock" : "In Stock"}
+                  {isOutOfStock ? "Out of Stock" : (product?.stock <= 3 ? `Only ${product?.stock} left ` : `In Stock `)}
                 </p>
               </div>
 
