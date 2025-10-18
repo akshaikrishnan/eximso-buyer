@@ -41,8 +41,6 @@ const MyOrders = () => {
     queryKey: ["orders"],
     queryFn: async (): Promise<OrderGroup[]> => {
       const res = await api.get(`${endpoints.order}/grouped`);
-      console.log("getGroupedOrders-res", res);
-
       return res.data.result.data.map((group: any) => ({
         GrandTotal: group.groupGrandTotal || "Grouped Orders",
         orders: group.orders.map((order: any) => ({
@@ -129,12 +127,12 @@ const MyOrders = () => {
                           </h3>
                           <span
                             className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium w-fit ${order.status === "Delivered"
-                                ? "bg-green-100 text-green-800"
-                                : order.status === "Shipped"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : order.status === "Cancelled"
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-yellow-100 text-yellow-800"
+                              ? "bg-green-100 text-green-800"
+                              : order.status === "Shipped"
+                                ? "bg-blue-100 text-blue-800"
+                                : order.status === "Cancelled"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
                               }`}
                           >
                             {order.status}
