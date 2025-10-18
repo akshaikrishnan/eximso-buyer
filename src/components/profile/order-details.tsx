@@ -20,6 +20,7 @@ type OrderItem = {
     price?: number;
     offerPrice?: number;
     orderNumber?: string;
+    slug?: string;
   };
   quantity?: number;
 };
@@ -46,8 +47,18 @@ type OrderRes = {
   shippingAddress?: any;
   billingAddress?: any;
   // shippingMethod can be a simple string or an object with a title
-  shippingMethod?: string | { title?: string };
+  shippingMethod?: string | { title?: string; icon?: string };
   connectedOrders?: ConnectedOrder[];
+  paymentMethod?: {
+    _id?: string;
+    name?: string;
+    image?: string;
+    apiUrl?: string;
+    slug?: string;
+    description?: string;
+    isActive?: boolean;
+    isDelete?: boolean;
+  };
 };
 
 export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
@@ -60,7 +71,6 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
     queryKey: ["orderNumber", orderNumber],
     queryFn: async () => {
       const res = await api.get(`${endpoints.order}/${orderNumber}`);
-      console.log("dffb", res);
 
       const data = res?.data?.result ?? res?.data;
       if (!data || typeof data !== "object") {
@@ -106,9 +116,6 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
       </div>
     );
   }
-
-  console.log(orderRes);
-
   const placedOn = orderRes.createdAt
     ? new Date(orderRes.createdAt).toLocaleDateString("en-GB")
     : "Unknown date";
@@ -134,13 +141,13 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
   }, 0) || 0;
 
   // Calculate total discount (difference between regular price and offer price)
-  const totalDiscount = totalPrice - subtotal;
+  let totalDiscount = totalPrice - subtotal;
 
-  // Calculate display price from connected orders if they exist
+  // Calculate display price and discount from connected orders if they exist
   let displayPrice = orderRes.itemsTotal ?? subtotal;
-  
+
   if (hasConnectedOrders) {
-    // Sum up all prices from connected orders
+    // Sum up all regular prices from connected orders
     const connectedOrdersTotalPrice = connectedOrdersQueries.reduce((acc, query) => {
       if (query.data?.items) {
         const orderPrice = query.data.items.reduce((itemAcc, item) => {
@@ -152,8 +159,22 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
       }
       return acc;
     }, 0);
-    
+
+    // Sum up all offer prices from connected orders (only actual offer prices)
+    const connectedOrdersOfferPrice = connectedOrdersQueries.reduce((acc, query) => {
+      if (query.data?.items) {
+        const orderOfferPrice = query.data.items.reduce((itemAcc, item) => {
+          const offerPrice = item.product?.offerPrice || 0;
+          const qty = item.quantity || 1;
+          return itemAcc + (offerPrice * qty);
+        }, 0);
+        return acc + orderOfferPrice;
+      }
+      return acc;
+    }, 0);
+
     displayPrice = connectedOrdersTotalPrice;
+    totalDiscount = connectedOrdersTotalPrice - connectedOrdersOfferPrice;
   }
 
   const shipping = orderRes.shippingAmount ?? orderRes.shippingPrice ?? 0;
@@ -225,8 +246,9 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
               p.thumbnail ||
               "https://via.placeholder.com/80";
             const qty = item.quantity || 1;
-            const price =
-              p.offerPrice && p.offerPrice > 0 ? p.offerPrice : p.price || 0;
+            const hasOffer = (p.offerPrice ?? 0) > 0 && p.offerPrice! < (p.price ?? 0);
+            const regularPrice = p.price || 0;
+            const offerPrice = hasOffer ? p.offerPrice! : regularPrice;
 
             return (
               <div
@@ -235,42 +257,60 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
               >
                 {/* Left side */}
                 <div className="flex items-center gap-3 flex-1">
-                  <img
-                    src={imageUrl}
-                    alt={p.name || "Product"}
-                    className="h-16 w-16 sm:h-20 sm:w-20 rounded object-cover shrink-0"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src =
-                        "https://via.placeholder.com/80";
-                    }}
-                  />
+                  <a href={"/" + p.slug}>
+                    <img
+                      src={imageUrl}
+                      alt={p.name || "Product"}
+                      className="h-16 w-16 sm:h-20 sm:w-20 rounded object-cover shrink-0"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src =
+                          "https://via.placeholder.com/80";
+                      }}
+                    />
+                  </a>
                   <div className="min-w-0">
-                    <h3 className="text-base sm:text-lg font-semibold dark:text-white break-words">
-                      {p.name || "Unknown Product"}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Model: {p.modelNumber || "N/A"}
-                    </p>
+                    <a href={"/" + p.slug}>
+                      <h3 className="text-base sm:text-lg font-semibold dark:text-white break-words">
+                        {p.name || "Unknown Product"}
+                      </h3>
+                    </a>
+
+                    {/* Price Display */}
+                    <div className="mt-1 space-x-2">
+                      {hasOffer ? (
+                        <>
+                          <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                            <Price amount={offerPrice} />
+                          </span>
+                          <span className="text-xs line-through text-gray-500 dark:text-gray-400">
+                            <Price amount={regularPrice} />
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                          <Price amount={regularPrice} />
+                        </span>
+                      )}
+                    </div>
+
                     {(p.discountPercentage ?? 0) > 0 && (
                       <p className="text-sm text-gray-600 dark:text-gray-300">
                         Discount: {p.discountPercentage}%
                       </p>
                     )}
+                    <p className="text-sm dark:text-gray-300">
+                      Qty: {qty}
+                    </p>
                   </div>
                 </div>
 
-                {/* Right side */}
-                <div className="sm:text-right mt-2 sm:mt-0 flex">
-                  <p className="text-base dark:text-white">
-                    Qty: {qty} &nbsp; &nbsp; <Price amount={price * qty} />
-                  </p>
-                </div>
               </div>
             );
           })
         ) : (
           <p>No items in this order.</p>
         )}
+
       </div>
 
       {/* Summary & Customer */}
@@ -369,19 +409,23 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
             Shipping
           </h3>
 
-       <div className="flex justify-between items-start w-full">
+          <div className="flex justify-between items-start w-full">
             <div className="flex justify-center items-center space-x-4">
               <div className="w-8 h-8">
                 <img
                   className="w-full h-full"
                   alt="logo"
-                  src="https://i.ibb.co/L8KSdNQ/image-3.png"
+                  src={
+                    typeof orderRes?.shippingMethod === 'object' && orderRes?.shippingMethod?.icon
+                      ? orderRes.shippingMethod.icon
+                      : "https://i.ibb.co/L8KSdNQ/image-3.png"
+                  }
                 />
               </div>
               <div className="flex flex-col justify-start items-center">
                 <p className="text-lg leading-6 dark:text-white font-semibold text-gray-800">
-                  {typeof orderRes?.shippingMethod === 'string' 
-                    ? orderRes.shippingMethod 
+                  {typeof orderRes?.shippingMethod === 'string'
+                    ? orderRes.shippingMethod
                     : orderRes?.shippingMethod?.title || "Standard Delivery"}
                   <br />
                   {/* <span className="font-normal">Delivery within 24 Hours</span> */}
@@ -393,8 +437,16 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
             </p>
           </div>
 
-          <div className="w-full flex justify-center items-center">
-            <button className="hover:bg-black dark:bg-white dark:text-gray-800 dark:hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 py-5 w-96 md:w-full bg-gray-800 text-base font-medium leading-4 text-white">
+          <div className="w-full flex justify-start items-center">
+            <button
+              onClick={() => {
+                if (orderRes?.paymentMethod?.apiUrl) {
+                  window.open(orderRes.paymentMethod.apiUrl, '_blank');
+                }
+              }}
+              disabled={!orderRes?.paymentMethod?.apiUrl}
+              className="hover:bg-black dark:bg-white dark:text-gray-800 dark:hover:bg-gray-100 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 py-5 w-full md:w-full bg-gray-800 text-base font-medium leading-4 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               View Carrier Details
             </button>
           </div>
@@ -406,7 +458,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
             <div className="flex flex-col md:flex-row xl:flex-col justify-start items-stretch h-full w-full md:space-x-6 lg:space-x-8 xl:space-x-0">
               {/* Customer email */}
               <div className="flex flex-col justify-start items-start shrink-0">
-                <div className="flex justify-center text-gray-800 dark:text-white md:justify-start items-center space-x-4 py-4 border-b border-gray-200 w-full">
+                <div className="flex justify-start text-gray-800 dark:text-white items-center space-x-4 py-4 border-b border-gray-200 w-full">
                   <svg
                     width="24"
                     height="24"
@@ -435,13 +487,13 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
 
               {/* Shipping & Billing */}
               <div className="flex justify-between xl:h-full items-stretch w-full flex-col mt-6 md:mt-0">
-                <div className="flex justify-center md:justify-start xl:flex-col flex-col md:space-x-6 lg:space-x-8 xl:space-x-0 space-y-4 xl:space-y-12 md:space-y-0 md:flex-row items-center md:items-start">
+                <div className="flex justify-start md:justify-start xl:flex-col flex-col md:space-x-6 lg:space-x-8 xl:space-x-0 space-y-4 xl:space-y-12 md:space-y-0 md:flex-row items-start md:items-start">
                   {/* Shipping Address */}
-                  <div className="flex justify-center md:justify-start items-center md:items-start flex-col space-y-4 xl:mt-8">
-                    <p className="text-base dark:text-white font-semibold leading-4 text-center md:text-left text-gray-800">
+                  <div className="flex justify-start md:justify-start items-start md:items-start flex-col space-y-4 xl:mt-8">
+                    <p className="text-base dark:text-white font-semibold leading-4 text-left text-gray-800">
                       Shipping Address
                     </p>
-                    <div className="w-48 lg:w-full dark:text-gray-300 xl:w-48 text-center md:text-left text-sm leading-5 text-gray-600">
+                    <div className="w-full lg:w-full dark:text-gray-300 xl:w-48 text-left text-sm leading-5 text-gray-600">
                       {orderRes?.shippingAddress ? (
                         <>
                           <p>{orderRes.shippingAddress.addressLine1 || "N/A"}</p>
@@ -460,11 +512,11 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                   </div>
 
                   {/* Billing Address */}
-                  <div className="flex justify-center md:justify-start items-center md:items-start flex-col space-y-4">
-                    <p className="text-base dark:text-white font-semibold leading-4 text-center md:text-left text-gray-800">
+                  <div className="flex justify-start md:justify-start items-start md:items-start flex-col space-y-4">
+                    <p className="text-base dark:text-white font-semibold leading-4 text-left text-gray-800">
                       Billing Address
                     </p>
-                    <div className="w-48 lg:w-full dark:text-gray-300 xl:w-48 text-center md:text-left text-sm leading-5 text-gray-600">
+                    <div className="w-full lg:w-full dark:text-gray-300 xl:w-48 text-left text-sm leading-5 text-gray-600">
                       {orderRes?.billingAddress ? (
                         <>
                           <p>{orderRes.billingAddress.addressLine1 || "N/A"}</p>
@@ -485,13 +537,13 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
               </div>
 
               {/* Invoice */}
-              <div className="flex w-full justify-center items-center md:justify-start md:items-start">
+              <div className="flex w-full justify-start items-start md:justify-start md:items-start">
                 <Link
                   href={`/profile/my-orders/${orderRes.orderNumber}/invoice`}
                   className="mt-6 md:mt-0 text-center dark:border-white dark:hover:bg-gray-900 
                   dark:bg-transparent dark:text-white py-5 hover:bg-gray-200 
                   focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 
-                  border border-gray-800 font-medium w-96 2xl:w-full text-base 
+                  border border-gray-800 font-medium w-full 2xl:w-full text-base 
                   leading-4 text-gray-800"
                 >
                   Download Invoice

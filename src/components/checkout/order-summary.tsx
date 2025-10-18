@@ -17,6 +17,7 @@ export default function OrderSummaryDetails({
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
   const [showCart, setShowCart] = React.useState(false);
   const router = useRouter();
+
   if (isLoading)
     return (
       <div>
@@ -26,6 +27,11 @@ export default function OrderSummaryDetails({
   if (cart?.items?.length === 0) {
     router.push("/cart");
   }
+
+  const isAnyOfItemsOutOfStock = cart?.items?.some(
+    (item: any) => item.product.stock <= 0
+  );
+
   return (
     <>
       <h2 className="sr-only">Order summary</h2>
@@ -95,7 +101,14 @@ export default function OrderSummaryDetails({
       </CheckoutBlock>
 
       <div id="orderSummary" className="xl:mt-4">
-        <OrderSummary subTotal={subTotal}>{children}</OrderSummary>
+        <OrderSummary
+          subTotal={subTotal}
+          isAnyOfItemsOutOfStock={isAnyOfItemsOutOfStock}
+          itemCount={cart?.items?.length || 0}
+          cart={cart}
+        >
+          {children}
+        </OrderSummary>
       </div>
     </>
   );
