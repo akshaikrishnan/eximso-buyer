@@ -1,4 +1,0 @@
-- [x] Decrease margin in collection-groups.tsx: Change gap-4 to gap-2 md:gap-4 in grid
-- [x] Decrease margin in products.tsx: Change gap-4 to gap-2 md:gap-4 in section
-- [x] Remove padding on mobile in collection-groups.tsx: Change p-4 to p-0 md:p-4
-- [x] Remove padding on mobile in products.tsx: Change p-6 to p-0 md:p-6
