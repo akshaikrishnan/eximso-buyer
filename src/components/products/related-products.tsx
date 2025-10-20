@@ -39,7 +39,7 @@ export function RelatedProduct({ product }: any) {
               height={288}
               src={product.thumbnail}
               alt={product.name}
-              className="h-full w-full object-cover object-center"
+              className="h-full w-full object-contain object-center"
             />
           </div>
           <div className="relative mt-4">
