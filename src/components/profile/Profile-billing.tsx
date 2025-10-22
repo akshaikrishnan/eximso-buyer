@@ -33,6 +33,11 @@ type Order = {
     country?: string;
   };
   items: OrderItem[];
+  connectedOrders?: Order[];
+  status?: string;
+  shippingAmount?: number;
+  taxAmount?: number;
+  totalAmount?: number;
 };
 
 interface ExportInvoiceProps {
@@ -62,8 +67,11 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
     },
   });
 
+  // Use items directly from the order
+  const allItems = order?.items || [];
+
   const totalAmount =
-    order?.items?.reduce((sum, item) => {
+    allItems?.reduce((sum, item) => {
       const unit =
         item.product?.offerPrice && item.product.offerPrice > 0
           ? item.product.offerPrice
@@ -95,7 +103,7 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
     <div className="p-4 md:p-6 bg-gray-50 min-h-screen flex flex-col justify-center items-center space-y-4">
       <div ref={componentRef} className="bg-white shadow-lg rounded-xl p-4 md:p-8 w-full max-w-5xl">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b-2 border-gray-200 pb-4">
+        <div className="flex flex-col md:flex-row justify-between items-center  border-b-2 border-gray-200 pb-4">
           <div>
             <div className="flex items-center space-x-4">
               <img src="/images/common/logo.png" alt="EXIMSO Logo" className="h-10 w-auto" />
@@ -121,8 +129,8 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
         </div>
 
         {/* Shipper and Customer */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-          <div className="bg-gray-100 p-4 rounded-lg shadow-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8 mb-2">
+          <div className="bg-gray-100 p-2 rounded-lg shadow-xs">
             <h3 className="font-bold text-gray-800 mb-2">SHIPPER</h3>
             <p className="text-sm text-gray-700">EXIMSO INTERNATIONAL PVT LTD,</p>
             <p className="text-sm text-gray-700">PM Kareem Centre, No 15/1031 Wonderla Road,</p>
@@ -130,7 +138,7 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
               Athani Junction, Kakkanad, Ernakulam, PIN 682030, Kerala India
             </p>
           </div>
-          <div className="bg-gray-100 p-4 rounded-lg shadow-xs">
+          <div className="bg-gray-100 p-2 rounded-lg shadow-xs">
             <h3 className="font-bold text-gray-800 mb-2">CUSTOMER</h3>
             <p className="text-sm text-gray-700">{order?.user?.name || "N/A"},</p>
             <p className="text-sm text-gray-700">{order?.shippingAddress?.addressLine1 || "N/A"}</p>
@@ -146,7 +154,7 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
         </div>
 
         {/* Invoice Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8 mb-6">
           <div>
             <p className="text-sm text-gray-700">
               <span className="font-bold">Invoice Number &amp; Date:</span>{" "}
@@ -190,16 +198,17 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
               </tr>
             </thead>
             <tbody>
-              {order.items?.map((item, index) => {
+              {allItems?.map((item, index) => {
                 const unit =
                   item.product?.offerPrice && item.product.offerPrice > 0
                     ? item.product.offerPrice
                     : item.product?.price ?? 0;
                 const amount = unit * (item.quantity ?? 0);
+                const description = item.product?.name;
                 return (
                   <tr key={`${item.product?.name}-${index}`}>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{index + 1}</td>
-                    <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{item.product?.name}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{description}</td>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{item.product?.hsnCode || "N/A"}</td>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{item.product?.uom || "N/A"}</td>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{item.quantity}</td>

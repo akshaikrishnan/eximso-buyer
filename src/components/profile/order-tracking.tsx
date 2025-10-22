@@ -130,18 +130,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
     );
   }
 
-  if (isError || !trackingRes) {
-    return (
-      <div className="mt-6 grow sm:mt-8 lg:mt-0">
-        <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Order history</h3>
-          <p className="text-gray-500 text-sm">Order processing...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const steps = trackingRes;
+  const steps = trackingRes || [];
 
   return (
     <div className="mt-6 grow sm:mt-8 lg:mt-0">
@@ -149,7 +138,7 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Order history</h3>
 
         {steps.length === 0 ? (
-          <p className="text-gray-500 text-sm">No tracking information available.</p>
+          <p className="text-gray-500 text-sm">Order processing...</p>
         ) : (
           <ol className="relative ms-3 border-s border-blue-500 dark:border-blue-400">
             {steps.map((step, index) => (
@@ -169,52 +158,59 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
           </ol>
         )}
 
-        {status && (
+        {currentStatus && (
           <p className="mt-3 text-sm text-gray-800 dark:text-gray-400">
-            Current Status: <span className="font-semibold">{status}</span>
+            Current Status: <span className="font-semibold">{currentStatus}</span>
           </p>
         )}
 
         {/* Cancel Order Section */}
         <div className="space-y-4">
-          <div className="gap-4 sm:flex sm:items-center">
-            {currentStatus === 'cancelled' ? (
-              <div className="w-full rounded-lg border border-red-200 bg-red-50 px-5 py-3 dark:border-red-800 dark:bg-red-900/20">
-                <div className="flex items-start space-x-2">
-                  <svg
-                    className="h-5 w-5 text-red-500 dark:text-red-400 mt-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 
-                        1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 
-                        16.5c-.77.833.192 2.5 1.732 2.5z"
-                    />
-                  </svg>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-red-800 dark:text-red-300">
-                      Cancelled
-                    </span>
-                    <span className="text-xs text-red-700 dark:text-red-400">
-                      Refund is processing
-                    </span>
-                  </div>
+          {/* Cancelled Status Notice */}
+          {currentStatus === 'cancelled' && (
+            <div className="w-full rounded-lg border border-red-200 bg-red-50 px-5 py-3 dark:border-red-800 dark:bg-red-900/20">
+              <div className="flex items-start space-x-2">
+                <svg
+                  className="h-5 w-5 text-red-500 dark:text-red-400 mt-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 
+                      1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 
+                      16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-red-800 dark:text-red-300">
+                    Cancelled
+                  </span>
+                  <span className="text-xs text-red-700 dark:text-red-400">
+                    Refund is processing
+                  </span>
                 </div>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={handleCancelClick}
-                className="w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-hidden focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
-              >
-                {showCancelDropdown ? 'Close Cancel Options' : 'Cancel the order'}
-              </button>
-            )}
+            </div>
+          )}
+
+          {/* Cancel Order Button - Visible for all statuses */}
+          <div className="gap-4 sm:flex sm:items-center">
+            <button
+              type="button"
+              onClick={handleCancelClick}
+              disabled={currentStatus === 'cancelled'}
+              className="w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-hidden focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
+            >
+              {currentStatus === 'cancelled' 
+                ? 'Order Cancelled' 
+                : showCancelDropdown 
+                  ? 'Close Cancel Options' 
+                  : 'Cancel the order'}
+            </button>
           </div>
 
           {/* Cancellation Dropdown Panel */}

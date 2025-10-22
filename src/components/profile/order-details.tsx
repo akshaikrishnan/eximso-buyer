@@ -484,7 +484,40 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                   </p>
                 </div>
               </div>
-
+              {/* Payment Details */}
+              <div className="flex flex-col justify-start items-start shrink-0">
+                <div className="flex justify-start text-gray-800 dark:text-white items-center space-x-4 py-4 border-b border-gray-200 w-full">
+                  <div className="flex flex-col">
+                    <p className="text-base font-semibold leading-5">
+                      Payment Method
+                    </p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {orderRes?.paymentMethod?.image && (
+                        <img
+                          src={orderRes.paymentMethod.image}
+                          alt={orderRes.paymentMethod.name || "Payment Method"}
+                          className="w-6 h-6 object-contain"
+                        />
+                      )}
+                      <p className="text-sm leading-5 text-gray-600 dark:text-gray-300">
+                        {orderRes?.paymentMethod?.name || "N/A"}
+                      </p>
+                    </div>
+                    {orderRes?.paymentMethod?.description && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {orderRes.paymentMethod.description}
+                      </p>
+                    )}
+                    <div className="mt-2">
+                      <p className="text-xs font-medium text-gray-700 dark:text-gray-200">
+                        Payment Status: <span className="font-semibold text-blue-600 bg-blue-200 px-2 py-1 rounded">
+                          {orderRes.status === 'paid' ? 'Paid' : orderRes.status === 'pending' ? 'Pending' : orderRes.status || 'Unknown'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
               {/* Shipping & Billing */}
               <div className="flex justify-between xl:h-full items-stretch w-full flex-col mt-6 md:mt-0">
                 <div className="flex justify-start md:justify-start xl:flex-col flex-col md:space-x-6 lg:space-x-8 xl:space-x-0 space-y-4 xl:space-y-12 md:space-y-0 md:flex-row items-start md:items-start">
