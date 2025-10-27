@@ -285,6 +285,52 @@ jobs:
             echo "::notice::Created release: $RELEASE_URL"
           fi
 
+      - name: Sync master into develop
+        id: sync_develop
+        run: |
+          set -euo pipefail
+
+          # Ensure we are working with the latest master
+          git checkout master
+          git pull --ff-only origin master
+
+          # Prepare local develop tracking branch
+          git fetch origin develop:develop --update-head-ok
+          git checkout develop
+          git pull --ff-only origin develop
+
+          BEFORE=$(git rev-parse HEAD)
+
+          # Try a fast-forward merge first
+          if git merge --ff-only master; then
+            MERGE_TYPE="fast-forward"
+          else
+            echo "::notice::Fast-forward merge not possible; attempting regular merge"
+
+            if git merge --no-ff --no-edit master; then
+              MERGE_TYPE="merge-commit"
+            else
+              echo "::error::Automatic merge of master into develop failed due to conflicts."
+              echo "status=conflicted" >> "$GITHUB_OUTPUT"
+              exit 1
+            fi
+          fi
+
+          AFTER=$(git rev-parse HEAD)
+
+          if [ "$AFTER" = "$BEFORE" ]; then
+            echo "::notice::Develop already up to date with master"
+            echo "status=already_up_to_date" >> "$GITHUB_OUTPUT"
+            echo "merge_type=none" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git push origin develop
+
+          echo "::notice::Synced develop with master via $MERGE_TYPE"
+          echo "status=synced" >> "$GITHUB_OUTPUT"
+          echo "merge_type=$MERGE_TYPE" >> "$GITHUB_OUTPUT"
+
       - name: Setup Node.js for version sync
         uses: actions/setup-node@v4
         with:
@@ -336,6 +382,11 @@ jobs:
           # Use npm to bump the version so package.json and package-lock.json stay in sync
           npm version "$MASTER_VERSION" --no-git-tag-version
 
+          # Regenerate the lockfile (if present) to ensure it reflects the merged dependencies
+          if [ -f "package-lock.json" ]; then
+            npm install --package-lock-only --ignore-scripts
+          fi
+
           # Check if there are any changes to commit
           if git diff --quiet; then
             echo "::notice::No changes needed"
@@ -363,6 +414,7 @@ jobs:
           echo "✅ Tag: ${{ steps.tagv.outputs.tag }}"
           echo "✅ Previous Tag: ${{ steps.notes.outputs.prev_tag }}"
           echo "✅ Release Created: ${{ steps.create_release.outputs.created || 'false' }}"
+          echo "✅ Develop Sync: ${{ steps.sync_develop.outputs.status || 'skipped' }}"
           echo "✅ Version Sync: ${{ steps.version_bump.outputs.status || 'failed' }}"
 
           if [ "${{ steps.create_release.outputs.created }}" = "true" ]; then
