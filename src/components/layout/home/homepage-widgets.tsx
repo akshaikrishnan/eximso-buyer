@@ -65,14 +65,14 @@ export default function HomePageWidgets() {
 
   const availableWidgets = useMemo(
     () =>
-      widgets.filter((widget) => {
+      Array.isArray(widgets) ? widgets.filter((widget) => {
         if (homeBentoGrids[widget.widget]) {
           return true;
         }
 
         console.warn(`Unknown homepage widget received: ${widget.widget}`);
         return false;
-      }),
+      }) : [],
     [widgets]
   );
 
