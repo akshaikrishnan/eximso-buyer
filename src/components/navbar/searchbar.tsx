@@ -1,9 +1,14 @@
 "use client";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+
+import api from "@/lib/api/axios.interceptor";
+import { endpoints } from "@/lib/data/endpoints";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 type AutocompleteSuggestion = {
   type: "product" | "text";
@@ -11,6 +16,11 @@ type AutocompleteSuggestion = {
   slug?: string;
   thumbnail?: string;
   text?: string;
+};
+
+type AutocompleteResponse = {
+  success: boolean;
+  result: AutocompleteSuggestion[];
 };
 
 export default function Searchbar({ categories }: any) {
@@ -21,75 +31,56 @@ export default function Searchbar({ categories }: any) {
   const [selected, setSelected] = useState(
     selectedCategory || "All Categories"
   );
-  const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const trimmedQuery = debouncedSearch.trim();
+
+  const {
+    data: suggestions = [],
+    isFetching,
+    isLoading,
+    isError,
+  } = useQuery<AutocompleteResponse, Error, AutocompleteSuggestion[]>({
+    queryKey: ["product-autocomplete", trimmedQuery],
+    queryFn: async () => {
+      const response = await api.get<AutocompleteResponse>(
+        endpoints.productAutocomplete,
+        {
+          params: {
+            query: trimmedQuery,
+            limit: 10,
+          },
+        }
+      );
+
+      return response.data;
+    },
+    enabled: Boolean(trimmedQuery),
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+    select: (data) => data?.result ?? [],
+  });
 
   useEffect(() => {
     if (!search.trim()) {
-      setSuggestions([]);
       setOpen(false);
       setHighlightedIndex(-1);
-      return;
     }
-
-    setIsLoading(true);
-    setOpen(true);
-
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-
-    const controller = new AbortController();
-
-    debounceTimer.current = setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `/backend/web/products/autocomplete?query=${encodeURIComponent(
-            search.trim()
-          )}&limit=10`,
-          {
-            signal: controller.signal,
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch suggestions");
-        }
-
-        const data = await response.json();
-        if (data?.success && Array.isArray(data?.result)) {
-          setSuggestions(data.result);
-          setOpen(data.result.length > 0);
-          setHighlightedIndex(-1);
-        } else {
-          setSuggestions([]);
-          setOpen(false);
-        }
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-        console.error("Autocomplete error", error);
-        setSuggestions([]);
-        setOpen(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 250);
-
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-      setIsLoading(false);
-      controller.abort();
-    };
   }, [search]);
+
+  useEffect(() => {
+    if (trimmedQuery && isFocused) {
+      setOpen(true);
+    }
+  }, [trimmedQuery, isFocused]);
+
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [suggestions]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -99,6 +90,7 @@ export default function Searchbar({ categories }: any) {
       ) {
         setOpen(false);
         setHighlightedIndex(-1);
+        setIsFocused(false);
       }
     };
 
@@ -122,6 +114,7 @@ export default function Searchbar({ categories }: any) {
 
     setOpen(false);
     setHighlightedIndex(-1);
+    setIsFocused(false);
 
     if (suggestion.type === "product" && suggestion.slug) {
       if (suggestion.name) {
@@ -138,12 +131,14 @@ export default function Searchbar({ categories }: any) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       if (!open) {
-        setOpen(suggestions.length > 0);
+        setOpen(true);
         return;
       }
       setHighlightedIndex((prev) => {
-        const nextIndex = Math.min(prev + 1, suggestions.length - 1);
-        return suggestions.length === 0 ? -1 : nextIndex;
+        if (!suggestions.length) {
+          return -1;
+        }
+        return Math.min(prev + 1, suggestions.length - 1);
       });
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
@@ -167,15 +162,18 @@ export default function Searchbar({ categories }: any) {
   };
 
   return (
-    <div ref={containerRef} className="relative md:order-3 md:mx-3">
+    <div
+      ref={containerRef}
+      className="relative w-full md:order-3 md:mx-3 md:max-w-xl lg:max-w-2xl"
+    >
       <form
         action="/search"
-        className="search flex items-center text-black border border-gray-200 rounded-lg bg-white"
+        className="search flex w-full items-center rounded-xl border border-gray-200 bg-white text-black shadow-sm transition focus-within:border-eximblue-400 focus-within:shadow-md"
       >
         <select
           onChange={(e) => setSelected(e.target.value)}
           value={selected}
-          className="h-10 w-28 hidden lg:block text-xs rounded-l-md bg-gray-100 text-gray- border-gray-300"
+          className="hidden h-11 w-32 shrink-0 rounded-l-xl border-r border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-600 lg:block"
           name="category"
           id="main-dropdown"
         >
@@ -196,34 +194,63 @@ export default function Searchbar({ categories }: any) {
           })}
         </select>
         <input
-          className="w-full rounded-l-lg border-none outline-hidden px-2 py-2.5 lg:py-2 lg:rounded-none bg-gray-50 focus:ring-4 focus:ring-eximblue-300 md:py-2.5 md:px-3.5 md:text-sm lg:rounded-l-lg"
+          className="w-full rounded-l-xl border-none bg-transparent px-3 py-3 text-sm outline-hidden focus:ring-0 md:px-3.5 md:py-3.5 md:text-base"
           type="search"
           name="q"
           id="search"
           placeholder="Search Eximso.com"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          onFocus={() => setOpen(suggestions.length > 0 || isLoading)}
+          onFocus={() => {
+            setIsFocused(true);
+            if (trimmedQuery) {
+              setOpen(true);
+            }
+          }}
           onKeyDown={handleKeyDown}
           autoComplete="off"
         />
-        <div className="bg-white rounded-r-lg focus:outline-4 md:rounded-r-lg">
-          <button className="cursor-pointer rounded-r-lg outline-hidden border-none px-4 py-2 bg-eximblue-600 rounded-md hover:bg-eximblue-700 text-white md:py-[7px] lg:py-[5.5px] md:px-3.5 md:text-xl md:rounded-l-none">
-            <MagnifyingGlassIcon className="h-7 w-7" />
+        <div className="rounded-r-xl bg-white md:rounded-r-xl">
+          <button className="cursor-pointer rounded-r-xl border-none bg-eximblue-600 px-4 py-3 text-white transition hover:bg-eximblue-700 md:py-[11px] md:px-4 md:text-xl md:rounded-l-none">
+            <MagnifyingGlassIcon className="h-6 w-6" />
           </button>
         </div>
       </form>
 
       {open && (
-        <div className="absolute left-0 right-0 z-20 mt-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
-          <ul className="max-h-72 overflow-y-auto py-2 text-sm text-gray-900">
-            {isLoading && (
-              <li className="px-4 py-2 text-gray-500">Loading suggestions...</li>
+        <div className="absolute left-0 right-0 z-20 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl">
+          <ul className="max-h-80 overflow-y-auto py-2 text-sm text-gray-900">
+            {(isLoading || isFetching) && (
+              <>
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <li
+                    key={`skeleton-${index}`}
+                    className="flex w-full items-center gap-3 px-4 py-2"
+                  >
+                    <div className="h-10 w-10 rounded-md bg-gray-200/80 animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-3/4 rounded-full bg-gray-200/80 animate-pulse" />
+                      <div className="h-3 w-1/2 rounded-full bg-gray-100 animate-pulse" />
+                    </div>
+                  </li>
+                ))}
+              </>
             )}
-            {!isLoading && suggestions.length === 0 && (
-              <li className="px-4 py-2 text-gray-500">No suggestions found</li>
+
+            {!isLoading && !isFetching && suggestions.length === 0 && !isError && (
+              <li className="px-4 py-6 text-center text-sm text-gray-500">
+                No suggestions found
+              </li>
             )}
+
+            {!isLoading && !isFetching && isError && (
+              <li className="px-4 py-6 text-center text-sm text-red-500">
+                Unable to load suggestions. Please try again.
+              </li>
+            )}
+
             {!isLoading &&
+              !isFetching &&
               suggestions.map((suggestion, index) => {
                 const isHighlighted = index === highlightedIndex;
                 const itemClasses = isHighlighted
@@ -232,41 +259,55 @@ export default function Searchbar({ categories }: any) {
 
                 if (suggestion.type === "product") {
                   return (
-                    <li key={`${suggestion.slug}-${index}`}>
+                    <li key={`${suggestion.slug ?? "product"}-${index}`}>
                       <button
                         type="button"
                         onClick={() => handleSuggestionSelect(suggestion)}
-                        className={`flex w-full items-center gap-3 px-4 py-2 text-left ${itemClasses}`}
+                        className={`flex w-full items-center gap-3 px-4 py-3 text-left ${itemClasses}`}
                         onMouseEnter={() => setHighlightedIndex(index)}
                       >
-                        {suggestion.thumbnail && (
-                          <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                        {suggestion.thumbnail ? (
+                          <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                             <Image
                               src={suggestion.thumbnail}
                               alt={suggestion.name || "Product thumbnail"}
                               fill
-                              sizes="40px"
+                              sizes="44px"
                               className="object-cover"
                             />
                           </div>
+                        ) : (
+                          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md bg-gray-100 text-xs font-semibold text-gray-500">
+                            {suggestion.name?.[0]?.toUpperCase() ?? "P"}
+                          </div>
                         )}
-                        <span className="text-sm font-medium text-gray-900">
-                          {suggestion.name}
-                        </span>
+                        <div className="flex flex-1 flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            {suggestion.name}
+                          </span>
+                          <span className="text-xs text-gray-500">View product</span>
+                        </div>
                       </button>
                     </li>
                   );
                 }
 
                 return (
-                  <li key={`${suggestion.text}-${index}`}>
+                  <li key={`${suggestion.text ?? "text"}-${index}`}>
                     <button
                       type="button"
                       onClick={() => handleSuggestionSelect(suggestion)}
-                      className={`w-full px-4 py-2 text-left text-sm text-gray-700 ${itemClasses}`}
+                      className={`w-full px-4 py-3 text-left text-sm text-gray-700 transition ${itemClasses}`}
                       onMouseEnter={() => setHighlightedIndex(index)}
                     >
-                      {suggestion.text}
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900">
+                          {suggestion.text}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          Search for this term
+                        </span>
+                      </div>
                     </button>
                   </li>
                 );
