@@ -94,7 +94,7 @@ export default function ProductsGrid({
   };
 
   return (
-    <div className="p-6">
+    <div className="p-0 md:p-6">
       {/* Initial Loading */}
       {isLoading && showLoader && (
         <div className="flex flex-col justify-center items-center h-48">
@@ -137,7 +137,7 @@ export default function ProductsGrid({
         </section>
       )}
 
-      {/* Infinite Scroll Trigger */}
+      {/* Infinite Scroll Trigger */} 
       {!disableInfiniteScroll && hasNextPage && (
         <InView
           as="div"

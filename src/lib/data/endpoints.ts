@@ -9,6 +9,7 @@ export const endpoints = {
   checkout: "checkout",
   order: "order",
   banner: "banner",
+  homepageLayout: "homepage-layout",
   collection: "collection",
   menu: "menu",
   pushSubscribe: "push/subscribe",

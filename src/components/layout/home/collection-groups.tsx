@@ -31,7 +31,7 @@ const CollectionGroup: React.FC<{ collectionGroup: CollectionGroupProps }> = ({
       </h2>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-2 gap-4 p-4">
+      <div className="grid grid-cols-2 gap-2 md:gap-4 p-0 md:p-4">
         {collectionGroup.products.map((product, productIndex) => (
           <Link
             key={productIndex}

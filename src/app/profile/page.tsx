@@ -1,146 +1,246 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import Select from "react-select";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
+
 import countries from "@/lib/data/db/countries.json";
 import { endpoints } from "@/lib/data/endpoints";
 import api from "@/lib/api/axios.interceptor";
-import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
 
-// Define the type for the country option
-type CountryOption = {
-  value: string;
-  label: string;
-};
+// ---- Types ----
+type Country = { code: string; name: string };
+type CountryOption = { value: string; label: string };
 
-// Define the expected structure of the countries array
-type Country = {
-  code: string;
+type UserRecord = {
+  _id: string;
   name: string;
+  email: string;
+  phone?: string;
+  gender?: "male" | "female" | "other" | "";
+  country?: string; // ISO code
+  address?: string;
+  logo?: string;
 };
+
+type UpdatePayload = Partial<
+  Pick<
+    UserRecord,
+    "name" | "email" | "phone" | "gender" | "country" | "address" | "logo"
+  >
+>;
+
+// ---- Helpers ----
+const countryOptions: CountryOption[] = (countries as Country[]).map((c) => ({
+  value: c.code,
+  label: c.name,
+}));
+
+function getUser(): Promise<UserRecord> {
+  return api.get(endpoints.user).then((r) => r?.data?.result ?? {});
+}
+
+function updateUser(data: UpdatePayload): Promise<UserRecord> {
+  return api.put(endpoints.user, data).then((r) => r?.data?.result ?? {});
+}
+
+function uploadImage(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  return api.post(endpoints.upload, fd).then((r) => r?.data?.fileUrl);
+}
 
 export default function UserProfile() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // ---- Fetch user ----
+  const {
+    data: user,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: getUser,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // ---- Local form state (derived from query) ----
+  const [formData, setFormData] = useState<UpdatePayload>({
     name: "",
     email: "",
     phone: "",
     gender: "",
     country: "",
     address: "",
-    logo: "", // To store the logo
+    logo: "",
   });
 
-  // Fix: Explicitly type the countries array
-  const countryOptions: CountryOption[] = (countries as Country[]).map(
-    (country) => ({
-      value: country.code,
-      label: country.name,
-    })
-  );
-
-  // Add this ref for the file input
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Fetch logged-in user's details
-  const getUserDetails = async () => {
-    try {
-      const response = await api.get(endpoints.user);
-      const userData = response?.data?.result || {};
-      setUser(userData);
-      setFormData({
-        name: userData.name || "",
-        email: userData.email || "",
-        phone: userData.phone || "",
-        gender: userData.gender || "",
-        country: userData.country || "",
-        address: userData.address || "",
-        logo: userData.logo || "", // Handle logo from user data
-      });
-    } catch (error) {
-      console.error("Error fetching user data: ", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    getUserDetails();
-  }, []);
+    if (!user) return;
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      gender: (user.gender as any) || "",
+      country: user.country || "",
+      address: user.address || "",
+      logo: user.logo || "",
+    });
+  }, [user]);
 
-  // Handle input changes
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const hasChanges = useMemo(() => {
+    if (!user) return false;
+    return (
+      (formData.name ?? "") !== (user.name ?? "") ||
+      (formData.email ?? "") !== (user.email ?? "") ||
+      (formData.phone ?? "") !== (user.phone ?? "") ||
+      (formData.gender ?? "") !== (user.gender ?? "") ||
+      (formData.country ?? "") !== (user.country ?? "") ||
+      (formData.address ?? "") !== (user.address ?? "") ||
+      (formData.logo ?? "") !== (user.logo ?? "")
+    );
+  }, [formData, user]);
 
-  // Handle country selection
-  const handleCountryChange = (selectedOption: CountryOption | null) => {
-    if (selectedOption) {
-      setFormData({ ...formData, country: selectedOption.value });
-    }
-  };
-
-  // Handle logo change
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const file = e.target.files[0];
-      const formDataObj = new FormData();
-      formDataObj.append("file", file);
-      api.post(endpoints.upload, formDataObj).then((res) => {
-        const imageUrl = res.data.fileUrl; // Assuming the response contains the URL
-        setFormData((prev) => ({ ...prev, logo: imageUrl }));
-        toast({
-          title: "Photo Updated!",
-          description:
-            "Your profile image has been uploaded, Please save the profile to apply changes.",
-        });
-      });
-    }
-  };
-
-  // Trigger file input click when "Change" button is clicked
-  const handleLogoChangeButtonClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click(); // Trigger the file input click
-    }
-  };
-
-  // Handle form submission (Update user details)
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setUpdating(true);
-    try {
-      const response = await api.put(endpoints.user, formData);
-      if (response.data) {
-        toast({
-          title: "Profile Updated!",
-          description: "Your profile has been updated successfully.",
-        });
-
-        getUserDetails();
-      } else {
-        throw new Error("No data returned from the server");
-      }
-    } catch (error) {
-      console.error("Error updating user data: ", error);
+  // ---- Mutations ----
+  // Upload avatar
+  const uploadMutation = useMutation({
+    mutationFn: uploadImage,
+    onSuccess: (url) => {
+      setFormData((prev) => ({ ...prev, logo: url }));
       toast({
-        title: "Update Failed",
-        description: "Failed to update profile. Please try again.",
+        title: "Photo uploaded",
+        description: "Click Save to apply your new profile photo.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Upload failed",
+        description: "Please try a different image.",
         variant: "destructive",
       });
-    } finally {
-      setUpdating(false);
-    }
+    },
+  });
+
+  // Update profile (with optimistic update)
+  const updateMutation = useMutation({
+    mutationFn: updateUser,
+    onMutate: async (patch) => {
+      await queryClient.cancelQueries({ queryKey: ["user"] });
+      const previous = queryClient.getQueryData<UserRecord>(["user"]);
+      // Optimistically update cache
+      if (previous) {
+        queryClient.setQueryData<UserRecord>(["user"], {
+          ...previous,
+          ...patch,
+        });
+      }
+      return { previous };
+    },
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["user"], updated);
+      toast({ title: "Profile updated", description: "Changes saved." });
+    },
+    onError: (_err, _patch, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["user"], context.previous);
+      }
+      toast({
+        title: "Update failed",
+        description: "Could not save your changes.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
+
+  // ---- Handlers ----
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+
+  const handleCountryChange = (opt: CountryOption | null) => {
+    setFormData((p) => ({ ...p, country: opt?.value ?? "" }));
   };
 
-  if (loading) return <div>Loading...</div>;
+  const handleLogoButton = () => fileInputRef.current?.click();
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    uploadMutation.mutate(file);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Tiny client-side guardrails
+    if (!formData.name?.trim()) {
+      toast({
+        title: "Name required",
+        description: "Please enter your full name.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!formData.email?.includes("@")) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateMutation.mutate(formData);
+  };
+
+  const handleCancel = () => {
+    if (!user) return;
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      gender: (user.gender as any) || "",
+      country: user.country || "",
+      address: user.address || "",
+      logo: user.logo || "",
+    });
+  };
+
+  // ---- Render ----
+  if (isLoading) {
+    return (
+      <div className="container m-auto pt-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 w-48 bg-gray-200 rounded" />
+          <div className="h-5 w-96 bg-gray-200 rounded" />
+          <div className="h-64 w-full bg-gray-200 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="container m-auto pt-6">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+          <p className="font-medium">Failed to load profile.</p>
+          <p className="text-sm opacity-80">
+            {(error as any)?.message ?? "Please refresh to try again."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container m-auto pt-6">
@@ -151,9 +251,11 @@ export default function UserProfile() {
               Personal Information
             </h2>
             <p className="mt-1 text-sm leading-6 text-gray-600">
-              This information will be displayed publicly, so be careful what
-              you share.
+              This information may be visible on your profile.
             </p>
+            {isFetching && (
+              <p className="mt-3 text-xs text-gray-400">Refreshing…</p>
+            )}
           </div>
 
           <form
@@ -162,46 +264,66 @@ export default function UserProfile() {
           >
             <div className="px-4 py-6 sm:p-8">
               <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                {/* Avatar */}
                 <div className="col-span-full">
-                  <div className="mt-2 flex items-center gap-x-3">
-                    <img
-                      src={formData.logo || "/images/common/user.png"}
-                      alt="Profile"
-                      className="h-25 w-25 rounded-full text-gray-300 object-cover"
-                    />
-                    <label className="block text-sm font-medium leading-6 text-gray-900">
-                      Photo
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleLogoChangeButtonClick} // Trigger file input click
-                      className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                    >
-                      Change
-                    </button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoChange}
-                      className="hidden"
-                      ref={fileInputRef} // Attach the ref
-                    />
+                  <label className="block text-sm font-medium leading-6 text-gray-900">
+                    Photo
+                  </label>
+                  <div className="mt-3 flex items-center gap-x-4">
+                    <div className="relative h-20 w-20 overflow-hidden rounded-full ring-1 ring-gray-200">
+                      {formData.logo ? (
+                        // Next/Image for optimization
+                        <Image
+                          src={formData.logo}
+                          alt="Profile photo"
+                          fill
+                          className="object-cover"
+                          sizes="80px"
+                          priority
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gray-100">
+                          <UserCircleIcon className="h-16 w-16 text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleLogoButton}
+                        className="rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                        disabled={uploadMutation.isPending}
+                      >
+                        {uploadMutation.isPending ? "Uploading…" : "Change"}
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        className="hidden"
+                      />
+                    </div>
                   </div>
                 </div>
 
+                {/* Name */}
                 <div className="sm:col-span-4">
                   <label className="block text-sm font-medium leading-6 text-gray-900">
-                    Full Name
+                    Full name
                   </label>
                   <input
                     type="text"
                     name="name"
-                    value={formData.name}
+                    value={formData.name ?? ""}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    placeholder="Your full name"
+                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
                 </div>
 
+                {/* Email */}
                 <div className="sm:col-span-4">
                   <label className="block text-sm font-medium leading-6 text-gray-900">
                     Email address
@@ -209,12 +331,14 @@ export default function UserProfile() {
                   <input
                     type="email"
                     name="email"
-                    value={formData.email}
+                    value={formData.email ?? ""}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    placeholder="you@example.com"
+                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
                 </div>
 
+                {/* Phone */}
                 <div className="sm:col-span-4">
                   <label className="block text-sm font-medium leading-6 text-gray-900">
                     Phone number
@@ -222,12 +346,14 @@ export default function UserProfile() {
                   <input
                     type="tel"
                     name="phone"
-                    value={formData.phone}
+                    value={formData.phone ?? ""}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    placeholder="+91 98765 43210"
+                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
                 </div>
 
+                {/* Gender */}
                 <div className="sm:col-span-4">
                   <label className="block text-sm font-medium leading-6 text-gray-900">
                     Gender
@@ -239,7 +365,7 @@ export default function UserProfile() {
                           type="radio"
                           name="gender"
                           value={g}
-                          checked={formData.gender === g}
+                          checked={formData.gender === (g as any)}
                           onChange={handleChange}
                           className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-600"
                         />
@@ -251,23 +377,31 @@ export default function UserProfile() {
                   </div>
                 </div>
 
+                {/* Country */}
                 <div className="sm:col-span-4">
                   <label className="block text-sm font-medium leading-6 text-gray-900">
                     Country
                   </label>
                   <Select
                     options={countryOptions}
-                    className="basic-single"
                     classNamePrefix="select"
                     placeholder="Select a country"
                     isSearchable
                     value={countryOptions.find(
-                      (option) => option.value === formData.country
+                      (o) => o.value === (formData.country ?? "")
                     )}
+                    // react-select portals can help if used inside modals / overflow
+                    menuPortalTarget={
+                      typeof window !== "undefined" ? document.body : undefined
+                    }
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 50 }),
+                    }}
                     onChange={handleCountryChange}
                   />
                 </div>
 
+                {/* Address */}
                 <div className="col-span-full">
                   <label className="block text-sm font-medium leading-6 text-gray-900">
                     Address
@@ -275,27 +409,30 @@ export default function UserProfile() {
                   <textarea
                     name="address"
                     rows={4}
-                    value={formData.address}
+                    value={formData.address ?? ""}
                     onChange={handleChange}
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset focus:ring-2 focus:ring-indigo-600 sm:text-sm"
-                    placeholder="Enter your address here..."
+                    placeholder="Enter your address here…"
+                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-x-6 border-t px-4 py-4 sm:px-8">
+            <div className="flex items-center justify-end gap-x-3 border-t px-4 py-4 sm:px-8">
               <button
                 type="button"
-                className="text-sm font-semibold text-gray-900"
+                onClick={handleCancel}
+                className="text-sm font-semibold text-gray-900 disabled:opacity-50"
+                disabled={!hasChanges || updateMutation.isPending}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500"
+                disabled={!hasChanges || updateMutation.isPending}
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 disabled:opacity-50"
               >
-                {updating ? "Saving..." : "Save"}
+                {updateMutation.isPending ? "Saving…" : "Save"}
               </button>
             </div>
           </form>
