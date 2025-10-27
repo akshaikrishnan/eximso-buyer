@@ -3,9 +3,12 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
-import { toast } from '@/hooks/use-toast';
 
-type CancellationReason = 'Ordered by mistake' | 'Item delayed' | 'Found a better price' | 'Changed my mind' | 'Duplicate order' | 'Other';
+interface TrackingStep {
+  status: string;
+  date: string;
+  description?: string;
+}
 
 interface TrackingStep {
   status: string;
