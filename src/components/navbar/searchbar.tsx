@@ -162,10 +162,7 @@ export default function Searchbar({ categories }: any) {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full md:order-3 md:mx-3 md:max-w-xl lg:max-w-2xl"
-    >
+    <div ref={containerRef} className="relative w-full md:order-3 md:mx-3">
       <form
         action="/search"
         className="search flex w-full items-center rounded-xl border border-gray-200 bg-white text-black shadow-sm transition focus-within:border-eximblue-400 focus-within:shadow-md"
