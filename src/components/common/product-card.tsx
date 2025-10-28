@@ -53,7 +53,7 @@ export default function ProductCard({ product }: any) {
   return (
     <div
       key={product._id}
-      className={`relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 ease-in-out ${
+      className={`relative flex h-full flex-col overflow-hidden rounded-lg shadow-md transition-transform duration-300 ease-in-out ${
         isOutOfStock
           ? "opacity-50 cursor-not-allowed"
           : "hover:shadow-xl hover:-translate-y-2"
@@ -81,19 +81,21 @@ export default function ProductCard({ product }: any) {
       </Link>
 
       {/* Responsive image container */}
-      <div className="relative w-full bg-gray-50" style={{ height: "200px" }}>
+      <div className="relative w-full bg-gray-50 aspect-square sm:aspect-[3/4] lg:aspect-[4/5]">
         <Image
           src={product.thumbnail}
           alt={product.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-contain p-2"
+          className="object-contain p-3"
           priority={false}
         />
       </div>
 
-      <div className="p-4 bg-background">
-        <h3 className="text-md font-semibold line-clamp-1">{product.name}</h3>
+      <div className="flex flex-1 flex-col justify-between bg-background p-4">
+        <h3 className="text-base font-semibold leading-tight line-clamp-2">
+          {product.name}
+        </h3>
         <div className="flex items-center gap-2 text-sm">
           <div className="flex items-center gap-0.5">
             <StarIcon className="w-4 h-4 fill-primary" />
@@ -107,7 +109,7 @@ export default function ProductCard({ product }: any) {
             )}
           </div>
         </div>
-        <span className="font-semibold">
+        <span className="mt-2 inline-block font-semibold">
           <Price
             amount={product.offerPrice ? product.offerPrice : product.price}
           />

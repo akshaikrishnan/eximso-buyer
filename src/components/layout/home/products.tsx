@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "@/lib/api/axios.interceptor";
 import { InView } from "react-intersection-observer";
@@ -8,11 +8,18 @@ import ProductCard from "@/components/common/product-card";
 import { useSearchParams } from "next/navigation";
 import { endpoints } from "@/lib/data/endpoints";
 import { getSearchParamsObject } from "@/lib/getSearchParamsObj";
+import mergeClasses from "@/lib/utils/classNames";
+
+type GridLayoutConfig = {
+  mobile: number;
+  desktop: number;
+};
 
 export default function ProductsGrid({
   params,
   disableInfiniteScroll = false,
   limit = 10,
+  gridLayout,
 }: any) {
   const searchParams = useSearchParams();
   const name = searchParams.get("q") || "";
@@ -86,6 +93,34 @@ export default function ProductsGrid({
     ? products.slice(0, limit)
     : products;
 
+  const resolvedLayout: GridLayoutConfig = {
+    mobile: gridLayout?.mobile ?? 2,
+    desktop: gridLayout?.desktop ?? 5,
+  };
+
+  const gridClassName = useMemo(() => {
+    const baseMap: Record<number, string> = {
+      1: "grid-cols-1 sm:grid-cols-1",
+      2: "grid-cols-2 sm:grid-cols-2",
+    };
+
+    const desktopMap: Record<number, string> = {
+      4: "lg:grid-cols-4 xl:grid-cols-4",
+      5: "lg:grid-cols-5 xl:grid-cols-5",
+      6: "lg:grid-cols-6 xl:grid-cols-6",
+    };
+
+    const baseClass = baseMap[resolvedLayout.mobile] ?? baseMap[2];
+    const desktopClass = desktopMap[resolvedLayout.desktop] ?? desktopMap[5];
+
+    return mergeClasses(
+      "grid gap-4 md:gap-6",
+      baseClass,
+      "md:grid-cols-3 lg:gap-6",
+      desktopClass
+    );
+  }, [resolvedLayout.desktop, resolvedLayout.mobile]);
+
   const handleInViewChange = (inView: boolean) => {
     if (disableInfiniteScroll) return;
     if (inView && !isFetchingNextPage && hasNextPage && !nextPageLoading) {
@@ -125,7 +160,7 @@ export default function ProductsGrid({
 
       {/* Product Grid */}
       {!isLoading && !isError && displayedProducts.length > 0 && (
-        <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <section className={gridClassName}>
           {displayedProducts.map((product) => (
             <div
               key={product._id}

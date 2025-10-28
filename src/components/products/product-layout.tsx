@@ -1,6 +1,14 @@
 "use client";
 
-import { ReactNode, useMemo, useState } from "react";
+import {
+  Children,
+  ReactNode,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -80,6 +88,42 @@ const filters = [
   },
 ];
 
+type GridLayoutConfig = {
+  mobile: number;
+  desktop: number;
+};
+
+const desktopLayoutOptions = [
+  { label: "4 per row", value: 4 },
+  { label: "5 per row", value: 5 },
+  { label: "6 per row", value: 6 },
+];
+
+const mobileLayoutOptions = [
+  { label: "1 per row", value: 1 },
+  { label: "2 per row", value: 2 },
+];
+
+const LayoutPreview = ({ columns }: { columns: number }) => {
+  const totalItems = columns > 4 ? 6 : columns * 2;
+  const displayColumns = Math.min(columns, 3);
+
+  return (
+    <span
+      aria-hidden="true"
+      className="grid h-5 w-5 shrink-0 gap-0.5 text-gray-500"
+      style={{ gridTemplateColumns: `repeat(${displayColumns}, minmax(0, 1fr))` }}
+    >
+      {Array.from({ length: totalItems }).map((_, idx) => (
+        <span
+          key={idx}
+          className="block h-1.5 w-full rounded-sm bg-current"
+        ></span>
+      ))}
+    </span>
+  );
+};
+
 export default function ProductLayout({
   children,
   params,
@@ -92,10 +136,54 @@ export default function ProductLayout({
   title?: string;
 }) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [gridLayout, setGridLayout] = useState<GridLayoutConfig>({
+    mobile: 2,
+    desktop: 5,
+  });
   const [sort, setSort] = useQueryParamState<string>("sort", "", {
     parse: (v) => v ?? "",
     serialize: (v) => (v ? v : null),
   });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const matches = window.matchMedia("(max-width: 767px)").matches;
+      setIsMobileViewport(matches);
+      setGridLayout((prev) => ({
+        mobile: matches ? Math.min(prev.mobile, 2) : prev.mobile || 2,
+        desktop: matches ? prev.desktop || 5 : Math.max(prev.desktop, 4),
+      }));
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const gridLayoutOptions = useMemo(
+    () => (isMobileViewport ? mobileLayoutOptions : desktopLayoutOptions),
+    [isMobileViewport]
+  );
+
+  const activeLayoutValue = isMobileViewport
+    ? gridLayout.mobile
+    : gridLayout.desktop;
+
+  const enhancedChildren = useMemo(
+    () =>
+      Children.map(children, (child) => {
+        if (!isValidElement(child)) {
+          return child;
+        }
+
+        return cloneElement(child, {
+          gridLayout,
+        });
+      }),
+    [children, gridLayout]
+  );
 
   // annotate which option is currently active
   const sortOptions = useMemo(
@@ -252,13 +340,44 @@ export default function ProductLayout({
                 </MenuItems>
               </Menu>
 
-              <button
-                type="button"
-                className="-m-2 ml-5 p-2 text-gray-400 hover:text-gray-500 sm:ml-7"
-              >
-                <span className="sr-only">View grid</span>
-                <Squares2X2Icon aria-hidden="true" className="h-5 w-5" />
-              </button>
+              <Menu as="div" className="relative ml-3 sm:ml-5">
+                <MenuButton className="-m-2 flex items-center gap-2 rounded-md p-2 text-gray-400 hover:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                  <span className="sr-only">View grid</span>
+                  <Squares2X2Icon aria-hidden="true" className="h-5 w-5" />
+                  <LayoutPreview columns={activeLayoutValue} />
+                </MenuButton>
+                <MenuItems
+                  transition
+                  className="absolute right-0 z-20 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-leave:duration-75 data-enter:ease-out data-leave:ease-in"
+                >
+                  {gridLayoutOptions.map((option) => (
+                    <MenuItem key={`layout-${option.value}`}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setGridLayout((prev) => ({
+                            mobile: isMobileViewport
+                              ? option.value
+                              : prev.mobile,
+                            desktop: isMobileViewport
+                              ? prev.desktop
+                              : option.value,
+                          }))
+                        }
+                        className={mergeClasses(
+                          "flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-600 transition data-focus:bg-gray-100",
+                          option.value === activeLayoutValue
+                            ? "text-gray-900"
+                            : ""
+                        )}
+                      >
+                        <LayoutPreview columns={option.value} />
+                        <span>{option.label}</span>
+                      </button>
+                    </MenuItem>
+                  ))}
+                </MenuItems>
+              </Menu>
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(true)}
@@ -334,7 +453,7 @@ export default function ProductLayout({
               </form>
 
               {/* Product grid */}
-              <div className="lg:col-span-3">{children}</div>
+              <div className="lg:col-span-3">{enhancedChildren}</div>
             </div>
           </section>
         </main>
