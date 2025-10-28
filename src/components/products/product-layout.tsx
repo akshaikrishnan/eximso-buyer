@@ -2,6 +2,7 @@
 
 import {
   Children,
+  ReactElement,
   ReactNode,
   cloneElement,
   isValidElement,
@@ -124,6 +125,10 @@ const LayoutPreview = ({ columns }: { columns: number }) => {
   );
 };
 
+type GridLayoutChildProps = {
+  gridLayout?: GridLayoutConfig;
+};
+
 export default function ProductLayout({
   children,
   params,
@@ -178,7 +183,7 @@ export default function ProductLayout({
           return child;
         }
 
-        return cloneElement(child, {
+        return cloneElement(child as ReactElement<GridLayoutChildProps>, {
           gridLayout,
         });
       }),
