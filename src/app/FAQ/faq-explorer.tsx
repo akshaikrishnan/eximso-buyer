@@ -1,10 +1,11 @@
 "use client";
 
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { Disclosure } from "@headlessui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import clsx from "clsx";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export type FAQ = {
   question: string;
@@ -25,11 +26,46 @@ interface FAQExplorerProps {
 }
 
 export function FAQExplorer({ sections }: FAQExplorerProps) {
-  const [activeSection, setActiveSection] = useState(() => sections[0]?.id ?? "");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const activeSectionId = useMemo(() => {
+    const requestedSection = searchParams?.get("topic");
+    const isValidSection = sections.some((section) => section.id === requestedSection);
+
+    if (requestedSection && isValidSection) {
+      return requestedSection;
+    }
+
+    return sections[0]?.id ?? "";
+  }, [searchParams, sections]);
+
+  const handleSectionSelect = useCallback(
+    (sectionId: string) => {
+      if (sectionId === activeSectionId) {
+        return;
+      }
+
+      const params = new URLSearchParams(searchParams?.toString());
+
+      if (!sectionId || sectionId === sections[0]?.id) {
+        params.delete("topic");
+      } else {
+        params.set("topic", sectionId);
+      }
+
+      const query = params.toString();
+      const nextUrl = query ? `${pathname}?${query}` : pathname;
+
+      router.replace(nextUrl, { scroll: false });
+    },
+    [activeSectionId, pathname, router, searchParams, sections],
+  );
 
   const currentSection = useMemo(
-    () => sections.find((section) => section.id === activeSection) ?? sections[0],
-    [activeSection, sections],
+    () => sections.find((section) => section.id === activeSectionId) ?? sections[0],
+    [activeSectionId, sections],
   );
 
   if (!currentSection) {
@@ -59,7 +95,7 @@ export function FAQExplorer({ sections }: FAQExplorerProps) {
             <button
               key={section.id}
               type="button"
-              onClick={() => setActiveSection(section.id)}
+              onClick={() => handleSectionSelect(section.id)}
               className={clsx(
                 "group relative flex min-w-[260px] snap-start flex-1 flex-col rounded-3xl border px-6 py-5 text-left transition-all duration-200",
                 "lg:min-w-[220px] lg:flex-none",
