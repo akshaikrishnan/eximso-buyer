@@ -1,11 +1,11 @@
 "use client";
 
-import { type ReactNode, useCallback, useMemo } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Disclosure } from "@headlessui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import clsx from "clsx";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export type FAQ = {
   question: string;
@@ -26,11 +26,11 @@ interface FAQExplorerProps {
 }
 
 export function FAQExplorer({ sections }: FAQExplorerProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const questionContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const activeSectionId = useMemo(() => {
+  const [activeSectionId, setActiveSectionId] = useState(() => {
     const requestedSection = searchParams?.get("topic");
     const isValidSection = sections.some((section) => section.id === requestedSection);
 
@@ -39,17 +39,18 @@ export function FAQExplorer({ sections }: FAQExplorerProps) {
     }
 
     return sections[0]?.id ?? "";
-  }, [searchParams, sections]);
+  });
 
-  const handleSectionSelect = useCallback(
+  const updateUrl = useCallback(
     (sectionId: string) => {
-      if (sectionId === activeSectionId) {
+      if (typeof window === "undefined") {
         return;
       }
 
-      const params = new URLSearchParams(searchParams?.toString());
+      const params = new URLSearchParams(window.location.search);
+      const defaultSectionId = sections[0]?.id ?? "";
 
-      if (!sectionId || sectionId === sections[0]?.id) {
+      if (!sectionId || sectionId === defaultSectionId) {
         params.delete("topic");
       } else {
         params.set("topic", sectionId);
@@ -58,9 +59,37 @@ export function FAQExplorer({ sections }: FAQExplorerProps) {
       const query = params.toString();
       const nextUrl = query ? `${pathname}?${query}` : pathname;
 
-      router.replace(nextUrl, { scroll: false });
+      window.history.replaceState(null, "", nextUrl);
     },
-    [activeSectionId, pathname, router, searchParams, sections],
+    [pathname, sections],
+  );
+
+  useEffect(() => {
+    const isValidSection = sections.some((section) => section.id === activeSectionId);
+
+    if (!isValidSection) {
+      const fallbackSectionId = sections[0]?.id ?? "";
+      setActiveSectionId(fallbackSectionId);
+      updateUrl(fallbackSectionId);
+    }
+  }, [activeSectionId, sections, updateUrl]);
+
+  const handleSectionSelect = useCallback(
+    (sectionId: string) => {
+      if (sectionId === activeSectionId) {
+        return;
+      }
+
+      setActiveSectionId(sectionId);
+      updateUrl(sectionId);
+
+      if (typeof window !== "undefined") {
+        window.requestAnimationFrame(() => {
+          questionContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+    },
+    [activeSectionId, updateUrl],
   );
 
   const currentSection = useMemo(
@@ -127,6 +156,7 @@ export function FAQExplorer({ sections }: FAQExplorerProps) {
 
       <AnimatePresence mode="wait">
         <motion.div
+          ref={questionContainerRef}
           key={currentSection.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
