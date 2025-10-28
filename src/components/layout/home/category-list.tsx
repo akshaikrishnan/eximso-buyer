@@ -39,12 +39,12 @@ const ListItem = ({
   );
 };
 
-export default async function CategoryList() {
+export default async function CategoryList({ limit = 9 }: { limit?: number }) {
   // const categories = await api
   //   .get(`${endpoints.categories}/top?limit=9`)
   //   .then((res) => res.data);
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/${endpoints.categories}/top?limit=9`,
+    `${process.env.NEXT_PUBLIC_API_URL}/${endpoints.categories}/top?limit=${limit}}`,
     {
       cache: "force-cache",
       next: { revalidate: 3600, tags: ["cache", "categories"] },
