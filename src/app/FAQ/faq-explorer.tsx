@@ -122,18 +122,18 @@ export function FAQExplorer({ sections }: FAQExplorerProps) {
                   </Disclosure.Button>
                   <AnimatePresence initial={false}>
                     {open ? (
-                      <Disclosure.Panel
-                        static
-                        as={motion.div}
+                      <motion.div
                         key="content"
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.25, ease: "easeInOut" }}
-                        className="px-6 pb-6 text-base leading-relaxed text-slate-600"
+                        className="overflow-hidden"
                       >
-                        {faq.answer}
-                      </Disclosure.Panel>
+                        <Disclosure.Panel className="px-6 pb-6 text-base leading-relaxed text-slate-600">
+                          {faq.answer}
+                        </Disclosure.Panel>
+                      </motion.div>
                     ) : null}
                   </AnimatePresence>
                 </motion.div>
