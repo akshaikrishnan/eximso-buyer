@@ -4,10 +4,10 @@ const callouts = [
     description: "A premium herbal skincare and haircare.",
     imageSrc:
       // "https://tailwindui.com/img/ecommerce-images/home-page-02-edition-01.jpg",
-      "/images/products/IMG_9291.JPG",
+      "/images/products/angana.jpg",
     imageAlt:
       "A premium herbal skincare and haircare",
-    href: "search?category=All+Categories&q=angana",
+    href: "/products?collection=herbal-oil-1",
   },
   {
     name: "ANGANA HERBAL POWDER",
@@ -17,16 +17,16 @@ const callouts = [
       "/images/products/power.jpg",
     imageAlt:
       "Angana herbal powders for natural coloring, cleansing, and dandruff control.",
-    href: "search?category=All+Categories&q=angana",
+    href: "/angana-henna-powder-40gms",
   },
   {
-    name: "NECKLACE",
-    description: "Elegant blue necklace adorned with floral motifs and gemstones.",
+    name: "Premium black pepper",
+    description: "Mulakupetti Premium Black Pepper Powder 100 gm.",
     imageSrc:
       // "https://tailwindui.com/img/ecommerce-images/home-page-02-edition-03.jpg",
-      "/images/products/jewellery.png",
-    imageAlt: "Collection of four insulated travel bottles on wooden shelf.",
-    href: "necklace",
+      "/images/products/Kurumulak.webp",
+    imageAlt: "Premium black pepper.",
+    href: "/premium-black-pepper-1",
   },
 ];
 
