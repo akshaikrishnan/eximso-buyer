@@ -21,7 +21,7 @@ const footerNavigation = {
     { name: "Contact Us", href: "/contact" },
   ],
   legal: [
-    { name: "Careers", href: "#" },
+    { name: "Post a Requirement", href: "/post-requirements" },
     { name: "FAQ", href: "/FAQ" },
     { name: "Terms & Conditions", href: "/policy/terms-and-conditions" },
     { name: "Privacy Policy", href: "/policy/privacy-policy" },
