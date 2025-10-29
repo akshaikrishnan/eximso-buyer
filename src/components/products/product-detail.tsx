@@ -11,6 +11,8 @@ import AddToWishlistBtn from "./add-to-wishlist";
 import { RelatedProduct } from "./related-products";
 import { Price } from "../common/price";
 import Image from "next/image";
+import { useProductReviews } from "@/hooks/use-product-reviews";
+import ProductReviews from "./product-reviews";
 
 // 💡 NEW: Dynamic Import for the Product Gallery
 import dynamic from "next/dynamic";
@@ -42,28 +44,6 @@ function pickProducts(payload: any) {
 }
 // ---
 
-// Dummy Reviews Data (for display)
-const reviews = [
-  {
-    id: 1,
-    rating: 5,
-    title: "Absolutely fantastic!",
-    content:
-      "The product exceeded my expectations in quality and design. Highly recommend to everyone.",
-    author: "Aarav S.",
-    date: "September 1, 2024",
-  },
-  {
-    id: 2,
-    rating: 4,
-    title: "Great value for money.",
-    content:
-      "A solid purchase, though the color was slightly different than expected from the photos.",
-    author: "Priya K.",
-    date: "August 28, 2024",
-  },
-];
-
 export default function ProductDetail({ product }: any) {
   const images: string[] = Array.isArray(product?.images)
     ? product.images
@@ -75,6 +55,12 @@ export default function ProductDetail({ product }: any) {
     product?.category?.name ?? product?.categoryName;
   const subcategoryName: string | undefined =
     product?.subcategory?.name ?? product?.subcategoryName;
+
+  const productId: string | undefined = product?._id ?? product?.id;
+  const reviewsQuery = useProductReviews(productId, 6);
+  const reviewStats = reviewsQuery.data?.pages?.[0]?.stats;
+  const averageRating = reviewStats?.averageRating ?? product?.rating ?? 0;
+  const totalReviews = reviewStats?.total ?? product?.reviewCount ?? 0;
 
   const productDetail = [
     {
@@ -203,11 +189,11 @@ export default function ProductDetail({ product }: any) {
               <div className="mt-4 flex items-center justify-between border-b pb-4">
                 <div className="flex items-center">
                   <div className="flex items-center">
-                    {[0, 1, 2, 3, 4].map((rating) => (
+                    {[0, 1, 2, 3, 4].map((ratingIndex) => (
                       <StarIcon
-                        key={rating}
+                        key={ratingIndex}
                         className={classNames(
-                          (product?.rating ?? 0) > rating
+                          averageRating > ratingIndex
                             ? "text-yellow-400"
                             : "text-gray-300",
                           "h-5 w-5 shrink-0"
@@ -220,7 +206,7 @@ export default function ProductDetail({ product }: any) {
                     href="#reviews"
                     className="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500"
                   >
-                    ({product?.reviewCount ?? 0} reviews)
+                    ({totalReviews} reviews)
                   </a>
                 </div>
 
@@ -341,65 +327,11 @@ export default function ProductDetail({ product }: any) {
 
           {/* <hr className="my-16 border-gray-200" /> */}
 
-          {/* Review Section */}
-          {/* <section
-            id="reviews"
-            aria-labelledby="reviews-heading"
-            className="mt-10"
-          >
-            <h2
-              id="reviews-heading"
-              className="text-3xl font-bold tracking-tight text-gray-900 mb-6"
-            >
-              Customer Reviews ({product?.rating ?? "—"} out of 5)
-            </h2>
-            <div className="space-y-8">
-              {reviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="border p-6 rounded-xl bg-white shadow-xs hover:shadow-md transition duration-300"
-                >
-                  <div className="flex items-center mb-2">
-                    {[0, 1, 2, 3, 4].map((rating) => (
-                      <StarIcon
-                        key={rating}
-                        className={classNames(
-                          review.rating > rating
-                            ? "text-yellow-500"
-                            : "text-gray-300",
-                          "h-5 w-5 shrink-0"
-                        )}
-                        aria-hidden="true"
-                      />
-                    ))}
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                    {review.title}
-                  </h3>
-                  <p className="text-gray-600 italic mb-3">
-                    "{review.content}"
-                  </p>
-                  <div className="flex justify-between items-center text-sm text-gray-500 border-t pt-2">
-                    <span>
-                      Reviewed by{" "}
-                      <span className="font-medium text-gray-700">
-                        {review.author}
-                      </span>
-                    </span>
-                    <span>on {review.date}</span>
-                  </div>
-                </div>
-              ))}
-              {reviews.length === 0 && (
-                <p className="text-gray-500">
-                  Be the first to leave a review for this product!
-                </p>
-              )}
-              <button className="mt-6 w-full sm:w-auto inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700">
-                Write a Review
-              </button>
-            </div>
-          </section> */}
+          <ProductReviews
+            productId={productId}
+            productName={product?.name}
+            reviewsQuery={reviewsQuery}
+          />
 
           <hr className="my-16 border-gray-200" />
 
