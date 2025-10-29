@@ -1,157 +1,392 @@
-import React from "react";
-import {
-  ShieldCheckIcon,
-  GlobeAltIcon,
-  UserGroupIcon,
-  SparklesIcon,
-  BuildingStorefrontIcon,
-  CubeIcon,
-  TruckIcon,
-  CreditCardIcon,
-  ChartBarIcon,
-  LifebuoyIcon,
-  HeartIcon,
-  ArrowPathIcon,
-  CurrencyDollarIcon,
-  PhoneIcon,
-  StarIcon,
-  LinkIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
-import Contact from "@/components/navbar/contact/contact-page";
-import { LeafIcon, DollarSignIcon } from "lucide-react";
+import type { Metadata } from "next";
+import type { ComponentType } from "react";
+import { Globe2, Mail, MessageCircle, Phone, ShieldCheck, Sparkles } from "lucide-react";
+import FAQExplorer, { type FAQSection } from "./faq-explorer";
 
-const howItWorks = [
+export const metadata: Metadata = {
+  title: "Frequently Asked Questions | Eximso",
+  description:
+    "Get clear answers about shopping, shipping, payments, and selling with Eximso's cross-border marketplace.",
+  openGraph: {
+    title: "Frequently Asked Questions | Eximso",
+    description:
+      "Understand how Eximso simplifies global commerce with proxy export operations, smart logistics, and secure payments.",
+    url: "https://www.eximso.com/faq",
+    type: "website",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Eximso – Global commerce made simple",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Frequently Asked Questions | Eximso",
+    description:
+      "Answers for buyers and sellers using Eximso's cross-border marketplace, from logistics to payments.",
+    images: ["/opengraph-image.png"],
+  },
+};
+
+type SupportCard = {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  highlight: string;
+};
+
+const faqSections: FAQSection[] = [
   {
-    name: "What is Eximso?",
-    icon: BuildingStorefrontIcon,
-    description: "Eximso is a trusted cross-border e-commerce platform that lets you shop authentic Indian products online from anywhere in the world. From fashion and beauty to wellness and home decor, we bring Indias finest D2C brands right to your doorstep."
+    id: "shopping",
+    title: "Shopping on Eximso",
+    badge: "For Buyers",
+    description: "Discover how we curate Indian D2C brands and make them shoppable worldwide.",
+    faqs: [
+      {
+        question: "What makes Eximso different from other cross-border marketplaces?",
+        summary: "We combine curated brands with localized experiences for shoppers everywhere.",
+        answer: (
+          <>
+            <p>
+              Eximso was built to connect the world with India&apos;s most loved D2C brands. Our platform blends global marketplace
+              access with localized languages, currencies, and experiences so you can shop seamlessly from anywhere.
+            </p>
+            <ul className="mt-3 list-disc space-y-2 pl-5">
+              <li>Curated catalogues of fashion, wellness, beauty, lifestyle, and home décor labels.</li>
+              <li>Localized interfaces that support multilingual browsing and multi-currency pricing.</li>
+              <li>Smart logistics and secure payments that keep every order protected from checkout to delivery.</li>
+            </ul>
+          </>
+        ),
+      },
+      {
+        question: "How does Eximso ensure that the products I buy are authentic?",
+        summary: "Every seller undergoes documentation, quality, and compliance checks before listing.",
+        answer: (
+          <>
+            <p>
+              Sellers must share GST certificates, banking details, catalog information, and category-level compliance before
+              their products go live. Our onboarding and proxy-export operations verify authenticity and maintain traceability for
+              each SKU, so you always receive genuine merchandise.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "Can I shop in my preferred currency and language?",
+        summary: "Yes. The storefront adapts to local expectations so global customers feel at home.",
+        answer: (
+          <>
+            <p>
+              Eximso is designed to deliver a localized customer experience. The platform supports multi-currency payments and
+              multilingual interfaces, helping you view prices transparently and check out without guesswork.
+            </p>
+          </>
+        ),
+      },
+    ],
   },
   {
-    name: "Is it safe to shop on Eximso?",
-    icon: CubeIcon,
-    description: "Yes. Eximso uses secure payment gateways, SSL encryption, and fraud protection tools to ensure safe shopping for all our international customers."
+    id: "logistics",
+    title: "Shipping & Logistics",
+    badge: "Delivery",
+    description: "Understand how our smart logistics network keeps orders moving worldwide.",
+    faqs: [
+      {
+        question: "How does international shipping with Eximso work?",
+        summary: "We integrate with leading partners to manage door-to-door delivery in 100+ countries.",
+        answer: (
+          <>
+            <p>
+              From the moment your order is confirmed, Eximso coordinates with trusted logistics specialists to handle pickup,
+              air and sea freight, and last-mile delivery. Our smart logistics integration keeps transit predictable and your
+              parcels moving quickly across borders.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "Can I track my order after it leaves India?",
+        summary: "Yes. You receive end-to-end tracking updates the moment we dispatch your parcel.",
+        answer: (
+          <>
+            <p>
+              Once your order is shipped, we send a tracking ID and live status updates straight to your inbox and Eximso
+              account. You can monitor every milestone—from export clearance to delivery at your doorstep.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "How are customs duties, taxes, and returns handled?",
+        summary: "We calculate duties upfront and support hassle-free returns in eligible categories.",
+        answer: (
+          <>
+            <p>
+              Applicable import duties and taxes are displayed during checkout so there are no surprises later. For eligible
+              categories, our buyer-friendly cancellation and return policies let you raise a request directly from your account,
+              and our support team coordinates the paperwork with local customs authorities.
+            </p>
+          </>
+        ),
+      },
+    ],
   },
   {
-    name: "What countries does Eximso ship to?",
-    icon: TruckIcon,
-    description: "We offer worldwide shipping to over 100+ countries through reliable logistics partners. Shipping availability is shown at checkout based on your delivery location. "
+    id: "payments",
+    title: "Payments & Pricing",
+    badge: "Payments",
+    description: "Find clarity on pricing, currencies, and refund timelines.",
+    faqs: [
+      {
+        question: "Which payment methods does Eximso support?",
+        summary: "Use international cards and region-specific payment options in multiple currencies.",
+        answer: (
+          <>
+            <p>
+              We accept international credit and debit cards alongside a growing roster of regional payment options. Every
+              transaction is encrypted and backed by fraud monitoring so you can checkout with confidence.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "Are the prices I see inclusive of duties and taxes?",
+        summary: "We surface shipping, duties, and taxes before you pay so costs stay transparent.",
+        answer: (
+          <>
+            <p>
+              Product prices, logistics fees, and estimated duties appear in your basket prior to payment. In markets where
+              customs requires an additional settlement, we explain the amount and the authority that will collect it during
+              delivery.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "How do refunds work for international orders?",
+        summary: "Refunds are processed after inspection and returned to your original payment method.",
+        answer: (
+          <>
+            <p>
+              Once a return is approved and the product reaches our fulfilment hub, we initiate the refund to your original
+              payment method. You&apos;ll receive confirmation emails at each step, and settlement times depend on your bank or
+              payment provider.
+            </p>
+          </>
+        ),
+      },
+    ],
   },
   {
-    name: "What are the shipping charges?",
-    icon: CreditCardIcon,
-    description: "Shipping fees vary based on destination, product weight, and delivery speed. You can view final shipping costs at the checkout page before payment."
+    id: "selling",
+    title: "Selling with Eximso",
+    badge: "For Sellers",
+    description: "Unlock the proxy-export infrastructure built for Indian manufacturers and D2C brands.",
+    faqs: [
+      {
+        question: "Who can sell on Eximso and what documents are required?",
+        summary: "Manufacturers, MSMEs, and D2C labels with export capability can apply with core paperwork.",
+        answer: (
+          <>
+            <p>
+              If you&apos;re an Indian business with GST registration and a product catalogue, you can apply to join Eximso. We
+              ask for GST details, bank information, and product data during onboarding so we can authenticate your business and
+              share your catalogue with global buyers.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "What is proxy export and how does Eximso manage it for sellers?",
+        summary: "We take care of export documentation, customs, and shipping labels on your behalf.",
+        answer: (
+          <>
+            <p>
+              Eximso&apos;s proxy-export model lets you focus on manufacturing while we prepare invoices, compliance documents,
+              customs filings, and freight handovers. That means faster go-to-market cycles without building your own export team.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "Can I handle both B2C and B2B orders through the same dashboard?",
+        summary: "Yes. Manage consumer parcels and bulk shipments with unified analytics and payouts.",
+        answer: (
+          <>
+            <p>
+              Your seller dashboard supports retail-ready listings and bulk procurement requests simultaneously. Real-time
+              analytics, payout tracking, and dedicated account managers help you scale globally without juggling multiple tools.
+            </p>
+          </>
+        ),
+      },
+    ],
   },
   {
-    name: "How do I track my order?",
-    icon: ChartBarIcon,
-    description: "Once your order is dispatched, you will receive a tracking number and link to monitor real-time delivery updates via your Eximso account."
+    id: "support",
+    title: "Growth & Support",
+    badge: "Assistance",
+    description: "Learn how we champion sustainable, customer-centric commerce for every partner.",
+    faqs: [
+      {
+        question: "What kind of business insights does Eximso provide to sellers?",
+        summary: "Leverage technology-driven dashboards to monitor demand, pricing, and fulfilment.",
+        answer: (
+          <>
+            <p>
+              Our technology stack surfaces analytics on shopper demand, regional pricing windows, logistics status, and repeat
+              behaviour. These insights help you optimise inventory, product-market fit, and marketing investments across
+              territories.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "How does Eximso maintain customer trust across regions?",
+        summary: "Buyer protection combines secure payments, responsive support, and easy returns.",
+        answer: (
+          <>
+            <p>
+              Secure cross-border payments, buyer protection policies, and responsive service are core to our promise. Dedicated
+              support specialists assist with escalations, while our sustainability commitments keep packaging and logistics
+              practices responsible.
+            </p>
+          </>
+        ),
+      },
+      {
+        question: "Who can I contact if I need tailored assistance?",
+        summary: "Reach our specialists via email, phone, or live chat for immediate help.",
+        answer: (
+          <>
+            <p>
+              Whether you&apos;re troubleshooting an order or planning expansion, our customer success team is a call or message
+              away. We&apos;ll connect you with the right expert—logistics, payments, or product—to resolve your request quickly.
+            </p>
+          </>
+        ),
+      },
+    ],
   },
-  {
-    name: "Are customs duties and taxes included?",
-    icon: LifebuoyIcon,
-    description: "We display applicable customs duties and import taxes at checkout. In some regions, you may need to pay additional charges to local customs authorities."
-  },
-  {
-    name: "Can I return or cancel my order?",
-    icon: LeafIcon,
-    description: "Yes.Eximso offers a buyer-friendly return and refund policy, subject to product category and seller terms. Contact our support team for assistance or check our refund policy."
-  },
-  {
-    name: "What payment methods do you accept?",
-    icon: LinkIcon,
-    description:"We accept international debit/credit cards, and other region-specific payment options in multiple currencies."
-  },
-  {
-    name: "How can I contact customer support?",
-    icon: DollarSignIcon,
-    description: "Live Chat on eximso.com contact@eximso.com"
-  },
-  {
-    name: "Who can sell on Eximso?",
-    icon: UserIcon,
-    description: "For Sellers (Indian Businesses & D2C Brands)MSME, manufacturer, or D2C brand with export capability and GST can sell on Eximso. We support sellers across all product categories. "
-  }
 ];
-const brandOnDemandSteps = [
-  "You'll need:  GST certificate,Bank account details,Product catalog & pricing.",
-  "Can I sell both B2B and B2C? : Yes. Eximso enables you to sell to global consumers (B2C)  under proxy export and bulk buyers or importers (B2B) through a single dashboard.",
-  "Who handles logistics and shipping?: Eximso offers integrated international logistics via air and sea freight through our logistics arm.",
-  "Do I need to handle customs and documentation?: No worries. Since we operate under proxy export, Eximso will deal with all export documentation, customs clearance, shipping labels, and more for a hassle-free selling experience.",
-  "How do I get paid? : All payments are made to your registered Indian bank account in INR. Please check the vendor terms and conditions.",
-  "Is there any seller support? : Yes. We offer dedicated account managers, onboarding support, and real-time dashboards to manage orders, payments, and returns. ",
-  "Why sell on Eximso?: Access global customers,Proxy export,Increase international visibility, Sell both B2B & B2C from one platform,Get paid in INR hassle-free,Hassle free documentation",
 
+const supportCards: SupportCard[] = [
+  {
+    icon: Mail,
+    title: "Email our specialists",
+    description: "contact@eximso.com",
+    highlight: "We respond within one business day for most queries.",
+  },
+  {
+    icon: Phone,
+    title: "Call the support desk",
+    description: "+91 90378 50541",
+    highlight: "Available Monday to Saturday, 9:00–19:00 IST.",
+  },
+  {
+    icon: MessageCircle,
+    title: "Start a live chat",
+    description: "Sign in to chat with our global support agents.",
+    highlight: "Ideal for quick updates on orders, payouts, or onboarding.",
+  },
 ];
 
-export default function FAQs() {
+export default function FAQsPage() {
   return (
-    <div className="bg-white scroll-smooth md:scroll-auto">
-   
-      {/* Core Values Section */}
-      <div className="bg-gray-50 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-block bg-indigo-100 px-3 py-1 rounded-full text-indigo-700 font-medium text-sm mb-4">
-            Eximso – Frequently Asked Questions (FAQs)
+    <div className="bg-gradient-to-b from-indigo-50/70 via-white to-white text-slate-900">
+      <section className="relative overflow-hidden">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-gradient-to-br from-indigo-500/40 via-purple-500/30 to-sky-500/30 blur-3xl"
+          aria-hidden="true"
+        />
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-center">
+            <div className="space-y-6">
+              <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1 text-sm font-semibold text-indigo-700">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                Frequently Asked Questions
+              </span>
+              <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+                Cross-border commerce, explained simply
+              </h1>
+              <p className="text-lg text-slate-600">
+                Explore how Eximso&apos;s proxy-export model, smart logistics network, and secure payment stack turn international
+                shopping into an easy, trustworthy experience for buyers and sellers alike.
+              </p>
+              <ul className="grid gap-3 pt-4 text-sm font-medium text-slate-700 sm:grid-cols-2">
+                <li className="flex items-start gap-3 rounded-2xl bg-white/70 p-4 shadow-sm backdrop-blur">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 text-indigo-600" aria-hidden="true" />
+                  Buyer protection, encrypted payments, and responsive service.
+                </li>
+                <li className="flex items-start gap-3 rounded-2xl bg-white/70 p-4 shadow-sm backdrop-blur">
+                  <Globe2 className="mt-0.5 h-5 w-5 text-indigo-600" aria-hidden="true" />
+                  Smart logistics for 100+ countries with customs-ready paperwork.
+                </li>
+                <li className="flex items-start gap-3 rounded-2xl bg-white/70 p-4 shadow-sm backdrop-blur">
+                  <Sparkles className="mt-0.5 h-5 w-5 text-indigo-600" aria-hidden="true" />
+                  Curated Indian D2C brands brought to global audiences.
+                </li>
+              </ul>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">Welcome to Eximso FAQ section! Whether you&apos;re an international customer 
-              or a seller looking to go global</h2>
-            <p className="mt-4 text-xl text-gray-500 max-w-3xl mx-auto">
-              we&apos;re here to help you understand how Eximso simplifies cross-border e-commerce.</p>
-          </div>
-         </div>
-      </div>
-
-      {/* How EXIMSO Works Section  */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
-          {howItWorks.slice(0, 9).map((item) => (
-            <div
-              key={item.name}
-              className="bg-indigo-100 p-6  rounded-xl border border-indigo-100 shadow-xs hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
-            >
-              <div className="flex items-center mb-4 ">
-                <div className="p-3 bg-indigo-100 rounded-lg text-indigo-600 flex items-center justify-center mr-3">
-                  <item.icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
+            <div className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-white/80 p-8 shadow-xl shadow-indigo-100 backdrop-blur">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-semibold text-slate-900">Why this FAQ exists</h2>
+                <p className="text-base text-slate-600">
+                  We analysed our About Us, Mission &amp; Vision, seller onboarding, logistics, and policy content to highlight
+                  the questions buyers and sellers ask most while navigating cross-border trade with Eximso.
+                </p>
+                <p className="text-base text-slate-600">
+                  Use the interactive explorer below to drill into shoppers, logistics, payments, seller operations, and growth
+                  topics—each with concise, animated answers.
+                </p>
               </div>
-              <p className="text-gray-600 grow">{item.description}</p>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* BrandOnDemand Section */}
-      <div className="bg-indigo-50 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-             <h2 className="text-3xl font-bold text-gray-900 md:text-4xl">How do we register as a seller?</h2>
-              <p className="mt-4 text-lg text-gray-600">
-                Simply visit seller.eximso.com and sign up by submitting your business documents, 
-                bank details, and product information. 
+      <section className="py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <FAQExplorer sections={faqSections} />
+        </div>
+      </section>
+
+      <section className="pb-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-10 rounded-4xl border border-indigo-100 bg-white/80 p-8 shadow-2xl shadow-indigo-100 backdrop-blur-lg lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:p-12">
+            <div className="space-y-4">
+              <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-1 text-sm font-semibold text-indigo-700">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                Need more help?
+              </span>
+              <h2 className="text-3xl font-bold text-slate-900">Still have a question for Eximso?</h2>
+              <p className="text-base text-slate-600">
+                Our global support specialists are ready to guide you—whether you&apos;re tracking an order, planning your export
+                roadmap, or tailoring a launch campaign for a new market.
               </p>
             </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="text-xl font-semibold text-indigo-600 mb-6">What documents are required for onboarding?</h3>
-              <div>
-                {brandOnDemandSteps.map((step, index) => (
-                  <div key={index} className="flex mb-4 pb-4 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-indigo-100 text-indigo-600 mr-3 shrink-0">
-                      {index + 1}
-                    </div>
-                    <p className="text-gray-700">{step}</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {supportCards.map((card) => (
+                <div
+                  key={card.title}
+                  className="flex h-full flex-col justify-between rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="space-y-3">
+                    <card.icon className="h-8 w-8 text-indigo-600" aria-hidden="true" />
+                    <h3 className="text-lg font-semibold text-slate-900">{card.title}</h3>
+                    <p className="text-base text-indigo-700">{card.description}</p>
                   </div>
-                ))}
-              </div>
-              {/* <p className="mt-4 text-indigo-600 font-medium">Discover how we&apos;re transforming the world of e-commerce—one border at a time.</p> */}
+                  <p className="mt-4 text-sm text-slate-500">{card.highlight}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
- </div>
+      </section>
+    </div>
   );
 }
