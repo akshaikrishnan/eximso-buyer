@@ -11,11 +11,12 @@ import { endpoints } from "@/lib/data/endpoints";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 type AutocompleteSuggestion = {
-  type: "product" | "text";
+  type: "product" | "text" | "category";
   name?: string;
   slug?: string;
   thumbnail?: string;
   text?: string;
+  path?: string;
 };
 
 type AutocompleteResponse = {
@@ -124,6 +125,9 @@ export default function Searchbar({ categories }: any) {
     } else if (suggestion.type === "text" && suggestion.text) {
       setSearch(suggestion.text);
       router.push(buildSearchUrl(suggestion.text));
+    }
+    if (suggestion.type === "category" && suggestion.path) {
+      router.push(suggestion.path);
     }
   };
 
@@ -234,11 +238,14 @@ export default function Searchbar({ categories }: any) {
               </>
             )}
 
-            {!isLoading && !isFetching && suggestions.length === 0 && !isError && (
-              <li className="px-4 py-6 text-center text-sm text-gray-500">
-                No suggestions found
-              </li>
-            )}
+            {!isLoading &&
+              !isFetching &&
+              suggestions.length === 0 &&
+              !isError && (
+                <li className="px-4 py-6 text-center text-sm text-gray-500">
+                  No suggestions found
+                </li>
+              )}
 
             {!isLoading && !isFetching && isError && (
               <li className="px-4 py-6 text-center text-sm text-red-500">
@@ -282,7 +289,46 @@ export default function Searchbar({ categories }: any) {
                           <span className="text-sm font-medium text-gray-900">
                             {suggestion.name}
                           </span>
-                          <span className="text-xs text-gray-500">View product</span>
+                          <span className="text-xs text-gray-500">
+                            View product
+                          </span>
+                        </div>
+                      </button>
+                    </li>
+                  );
+                }
+
+                if (suggestion.type === "category") {
+                  return (
+                    <li key={`${suggestion.path ?? "category"}-${index}`}>
+                      <button
+                        type="button"
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                        className={`flex w-full items-center gap-3 px-4 py-3 text-left ${itemClasses}`}
+                        onMouseEnter={() => setHighlightedIndex(index)}
+                      >
+                        {suggestion.thumbnail ? (
+                          <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                            <Image
+                              src={suggestion.thumbnail}
+                              alt={suggestion.name || "Product thumbnail"}
+                              fill
+                              sizes="44px"
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md bg-gray-100 text-xs font-semibold text-gray-500">
+                            {suggestion.name?.[0]?.toUpperCase() ?? "C"}
+                          </div>
+                        )}
+                        <div className="flex flex-1 flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            {suggestion.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            Search in category
+                          </span>
                         </div>
                       </button>
                     </li>
