@@ -95,40 +95,68 @@ type GridLayoutConfig = {
   desktop: number;
 };
 
-const desktopLayoutOptions = [
-  { label: "4 per row", value: 4 },
-  { label: "5 per row", value: 5 },
-  { label: "6 per row", value: 6 },
-];
+type LayoutOption = {
+  label: string;
+  value: number;
+};
 
-const mobileLayoutOptions = [
+const mobileLayoutOptions: LayoutOption[] = [
   { label: "1 per row", value: 1 },
   { label: "2 per row", value: 2 },
 ];
 
+const desktopLayoutBreakpoints: {
+  minWidth: number;
+  options: LayoutOption[];
+  defaultValue: number;
+}[] = [
+  {
+    minWidth: 1536,
+    options: [
+      { label: "4 per row", value: 4 },
+      { label: "5 per row", value: 5 },
+      { label: "6 per row", value: 6 },
+    ],
+    defaultValue: 5,
+  },
+  {
+    minWidth: 1280,
+    options: [
+      { label: "4 per row", value: 4 },
+      { label: "5 per row", value: 5 },
+    ],
+    defaultValue: 4,
+  },
+  {
+    minWidth: 1024,
+    options: [
+      { label: "3 per row", value: 3 },
+      { label: "4 per row", value: 4 },
+    ],
+    defaultValue: 3,
+  },
+  {
+    minWidth: 0,
+    options: [{ label: "3 per row", value: 3 }],
+    defaultValue: 3,
+  },
+];
+
 const DEFAULT_GRID_LAYOUT: GridLayoutConfig = {
   mobile: 2,
-  desktop: 5,
+  desktop: 4,
 };
 
 const LAYOUT_STORAGE_KEY = "product-grid-layout";
 
-const mobileLayoutValues = new Set(mobileLayoutOptions.map((option) => option.value));
-const desktopLayoutValues = new Set(desktopLayoutOptions.map((option) => option.value));
-
-const clampGridLayout = (layout: GridLayoutConfig): GridLayoutConfig => {
-  const mobile = mobileLayoutValues.has(layout.mobile)
-    ? layout.mobile
-    : DEFAULT_GRID_LAYOUT.mobile;
-  const desktop = desktopLayoutValues.has(layout.desktop)
-    ? layout.desktop
-    : DEFAULT_GRID_LAYOUT.desktop;
-
-  if (mobile === layout.mobile && desktop === layout.desktop) {
-    return layout;
+const getDesktopPresetForWidth = (width: number) => {
+  for (const preset of desktopLayoutBreakpoints) {
+    if (width >= preset.minWidth) {
+      return preset;
+    }
   }
 
-  return { mobile, desktop };
+  return desktopLayoutBreakpoints[desktopLayoutBreakpoints.length - 1];
 };
 
 const LayoutPreview = ({ columns }: { columns: number }) => {
@@ -170,7 +198,14 @@ export default function ProductLayout({
 }) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
-  const [gridLayout, setGridLayout] = useState<GridLayoutConfig>(
+  const initialDesktopPreset = getDesktopPresetForWidth(0);
+  const [desktopOptions, setDesktopOptions] = useState<LayoutOption[]>(
+    initialDesktopPreset.options
+  );
+  const [desktopDefaultValue, setDesktopDefaultValue] = useState<number>(
+    initialDesktopPreset.defaultValue
+  );
+  const [preferredLayout, setPreferredLayout] = useState<GridLayoutConfig>(
     () => ({ ...DEFAULT_GRID_LAYOUT })
   );
   const [sort, setSort] = useQueryParamState<string>("sort", "", {
@@ -178,10 +213,49 @@ export default function ProductLayout({
     serialize: (v) => (v ? v : null),
   });
 
+  const mobileLayoutValues = useMemo(
+    () => new Set(mobileLayoutOptions.map((option) => option.value)),
+    []
+  );
+
+  const desktopLayoutValues = useMemo(
+    () => new Set(desktopOptions.map((option) => option.value)),
+    [desktopOptions]
+  );
+
+  const clampGridLayout = useCallback(
+    (layout: GridLayoutConfig): GridLayoutConfig => {
+      const mobile = mobileLayoutValues.has(layout.mobile)
+        ? layout.mobile
+        : DEFAULT_GRID_LAYOUT.mobile;
+
+      const fallbackDesktop =
+        typeof desktopDefaultValue === "number"
+          ? desktopDefaultValue
+          : DEFAULT_GRID_LAYOUT.desktop;
+
+      const desktop = desktopLayoutValues.has(layout.desktop)
+        ? layout.desktop
+        : fallbackDesktop;
+
+      return {
+        mobile,
+        desktop:
+          typeof desktop === "number" ? desktop : DEFAULT_GRID_LAYOUT.desktop,
+      };
+    },
+    [desktopDefaultValue, desktopLayoutValues, mobileLayoutValues]
+  );
+
+  const gridLayout = useMemo(
+    () => clampGridLayout(preferredLayout),
+    [preferredLayout, clampGridLayout]
+  );
+
   const updateGridLayout = useCallback(
     (updater: (prev: GridLayoutConfig) => GridLayoutConfig) => {
-      setGridLayout((prev) => {
-        const next = clampGridLayout(updater(prev));
+      setPreferredLayout((prev) => {
+        const next = updater(prev);
 
         if (prev.mobile === next.mobile && prev.desktop === next.desktop) {
           return prev;
@@ -203,20 +277,61 @@ export default function ProductLayout({
 
     try {
       const parsed = JSON.parse(storedLayout);
-      updateGridLayout(() => ({
-        mobile:
-          typeof parsed?.mobile === "number"
+      setPreferredLayout((prev) => {
+        const parsedMobile =
+          typeof parsed?.mobile === "number" && Number.isFinite(parsed.mobile)
             ? parsed.mobile
-            : DEFAULT_GRID_LAYOUT.mobile,
-        desktop:
-          typeof parsed?.desktop === "number"
+            : undefined;
+        const parsedDesktop =
+          typeof parsed?.desktop === "number" && Number.isFinite(parsed.desktop)
             ? parsed.desktop
-            : DEFAULT_GRID_LAYOUT.desktop,
-      }));
+            : undefined;
+
+        return {
+          mobile:
+            parsedMobile !== undefined && mobileLayoutValues.has(parsedMobile)
+              ? parsedMobile
+              : prev.mobile,
+          desktop:
+            parsedDesktop !== undefined ? parsedDesktop : prev.desktop,
+        };
+      });
     } catch (error) {
       console.error("Failed to parse stored grid layout", error);
     }
-  }, [updateGridLayout]);
+  }, [mobileLayoutValues]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const applyPreset = (width: number) => {
+      const preset = getDesktopPresetForWidth(width);
+
+      setDesktopOptions((prev) => {
+        const prevValues = prev.map((option) => option.value).join(",");
+        const nextValues = preset.options.map((option) => option.value).join(",");
+
+        if (prevValues === nextValues) {
+          return prev;
+        }
+
+        return preset.options;
+      });
+
+      setDesktopDefaultValue((prev) =>
+        prev === preset.defaultValue ? prev : preset.defaultValue
+      );
+    };
+
+    applyPreset(window.innerWidth);
+
+    const handleResize = () => {
+      applyPreset(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -225,7 +340,6 @@ export default function ProductLayout({
 
     const applyMatch = (matches: boolean) => {
       setIsMobileViewport(matches);
-      updateGridLayout((prev) => prev);
     };
 
     applyMatch(mediaQuery.matches);
@@ -241,7 +355,7 @@ export default function ProductLayout({
 
     mediaQuery.addListener(handleChange);
     return () => mediaQuery.removeListener(handleChange);
-  }, [updateGridLayout]);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -249,40 +363,40 @@ export default function ProductLayout({
     window.localStorage.setItem(
       LAYOUT_STORAGE_KEY,
       JSON.stringify({
-        mobile: gridLayout.mobile,
-        desktop: gridLayout.desktop,
+        mobile: preferredLayout.mobile,
+        desktop: preferredLayout.desktop,
       })
     );
-  }, [gridLayout]);
+  }, [preferredLayout]);
 
   const gridLayoutOptions = useMemo(
-    () => (isMobileViewport ? mobileLayoutOptions : desktopLayoutOptions),
-    [isMobileViewport]
+    () => (isMobileViewport ? mobileLayoutOptions : desktopOptions),
+    [desktopOptions, isMobileViewport]
   );
 
   const activeLayoutValue = isMobileViewport
     ? gridLayout.mobile
     : gridLayout.desktop;
 
-const isGridLayoutChild = (
-  element: ReactNode
-): element is ReactElement<GridLayoutChildProps> => isValidElement(element);
+  const isGridLayoutChild = (
+    element: ReactNode
+  ): element is ReactElement<GridLayoutChildProps> => isValidElement(element);
 
-const enhancedChildren = useMemo(
-  () =>
-    Children.map(children, (child) => {
-      if (!isGridLayoutChild(child)) {
-        return child;
-      }
+  const enhancedChildren = useMemo(
+    () =>
+      Children.map(children, (child) => {
+        if (!isGridLayoutChild(child)) {
+          return child;
+        }
 
-      return cloneElement<GridLayoutChildProps>(child, {
-        gridLayout,
-        activeColumns: activeLayoutValue,
-        isMobileViewport,
-      });
-    }),
-  [children, gridLayout, activeLayoutValue, isMobileViewport]
-);
+        return cloneElement<GridLayoutChildProps>(child, {
+          gridLayout,
+          activeColumns: activeLayoutValue,
+          isMobileViewport,
+        });
+      }),
+    [children, gridLayout, activeLayoutValue, isMobileViewport]
+  );
 
   // annotate which option is currently active
   const sortOptions = useMemo(
@@ -491,9 +605,9 @@ const enhancedChildren = useMemo(
               Products
             </h2>
 
-            <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-10 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:gap-x-10">
               {/* Filters */}
-              <form className="hidden lg:block">
+              <form className="hidden lg:block lg:max-w-[260px] xl:max-w-[280px]">
                 <h3 className="sr-only">Categories</h3>
                 <ul
                   role="list"
@@ -550,7 +664,9 @@ const enhancedChildren = useMemo(
               </form>
 
               {/* Product grid */}
-              <div className="lg:col-span-3">{enhancedChildren}</div>
+              <div className="lg:col-start-2 lg:pl-2 xl:pl-4">
+                {enhancedChildren}
+              </div>
             </div>
           </section>
         </main>

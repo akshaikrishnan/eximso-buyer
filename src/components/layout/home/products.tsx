@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { CSSProperties, useEffect, useMemo, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "@/lib/api/axios.interceptor";
 import { InView } from "react-intersection-observer";
@@ -17,7 +17,7 @@ type GridLayoutConfig = {
 
 const DEFAULT_GRID_LAYOUT: GridLayoutConfig = {
   mobile: 2,
-  desktop: 5,
+  desktop: 4,
 };
 
 interface ProductsGridProps {
@@ -192,28 +192,19 @@ export default function ProductsGrid({
         1
       );
 
-  const gridClassName = useMemo(() => {
-    const baseMap: Record<number, string> = {
-      1: "grid-cols-1 sm:grid-cols-1",
-      2: "grid-cols-2 sm:grid-cols-2",
-    };
+  const columnCount = Math.max(activeColumnCount, 1);
 
-    const desktopMap: Record<number, string> = {
-      4: "lg:grid-cols-4 xl:grid-cols-4",
-      5: "lg:grid-cols-5 xl:grid-cols-5",
-      6: "lg:grid-cols-6 xl:grid-cols-6",
-    };
+  const gridColumnsStyle = useMemo<CSSProperties>(
+    () => ({
+      gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+    }),
+    [columnCount]
+  );
 
-    const baseClass = baseMap[resolvedLayout.mobile] ?? baseMap[2];
-    const desktopClass = desktopMap[resolvedLayout.desktop] ?? desktopMap[5];
-
-    return mergeClasses(
-      "grid gap-4 md:gap-6",
-      baseClass,
-      "md:grid-cols-3 lg:gap-6",
-      desktopClass
-    );
-  }, [resolvedLayout.desktop, resolvedLayout.mobile]);
+  const gridClassName = mergeClasses(
+    "grid gap-4 md:gap-6",
+    effectiveIsMobile ? "" : "lg:gap-8"
+  );
 
   const initialSkeletonCount = useMemo(() => {
     const rows = effectiveIsMobile ? 3 : 2;
@@ -238,7 +229,11 @@ export default function ProductsGrid({
     <div className="p-0 md:p-6">
       {/* Initial Loading */}
       {isLoading && showLoader && (
-        <section className={gridClassName} aria-hidden="true">
+        <section
+          className={gridClassName}
+          style={gridColumnsStyle}
+          aria-hidden="true"
+        >
           {Array.from({ length: initialSkeletonCount }).map((_, index) => (
             <ProductCardSkeleton
               key={`initial-skeleton-${index}`}
@@ -270,7 +265,7 @@ export default function ProductsGrid({
 
       {/* Product Grid */}
       {!isLoading && !isError && displayedProducts.length > 0 && (
-        <section className={gridClassName}>
+        <section className={gridClassName} style={gridColumnsStyle}>
           {displayedProducts.map((product) => (
             <div
               key={product._id}
