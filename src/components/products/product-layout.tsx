@@ -264,21 +264,25 @@ export default function ProductLayout({
     ? gridLayout.mobile
     : gridLayout.desktop;
 
-  const enhancedChildren = useMemo(
-    () =>
-      Children.map(children, (child) => {
-        if (!isValidElement(child)) {
-          return child;
-        }
+const isGridLayoutChild = (
+  element: ReactNode
+): element is ReactElement<GridLayoutChildProps> => isValidElement(element);
 
-        return cloneElement(child as ReactElement<GridLayoutChildProps>, {
-          gridLayout,
-          activeColumns: activeLayoutValue,
-          isMobileViewport,
-        });
-      }),
-    [children, gridLayout, activeLayoutValue, isMobileViewport]
-  );
+const enhancedChildren = useMemo(
+  () =>
+    Children.map(children, (child) => {
+      if (!isGridLayoutChild(child)) {
+        return child;
+      }
+
+      return cloneElement<GridLayoutChildProps>(child, {
+        gridLayout,
+        activeColumns: activeLayoutValue,
+        isMobileViewport,
+      });
+    }),
+  [children, gridLayout, activeLayoutValue, isMobileViewport]
+);
 
   // annotate which option is currently active
   const sortOptions = useMemo(
