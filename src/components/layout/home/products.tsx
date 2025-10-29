@@ -29,20 +29,44 @@ interface ProductsGridProps {
   isMobileViewport?: boolean;
 }
 
-const ProductCardSkeleton = () => {
+const ProductCardSkeleton = ({
+  variant = "grid",
+}: {
+  variant?: "grid" | "list";
+}) => {
+  const isListLayout = variant === "list";
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
-      <div className="relative w-full bg-gray-100 aspect-square sm:aspect-[3/4] lg:aspect-[4/5]">
+    <div
+      className={mergeClasses(
+        "overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm",
+        isListLayout ? "flex gap-4 p-4" : "flex h-full flex-col"
+      )}
+    >
+      <div
+        className={mergeClasses(
+          "relative bg-gray-100",
+          isListLayout
+            ? "aspect-square w-28 shrink-0 rounded-xl sm:w-32"
+            : "aspect-square w-full sm:aspect-[3/4] lg:aspect-[4/5]"
+        )}
+      >
         <div className="absolute inset-0 animate-pulse bg-gray-200" />
       </div>
-      <div className="flex flex-1 flex-col justify-between gap-3 p-4">
-        <div className="space-y-2">
+      <div
+        className={mergeClasses(
+          "flex flex-1 flex-col justify-between gap-3",
+          isListLayout ? "" : "p-4"
+        )}
+      >
+        <div className="space-y-3">
+          <div className="h-3.5 w-24 animate-pulse rounded bg-gray-200" />
           <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
           <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
         </div>
-        <div className="space-y-2">
-          <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
-          <div className="h-6 w-1/3 animate-pulse rounded bg-gray-300" />
+        <div className="space-y-3">
+          <div className="h-3 w-32 animate-pulse rounded bg-gray-200" />
+          <div className="h-3 w-28 animate-pulse rounded bg-gray-200" />
+          <div className="h-6 w-24 animate-pulse rounded bg-gray-300" />
         </div>
       </div>
     </div>
@@ -207,13 +231,19 @@ export default function ProductsGrid({
     }
   };
 
+  const cardVariant =
+    effectiveIsMobile && activeColumnCount === 1 ? "list" : "grid";
+
   return (
     <div className="p-0 md:p-6">
       {/* Initial Loading */}
       {isLoading && showLoader && (
         <section className={gridClassName} aria-hidden="true">
           {Array.from({ length: initialSkeletonCount }).map((_, index) => (
-            <ProductCardSkeleton key={`initial-skeleton-${index}`} />
+            <ProductCardSkeleton
+              key={`initial-skeleton-${index}`}
+              variant={cardVariant}
+            />
           ))}
         </section>
       )}
@@ -244,14 +274,24 @@ export default function ProductsGrid({
           {displayedProducts.map((product) => (
             <div
               key={product._id}
-              className="hover:scale-105 transition-transform duration-300"
+              className={mergeClasses(
+                "transition-transform duration-300",
+                cardVariant === "grid" ? "hover:scale-105" : ""
+              )}
             >
-              <ProductCard product={product} />
+              <ProductCard
+                product={product}
+                layoutVariant={cardVariant}
+                isMobileViewport={effectiveIsMobile}
+              />
             </div>
           ))}
           {isFetchingNextPage && hasNextPage &&
             Array.from({ length: loadMoreSkeletonCount }).map((_, index) => (
-              <ProductCardSkeleton key={`next-page-skeleton-${index}`} />
+              <ProductCardSkeleton
+                key={`next-page-skeleton-${index}`}
+                variant={cardVariant}
+              />
             ))}
         </section>
       )}
