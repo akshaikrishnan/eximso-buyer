@@ -2,10 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useQuery } from "@tanstack/react-query";
 import { Loader2, UploadCloud, X } from "lucide-react";
-import api from "@/lib/api/axios.interceptor";
-import { endpoints } from "@/lib/data/endpoints";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
 
@@ -38,7 +35,22 @@ interface CategoryOption {
   subcategories?: CategoryOption[];
 }
 
+interface PostRequirementPageProps {
+  categories: CategoryOption[];
+}
+
 const OTHER_OPTION_VALUE = "other";
+
+const getOptionValue = (option: CategoryOption) =>
+  option._id ?? option.id ?? option.slug ?? option.name;
+
+const normalizeCategories = (categories: CategoryOption[] = []) =>
+  categories.map((category) => ({
+    ...category,
+    subcategories: Array.isArray(category.subcategories)
+      ? category.subcategories
+      : [],
+  }));
 
 function createCaptcha() {
   const left = Math.floor(Math.random() * 6) + 2;
@@ -46,11 +58,17 @@ function createCaptcha() {
   return { question: `${left} + ${right}`, answer: (left + right).toString() };
 }
 
-export default function PostRequirementPage() {
+export default function PostRequirementPage({
+  categories,
+}: PostRequirementPageProps) {
+  const normalizedCategories = useMemo(
+    () => normalizeCategories(categories),
+    [categories]
+  );
+
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors, isSubmitting },
     reset,
@@ -68,81 +86,45 @@ export default function PostRequirementPage() {
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [captcha, setCaptcha] = useState(createCaptcha);
-
-  const selectedCategory = watch("category");
-  const selectedSubcategory = watch("subcategory");
-
-  useEffect(() => {
-    setValue("subcategory", "");
-    setValue("otherSubcategory", "");
-    if (selectedCategory !== OTHER_OPTION_VALUE) {
-      setValue("otherCategory", "");
-    }
-  }, [selectedCategory, setValue]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>(
+    ""
+  );
 
   useEffect(() => {
-    if (selectedSubcategory !== OTHER_OPTION_VALUE) {
+    setValue("category", selectedCategoryId);
+    if (!selectedCategoryId || selectedCategoryId === OTHER_OPTION_VALUE) {
+      setSelectedSubcategoryId("");
+      setValue("subcategory", "");
       setValue("otherSubcategory", "");
     }
-  }, [selectedSubcategory, setValue]);
+    if (selectedCategoryId !== OTHER_OPTION_VALUE) {
+      setValue("otherCategory", "");
+    }
+  }, [selectedCategoryId, setValue]);
 
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery<
-    CategoryOption[]
-  >({
-    queryKey: ["post-requirement-categories"],
-    queryFn: async () => {
-      const res = await api.get(endpoints.categories);
-      const payload = res?.data?.result ?? res?.data ?? [];
-      if (Array.isArray(payload)) {
-        return payload;
-      }
-      return [];
-    },
-    staleTime: 60 * 60 * 1000,
-  });
-
-  const { data: fetchedSubcategories = [], isFetching: subcategoriesLoading } =
-    useQuery<CategoryOption[]>({
-      queryKey: ["post-requirement-subcategories", selectedCategory],
-      enabled:
-        !!selectedCategory && selectedCategory !== OTHER_OPTION_VALUE &&
-        selectedCategory !== "",
-      queryFn: async () => {
-        try {
-          const res = await api.get(
-            `${endpoints.categories}/${selectedCategory}`
-          );
-          const data = res?.data?.result ?? res?.data ?? {};
-          if (Array.isArray(data)) {
-            return data;
-          }
-          if (Array.isArray((data as any)?.subcategories)) {
-            return (data as any).subcategories;
-          }
-        } catch (error) {
-          // ignore network errors and gracefully fall back below
-        }
-        const fromCategories = categories?.find((item) =>
-          [item._id, item.id, item.slug].includes(selectedCategory)
-        );
-        if (fromCategories?.subcategories) {
-          return fromCategories.subcategories;
-        }
-        return [];
-      },
-      staleTime: 10 * 60 * 1000,
-    });
+  useEffect(() => {
+    setValue("subcategory", selectedSubcategoryId);
+    if (selectedSubcategoryId !== OTHER_OPTION_VALUE) {
+      setValue("otherSubcategory", "");
+    }
+  }, [selectedSubcategoryId, setValue]);
 
   const subcategoryOptions = useMemo(() => {
     if (
-      !selectedCategory ||
-      selectedCategory === OTHER_OPTION_VALUE ||
-      selectedCategory === ""
+      !selectedCategoryId ||
+      selectedCategoryId === OTHER_OPTION_VALUE ||
+      selectedCategoryId === ""
     ) {
       return [];
     }
-    return fetchedSubcategories;
-  }, [fetchedSubcategories, selectedCategory]);
+
+    const match = normalizedCategories.find(
+      (item) => getOptionValue(item) === selectedCategoryId
+    );
+
+    return match?.subcategories ?? [];
+  }, [normalizedCategories, selectedCategoryId]);
 
   const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
@@ -253,6 +235,8 @@ export default function PostRequirementPage() {
       acceptTerms: false,
     });
     setUploadedFiles([]);
+    setSelectedCategoryId("");
+    setSelectedSubcategoryId("");
     refreshCaptcha();
     console.info("Submitted requirement", payload);
   };
@@ -399,24 +383,32 @@ export default function PostRequirementPage() {
                   label="Category"
                   error={errors.category?.message}
                   helperText={
-                    categoriesLoading
-                      ? "Loading categories…"
+                    normalizedCategories.length === 0
+                      ? "No categories found. Choose Other to describe your requirement."
                       : undefined
                   }
                 >
                   <select
                     {...register("category", {
                       required: "Select a category or choose Other.",
+                      onChange: (event) => {
+                        const value = event.target.value;
+                        setSelectedCategoryId(value);
+                        setSelectedSubcategoryId("");
+                      },
                     })}
+                    value={selectedCategoryId}
                     className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#8600f0] focus:ring-2 focus:ring-[#8600f0]/20"
                   >
                     <option value="" disabled>
-                      {categoriesLoading ? "Loading…" : "Choose category"}
+                      {normalizedCategories.length === 0
+                        ? "Choose Other"
+                        : "Choose category"}
                     </option>
-                    {categories.map((category) => (
+                    {normalizedCategories.map((category) => (
                       <option
-                        key={category._id ?? category.id ?? category.slug ?? category.name}
-                        value={category._id ?? category.id ?? category.slug ?? category.name}
+                        key={getOptionValue(category)}
+                        value={getOptionValue(category)}
                       >
                         {category.name}
                       </option>
@@ -425,7 +417,7 @@ export default function PostRequirementPage() {
                   </select>
                 </Field>
 
-                {selectedCategory === OTHER_OPTION_VALUE ? (
+                {selectedCategoryId === OTHER_OPTION_VALUE ? (
                   <Field
                     label="Your category"
                     error={errors.otherCategory?.message}
@@ -444,23 +436,27 @@ export default function PostRequirementPage() {
                     label="Subcategory"
                     error={errors.subcategory?.message}
                     helperText={
-                      subcategoriesLoading
-                        ? "Loading subcategories…"
-                        : subcategoryOptions.length === 0
-                          ? "No preset subcategories. Choose Other to describe yours."
-                          : undefined
+                      selectedCategoryId &&
+                      subcategoryOptions.length === 0 &&
+                      selectedCategoryId !== ""
+                        ? "No preset subcategories. Choose Other to describe yours."
+                        : undefined
                     }
                   >
                     <select
                       {...register("subcategory", {
                         required: "Select a subcategory or choose Other.",
+                        onChange: (event) => {
+                          setSelectedSubcategoryId(event.target.value);
+                        },
                       })}
-                      disabled={subcategoriesLoading}
+                      value={selectedSubcategoryId}
+                      disabled={selectedCategoryId === ""}
                       className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#8600f0] focus:ring-2 focus:ring-[#8600f0]/20 disabled:cursor-not-allowed disabled:bg-slate-50"
                     >
                       <option value="" disabled>
-                        {subcategoriesLoading
-                          ? "Loading…"
+                        {selectedCategoryId === ""
+                          ? "Select category first"
                           : subcategoryOptions.length === 0
                             ? "No subcategories found"
                             : "Choose subcategory"}
@@ -489,8 +485,8 @@ export default function PostRequirementPage() {
                 )}
               </div>
 
-              {selectedCategory !== OTHER_OPTION_VALUE &&
-              selectedSubcategory === OTHER_OPTION_VALUE ? (
+              {selectedCategoryId !== OTHER_OPTION_VALUE &&
+              selectedSubcategoryId === OTHER_OPTION_VALUE ? (
                 <Field
                   label="Your subcategory"
                   error={errors.otherSubcategory?.message}
