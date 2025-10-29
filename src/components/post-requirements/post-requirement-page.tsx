@@ -5,6 +5,9 @@ import { useForm } from "react-hook-form";
 import { Loader2, UploadCloud, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
+import api from "@/lib/api/axios.interceptor";
+import { endpoints } from "@/lib/data/endpoints";
+import { useMutation } from "@tanstack/react-query";
 
 interface RequirementFormValues {
   fullName: string;
@@ -90,6 +93,12 @@ export default function PostRequirementPage({
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>(
     ""
   );
+
+  const postRequirementMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      return api.post(endpoints.postRequirements, formData);
+    },
+  });
 
   useEffect(() => {
     setValue("category", selectedCategoryId);
@@ -192,53 +201,97 @@ export default function PostRequirementPage({
       return;
     }
 
+    const normalizedCategory =
+      values.category === OTHER_OPTION_VALUE ? values.otherCategory ?? "" : values.category;
+    const normalizedSubcategory =
+      values.subcategory === OTHER_OPTION_VALUE
+        ? values.otherSubcategory ?? ""
+        : values.subcategory;
+
     const payload = {
       ...values,
-      category:
-        values.category === OTHER_OPTION_VALUE
-          ? values.otherCategory
-          : values.category,
-      subcategory:
-        values.subcategory === OTHER_OPTION_VALUE
-          ? values.otherSubcategory
-          : values.subcategory,
+      category: normalizedCategory,
+      subcategory: normalizedSubcategory,
       attachments: undefined,
       fileCount: values.attachments?.length ?? 0,
     };
 
-    await new Promise((resolve) => setTimeout(resolve, 900));
+    const formData = new FormData();
 
-    toast({
-      title: "Requirement submitted",
-      description:
-        "Thanks! Our sourcing experts will get in touch within 24 hours.",
+    Object.entries(payload).forEach(([key, value]) => {
+      if (key === "attachments") {
+        return;
+      }
+
+      if (value === undefined || value === null) {
+        return;
+      }
+
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed === "") {
+          return;
+        }
+        formData.append(key, trimmed);
+        return;
+      }
+
+      if (typeof value === "boolean") {
+        formData.append(key, value ? "true" : "false");
+        return;
+      }
+
+      formData.append(key, String(value));
     });
 
-    reset({
-      fullName: "",
-      companyName: "",
-      email: "",
-      phone: "",
-      productName: "",
-      category: "",
-      otherCategory: "",
-      subcategory: "",
-      otherSubcategory: "",
-      quantity: "",
-      budget: "",
-      targetDate: "",
-      country: "",
-      city: "",
-      specification: "",
-      attachments: [],
-      captchaAnswer: "",
-      acceptTerms: false,
+    values.attachments?.forEach((file) => {
+      formData.append("attachments", file, file.name);
     });
-    setUploadedFiles([]);
-    setSelectedCategoryId("");
-    setSelectedSubcategoryId("");
-    refreshCaptcha();
-    console.info("Submitted requirement", payload);
+
+    try {
+      await postRequirementMutation.mutateAsync(formData);
+
+      toast({
+        title: "Requirement submitted",
+        description:
+          "Thanks! Our sourcing experts will get in touch within 24 hours.",
+      });
+
+      reset({
+        fullName: "",
+        companyName: "",
+        email: "",
+        phone: "",
+        productName: "",
+        category: "",
+        otherCategory: "",
+        subcategory: "",
+        otherSubcategory: "",
+        quantity: "",
+        budget: "",
+        targetDate: "",
+        country: "",
+        city: "",
+        specification: "",
+        attachments: [],
+        captchaAnswer: "",
+        acceptTerms: false,
+      });
+      setUploadedFiles([]);
+      setSelectedCategoryId("");
+      setSelectedSubcategoryId("");
+      refreshCaptcha();
+      console.info("Submitted requirement", payload);
+    } catch (error) {
+      console.error("Failed to submit requirement", error);
+      toast({
+        title: "Submission failed",
+        description:
+          "We couldn't submit your requirement. Please try again in a moment.",
+        variant: "destructive",
+      });
+      refreshCaptcha();
+    }
   };
 
   return (

@@ -19,4 +19,5 @@ export const endpoints = {
   upload: "media/s3-upload",
   paymentProviders: "payment-providers",
   tracking: "tracking",
+  postRequirements: "post-requirements",
 };
