@@ -51,6 +51,44 @@ const getLabel = (product: any) => {
 const sanitizeText = (value?: string) =>
   value?.replace(/<[^>]+>/g, " ")?.replace(/\s+/g, " ")?.trim();
 
+const resolveLabelTheme = (label?: string) => {
+  const baseTheme = {
+    backgroundClass: "bg-slate-900/90",
+    textClass: "text-white",
+  } as const;
+
+  if (!label) return baseTheme;
+
+  const normalized = label.toLowerCase();
+
+  if (normalized.includes("new")) {
+    return {
+      backgroundClass: "bg-emerald-600/95",
+      textClass: "text-white",
+    } as const;
+  }
+
+  if (
+    normalized.includes("offer") ||
+    normalized.includes("deal") ||
+    normalized.includes("discount")
+  ) {
+    return {
+      backgroundClass: "bg-amber-500/95",
+      textClass: "text-white",
+    } as const;
+  }
+
+  if (normalized.includes("limited") || normalized.includes("exclusive")) {
+    return {
+      backgroundClass: "bg-purple-600/95",
+      textClass: "text-white",
+    } as const;
+  }
+
+  return baseTheme;
+};
+
 type ProductCardProps = {
   product: any;
   layoutVariant?: ProductCardVariant;
@@ -81,6 +119,9 @@ export default function ProductCard({
     product?.stock < product?.minimumOrderQuantity ||
     !product?.isActive ||
     product?.stock <= 0;
+
+  const labelText = getLabel(product) ?? undefined;
+  const labelTheme = resolveLabelTheme(labelText);
 
   const brandName =
     sanitizeText(product?.brand) ||
@@ -135,9 +176,15 @@ export default function ProductCard({
           Out of Stock
         </div>
       )}
-      {getLabel(product) && !isOutOfStock && (
-        <div className="absolute top-3 left-3 z-20 rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow">
-          {getLabel(product)}
+      {labelText && !isOutOfStock && (
+        <div
+          className={mergeClasses(
+            "absolute top-3 left-3 z-20 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide shadow",
+            labelTheme.backgroundClass,
+            labelTheme.textClass
+          )}
+        >
+          {labelText}
         </div>
       )}
       <Link
