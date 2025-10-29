@@ -79,6 +79,12 @@ export default function NotFound({ categories }: { categories: any }) {
               ← Go Home
             </Link>
             <Link
+              href="/post-requirements"
+              className="rounded-xl border border-violet-300/60 bg-violet-50 px-4 py-2.5 text-sm font-medium text-violet-800 transition hover:bg-violet-100"
+            >
+              Post a Requirement
+            </Link>
+            <Link
               href="/profile/my-orders"
               className="rounded-xl border border-cyan-300/60 bg-cyan-50 px-4 py-2.5 text-sm font-medium text-cyan-800 transition hover:bg-cyan-100"
             >
