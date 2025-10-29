@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "@/lib/api/axios.interceptor";
 import { InView } from "react-intersection-observer";
@@ -8,12 +8,55 @@ import ProductCard from "@/components/common/product-card";
 import { useSearchParams } from "next/navigation";
 import { endpoints } from "@/lib/data/endpoints";
 import { getSearchParamsObject } from "@/lib/getSearchParamsObj";
+import mergeClasses from "@/lib/utils/classNames";
+
+type GridLayoutConfig = {
+  mobile: number;
+  desktop: number;
+};
+
+const DEFAULT_GRID_LAYOUT: GridLayoutConfig = {
+  mobile: 2,
+  desktop: 5,
+};
+
+interface ProductsGridProps {
+  params?: any;
+  disableInfiniteScroll?: boolean;
+  limit?: number;
+  gridLayout?: GridLayoutConfig;
+  activeColumns?: number;
+  isMobileViewport?: boolean;
+}
+
+const ProductCardSkeleton = () => {
+  return (
+    <div className="flex h-full flex-col overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
+      <div className="relative w-full bg-gray-100 aspect-square sm:aspect-[3/4] lg:aspect-[4/5]">
+        <div className="absolute inset-0 animate-pulse bg-gray-200" />
+      </div>
+      <div className="flex flex-1 flex-col justify-between gap-3 p-4">
+        <div className="space-y-2">
+          <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
+          <div className="h-6 w-1/3 animate-pulse rounded bg-gray-300" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function ProductsGrid({
   params,
   disableInfiniteScroll = false,
   limit = 10,
-}: any) {
+  gridLayout,
+  activeColumns,
+  isMobileViewport,
+}: ProductsGridProps) {
   const searchParams = useSearchParams();
   const name = searchParams.get("q") || "";
   const sort = searchParams.get("sort") || "";
@@ -34,7 +77,6 @@ export default function ProductsGrid({
     });
     return res.data.result;
   };
-  console.log(["products", params, searchParamsObj]);
   const {
     data,
     isLoading,
@@ -64,9 +106,34 @@ export default function ProductsGrid({
   const [showScrollLoader, setShowScrollLoader] = useState(false);
   const [nextPageLoading, setNextPageLoading] = useState(false);
 
+  const [localIsMobile, setLocalIsMobile] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
+
   useEffect(() => {
     setShowLoader(isLoading);
   }, [isLoading]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      setLocalIsMobile(event.matches);
+    };
+
+    setLocalIsMobile(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
 
   useEffect(() => {
     if (nextPageLoading) {
@@ -76,7 +143,7 @@ export default function ProductsGrid({
         setShowScrollLoader(false);
       });
     }
-  }, [nextPageLoading]);
+  }, [fetchNextPage, nextPageLoading]);
 
   const products: any[] =
     data?.pages?.flatMap((page) => page?.data || []) || [];
@@ -85,6 +152,53 @@ export default function ProductsGrid({
   const displayedProducts = disableInfiniteScroll
     ? products.slice(0, limit)
     : products;
+
+  const resolvedLayout: GridLayoutConfig = {
+    mobile: gridLayout?.mobile ?? DEFAULT_GRID_LAYOUT.mobile,
+    desktop: gridLayout?.desktop ?? DEFAULT_GRID_LAYOUT.desktop,
+  };
+
+  const effectiveIsMobile =
+    typeof isMobileViewport === "boolean" ? isMobileViewport : localIsMobile;
+
+  const activeColumnCount = activeColumns
+    ? Math.max(activeColumns, 1)
+    : Math.max(
+        effectiveIsMobile ? resolvedLayout.mobile : resolvedLayout.desktop,
+        1
+      );
+
+  const gridClassName = useMemo(() => {
+    const baseMap: Record<number, string> = {
+      1: "grid-cols-1 sm:grid-cols-1",
+      2: "grid-cols-2 sm:grid-cols-2",
+    };
+
+    const desktopMap: Record<number, string> = {
+      4: "lg:grid-cols-4 xl:grid-cols-4",
+      5: "lg:grid-cols-5 xl:grid-cols-5",
+      6: "lg:grid-cols-6 xl:grid-cols-6",
+    };
+
+    const baseClass = baseMap[resolvedLayout.mobile] ?? baseMap[2];
+    const desktopClass = desktopMap[resolvedLayout.desktop] ?? desktopMap[5];
+
+    return mergeClasses(
+      "grid gap-4 md:gap-6",
+      baseClass,
+      "md:grid-cols-3 lg:gap-6",
+      desktopClass
+    );
+  }, [resolvedLayout.desktop, resolvedLayout.mobile]);
+
+  const initialSkeletonCount = useMemo(() => {
+    const rows = effectiveIsMobile ? 3 : 2;
+    return activeColumnCount * rows;
+  }, [activeColumnCount, effectiveIsMobile]);
+
+  const loadMoreSkeletonCount = useMemo(() => {
+    return activeColumnCount;
+  }, [activeColumnCount]);
 
   const handleInViewChange = (inView: boolean) => {
     if (disableInfiniteScroll) return;
@@ -97,10 +211,11 @@ export default function ProductsGrid({
     <div className="p-0 md:p-6">
       {/* Initial Loading */}
       {isLoading && showLoader && (
-        <div className="flex flex-col justify-center items-center h-48">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
-          <p className="mt-2 text-gray-600">Loading products...</p>
-        </div>
+        <section className={gridClassName} aria-hidden="true">
+          {Array.from({ length: initialSkeletonCount }).map((_, index) => (
+            <ProductCardSkeleton key={`initial-skeleton-${index}`} />
+          ))}
+        </section>
       )}
 
       {/* Error Handling */}
@@ -125,7 +240,7 @@ export default function ProductsGrid({
 
       {/* Product Grid */}
       {!isLoading && !isError && displayedProducts.length > 0 && (
-        <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <section className={gridClassName}>
           {displayedProducts.map((product) => (
             <div
               key={product._id}
@@ -134,10 +249,14 @@ export default function ProductsGrid({
               <ProductCard product={product} />
             </div>
           ))}
+          {isFetchingNextPage && hasNextPage &&
+            Array.from({ length: loadMoreSkeletonCount }).map((_, index) => (
+              <ProductCardSkeleton key={`next-page-skeleton-${index}`} />
+            ))}
         </section>
       )}
 
-      {/* Infinite Scroll Trigger */} 
+      {/* Infinite Scroll Trigger */}
       {!disableInfiniteScroll && hasNextPage && (
         <InView
           as="div"
@@ -151,7 +270,7 @@ export default function ProductsGrid({
             }`}
           >
             <div className="flex items-center gap-2 text-gray-600">
-              <p>Loading...</p>
+              <p>Loading more products...</p>
               <div
                 role="status"
                 aria-live="polite"
