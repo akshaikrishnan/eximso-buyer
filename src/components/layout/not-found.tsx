@@ -19,7 +19,7 @@ export default function NotFound({ categories }: { categories: any }) {
   return (
     <main className="relative min-h-[100dvh] bg-gradient-to-b from-white via-slate-50 to-white text-slate-800">
       {/* Subtle decorative glows */}
-      <div className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none absolute inset-0 overflow-x-hidden">
         <div className="absolute left-1/2 top-[-10%] -translate-x-1/2 h-[36rem] w-[36rem] rounded-full bg-fuchsia-300/10 blur-3xl" />
         <div className="absolute right-[-10%] bottom-[-10%] h-[28rem] w-[28rem] rounded-full bg-cyan-300/10 blur-3xl" />
       </div>
