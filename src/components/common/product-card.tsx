@@ -157,7 +157,7 @@ export default function ProductCard({
           "relative bg-slate-50",
           isListLayout
             ? "aspect-square w-28 shrink-0 overflow-hidden rounded-xl sm:w-32"
-            : "w-full overflow-hidden rounded-b-none border-b border-slate-100"
+            : "aspect-[4/3] w-full overflow-hidden rounded-b-none border-b border-slate-100"
         )}
       >
         <Image
