@@ -168,7 +168,7 @@ export default function NotFound({ categories }: { categories: any }) {
               {categories.map((c: any) => (
                 <Link
                   key={c.name}
-                  href={c.slug}
+                  href={`/products/${c.slug}`}
                   className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:bg-slate-50"
                 >
                   <div className="text-lg font-semibold text-slate-800 transition group-hover:translate-x-0.5">
