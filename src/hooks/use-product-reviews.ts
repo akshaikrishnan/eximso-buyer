@@ -99,3 +99,5 @@ export const useProductReviews = (
     getNextPageParam: (lastPage) =>
       lastPage.hasNext ? lastPage.page + 1 : undefined,
   });
+
+export type ProductReviewsQueryResult = ReturnType<typeof useProductReviews>;

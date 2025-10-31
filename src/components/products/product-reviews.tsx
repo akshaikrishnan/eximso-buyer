@@ -5,7 +5,10 @@ import { StarIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 
-import type { ProductReviewPage } from "@/hooks/use-product-reviews";
+import type {
+  ProductReviewPage,
+  ProductReviewsQueryResult,
+} from "@/hooks/use-product-reviews";
 import {
   getReviewBody,
   getReviewHeadline,
@@ -15,10 +18,17 @@ import {
   isSameReview,
 } from "@/lib/utils/review-utils";
 
+type ReviewsQuery = ProductReviewsQueryResult extends UseInfiniteQueryResult<
+  infer TData,
+  infer TError
+>
+  ? UseInfiniteQueryResult<TData, TError>
+  : UseInfiniteQueryResult<InfiniteData<ProductReviewPage>, Error>;
+
 interface ProductReviewsProps {
   productId?: string;
   productName?: string;
-  reviewsQuery: UseInfiniteQueryResult<InfiniteData<ProductReviewPage>, Error>;
+  reviewsQuery: ReviewsQuery;
 }
 
 const stars = [1, 2, 3, 4, 5];
