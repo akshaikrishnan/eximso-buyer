@@ -1,101 +1,119 @@
-// components/ProductDetailSkeleton.js
-
 import React from "react";
 
-// A single generic line placeholder
-const LinePlaceholder = ({ width = "w-full" }) => (
-  <div className={`h-4 bg-gray-200 rounded ${width} mb-2`}></div>
+const LinePlaceholder = ({ width = "w-full" }: { width?: string }) => (
+  <div className={`h-4 rounded-full bg-slate-200/80 ${width}`} />
 );
 
-// --- Left Column: Image Gallery ---
-const ImageGallerySkeleton = () => (
-  <div className="w-full lg:w-1/2 p-2 lg:sticky lg:top-8">
-    {/* Main Image Placeholder */}
-    <div className="w-full aspect-video bg-gray-300 rounded-lg mb-4 animate-pulse">
-      {/* Optional: Add placeholders for carousel arrows if needed */}
-    </div>
-
-    {/* Thumbnail Gallery Placeholder (visible on both mobile and desktop) */}
-    <div className="flex justify-center lg:justify-start space-x-2">
-      {[...Array(4)].map((_, i) => (
-        <div
-          key={i}
-          className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-md border-2 border-gray-300 animate-pulse"
-        ></div>
-      ))}
-    </div>
-  </div>
+const BlockPlaceholder = ({ className }: { className: string }) => (
+  <div className={`animate-pulse rounded-3xl bg-slate-200/60 ${className}`} />
 );
 
-// --- Right Column: Product Details ---
-const ProductInfoSkeleton = () => (
-  <div className="w-full lg:w-1/2 p-2 pt-4">
-    <div className="animate-pulse">
-      {/* Product Title Placeholder */}
-      <div className="h-10 bg-gray-300 rounded w-full sm:w-3/4 mb-4"></div>
-
-      {/* Price & Offer Placeholder */}
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="h-8 w-32 bg-indigo-200 rounded"></div>{" "}
-        {/* Current Price */}
-        <div className="h-5 w-20 bg-gray-200 rounded line-through"></div>{" "}
-        {/* Old Price */}
-        <div className="h-6 w-16 bg-red-100 rounded"></div> {/* Discount Tag */}
-      </div>
-
-      {/* Reviews and Stock Placeholder */}
-      <div className="flex items-center space-x-4 mb-8">
-        <div className="h-4 w-20 bg-gray-200 rounded"></div>{" "}
-        {/* Stars/Reviews */}
-        <div className="h-4 w-20 bg-green-200 rounded"></div> {/* In Stock */}
-      </div>
-
-      {/* CTA Button Placeholder */}
-      <div className="h-12 w-full max-w-sm bg-purple-400 rounded-lg mb-8"></div>
-
-      {/* --- About This Product Section --- */}
-      <h2 className="text-xl font-semibold mb-3">
-        <div className="h-6 w-32 bg-gray-300 rounded"></div>
-      </h2>
-      <LinePlaceholder width="w-full" />
-      <LinePlaceholder width="w-11/12" />
-      <LinePlaceholder width="w-10/12" />
-      <div className="h-4 bg-gray-200 rounded w-1/2 mb-6"></div>
-
-      {/* --- Product Specifications & Details Section --- */}
-      <h2 className="text-xl font-semibold mt-6 mb-3">
-        <div className="h-6 w-48 bg-gray-300 rounded"></div>
-      </h2>
-
-      {/* Specs List Placeholder (e.g., 5 rows) */}
-      <div className="space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="flex justify-between items-center border-b border-gray-100 pb-2"
-          >
-            <div className="h-4 w-24 bg-gray-200 rounded"></div>{" "}
-            {/* Spec Name */}
-            <div className="h-4 w-40 bg-gray-100 rounded"></div>{" "}
-            {/* Spec Value */}
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
-// --- Main Component ---
 const ProductDetailSkeleton = () => {
   return (
-    <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
-      {/* Main Container: Flex on large screens, stacked on mobile */}
-      <div className="flex flex-col lg:flex-row lg:space-x-8 max-w-7xl mx-auto">
-        {/* 1. Image Gallery (Left Side on Desktop) */}
-        <ImageGallerySkeleton />
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-white px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] xl:items-start">
+        <div className="space-y-8">
+          <BlockPlaceholder className="h-[520px] border border-slate-200" />
+          <BlockPlaceholder className="h-48 border border-slate-200" />
+        </div>
 
-        {/* 2. Product Details (Right Side on Desktop) */}
-        <ProductInfoSkeleton />
+        <div className="space-y-8">
+          <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="h-7 w-20 rounded-full bg-slate-200/70" />
+              <div className="h-7 w-28 rounded-full bg-slate-200/70" />
+            </div>
+            <div className="mt-6 space-y-3">
+              <div className="h-10 w-3/4 rounded-full bg-slate-200/80" />
+              <LinePlaceholder width="w-full" />
+              <LinePlaceholder width="w-10/12" />
+            </div>
+            <div className="mt-6 flex flex-wrap items-end gap-4">
+              <div className="h-12 w-40 rounded-2xl bg-slate-200" />
+              <div className="h-7 w-28 rounded-full bg-red-100/70" />
+            </div>
+            <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-100/80 px-4 py-4">
+              <div className="h-6 w-40 rounded-full bg-slate-200/80" />
+              <div className="h-6 w-24 rounded-full bg-slate-200/80" />
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="h-12 flex-1 rounded-xl bg-indigo-200/60" />
+              <div className="h-12 flex-1 rounded-xl border border-slate-200 bg-white" />
+            </div>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-6 w-24 rounded-full border border-indigo-100 bg-indigo-50/80"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-indigo-100/70" />
+              <div className="h-6 w-32 rounded-full bg-slate-200/80" />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-20 rounded-2xl border border-slate-100 bg-slate-100/80"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto mt-12 max-w-7xl rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-indigo-100/70" />
+          <div className="h-6 w-64 rounded-full bg-slate-200/80" />
+        </div>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          <div className="space-y-4">
+            <LinePlaceholder width="w-full" />
+            <LinePlaceholder width="w-11/12" />
+            <LinePlaceholder width="w-10/12" />
+            <LinePlaceholder width="w-9/12" />
+          </div>
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-4"
+              >
+                <div className="h-5 w-40 rounded-full bg-slate-200/80" />
+                <div className="mt-3 space-y-2">
+                  <LinePlaceholder width="w-full" />
+                  <LinePlaceholder width="w-5/6" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto mt-12 max-w-7xl space-y-12">
+        <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+          <div className="h-8 w-56 rounded-full bg-slate-200/80" />
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-60 rounded-2xl bg-slate-100/80" />
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+          <div className="h-8 w-52 rounded-full bg-slate-200/80" />
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-60 rounded-2xl bg-slate-100/80" />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

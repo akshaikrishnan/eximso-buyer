@@ -5,7 +5,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
-function classNames(...classes: any[]) {
+function classNames(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -31,12 +31,12 @@ const Magnifier = ({
   const handleMouseMove = (
     e: React.MouseEvent<HTMLImageElement, MouseEvent>
   ) => {
-    const { left, top, width, height } =
+    const { left, top, width: rectWidth, height: rectHeight } =
       e.currentTarget.getBoundingClientRect();
     const x = e.clientX - left;
     const y = e.clientY - top;
-    const xPercentage = (x / width) * 100;
-    const yPercentage = (y / height) * 100;
+    const xPercentage = (x / rectWidth) * 100;
+    const yPercentage = (y / rectHeight) * 100;
 
     setPosition({ x: xPercentage, y: yPercentage });
   };
@@ -44,12 +44,11 @@ const Magnifier = ({
   const handleMouseEnter = () => setIsHovering(true);
   const handleMouseLeave = () => setIsHovering(false);
 
-  // Background size set to 2.5 times the image size for the zoom effect
   const backgroundSize = `${width * 2.5}px ${height * 2.5}px`;
 
   return (
     <div
-      className="relative overflow-hidden cursor-zoom-in group w-full h-full"
+      className="group relative h-full w-full overflow-hidden rounded-3xl bg-white"
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -60,14 +59,13 @@ const Magnifier = ({
         alt={alt}
         width={width}
         height={height}
-        className="object-contain w-full h-full sm:rounded-lg"
-        priority // Consider priority loading for the main image
+        className="h-full w-full object-contain"
+        priority
       />
-      {/* Magnifier Overlay for Desktop */}
       {isHovering &&
-        isZoomEnabled && ( // Only show zoom if enabled
+        isZoomEnabled && (
           <div
-            className="hidden lg:block absolute inset-0 border-4 border-indigo-500 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            className="pointer-events-none absolute inset-0 hidden border-4 border-indigo-500/60 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100 lg:block"
             style={{
               backgroundImage: `url(${src})`,
               backgroundPosition: `${position.x}% ${position.y}%`,
@@ -80,33 +78,28 @@ const Magnifier = ({
   );
 };
 
-/**
- * Thumbnail Button Component
- */
-const ThumbButton = ({
-  selected,
-  onClick,
-  image,
-  alt,
-}: {
+interface ThumbButtonProps {
   selected: boolean;
   onClick: () => void;
   image: string;
   alt: string;
-}) => (
+}
+
+const ThumbButton = ({ selected, onClick, image, alt }: ThumbButtonProps) => (
   <button
     className={classNames(
-      selected ? "ring-indigo-500" : "ring-transparent hover:ring-gray-300",
-      "w-full relative flex h-24 cursor-pointer items-center justify-center rounded-lg bg-white text-sm font-medium uppercase text-gray-900 focus:outline-hidden ring-2 ring-offset-2 transition-shadow duration-200"
+      selected ? "ring-indigo-500" : "ring-transparent hover:ring-indigo-200",
+      "relative flex h-24 w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl bg-white text-sm font-medium text-slate-900 ring-2 ring-offset-2 transition"
     )}
     onClick={onClick}
     type="button"
+    aria-pressed={selected}
   >
-    <span className="absolute inset-0 overflow-hidden rounded-md flex items-center justify-center p-1">
+    <span className="absolute inset-0 flex items-center justify-center overflow-hidden p-1">
       <Image
         src={image}
-        width={100}
-        height={100}
+        width={160}
+        height={160}
         alt={alt}
         className="max-h-full max-w-full object-contain"
       />
@@ -114,28 +107,20 @@ const ThumbButton = ({
   </button>
 );
 
-/**
- * Main Product Gallery Component using Embla Carousel
- */
-export default function ProductGallery({
-  images,
-  productName,
-}: {
+interface ProductGalleryProps {
   images: string[];
   productName: string;
-}) {
+}
+
+export default function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [mainEmblaRef, mainEmblaApi] = useEmblaCarousel({ loop: false });
-
-  // Decide whether to use the vertical Embla carousel for thumbnails
   const enableThumbCarousel = images.length > 4;
   const [thumbEmblaRef, thumbEmblaApi] = useEmblaCarousel({
     containScroll: "keepSnaps",
     dragFree: true,
     slidesToScroll: 1,
     align: "start",
-    // 💡 Change: Set axis to 'x' for mobile (default for Embla is 'x')
-    // We conditionally apply 'axis: "y"' in CSS for large screens
   });
 
   const scrollPrev = useCallback(() => {
@@ -158,19 +143,16 @@ export default function ProductGallery({
     if (!mainEmblaApi) return;
     const newIndex = mainEmblaApi.selectedScrollSnap();
     setSelectedIndex(newIndex);
-    // Auto-scroll the thumbnail carousel
     if (enableThumbCarousel && thumbEmblaApi) {
-      // 💡 Improvement: Scroll to selected index only if the main embla is available
       thumbEmblaApi.scrollTo(newIndex);
     }
-  }, [mainEmblaApi, thumbEmblaApi, setSelectedIndex, enableThumbCarousel]);
+  }, [enableThumbCarousel, mainEmblaApi, thumbEmblaApi]);
 
   useEffect(() => {
     if (!mainEmblaApi) return;
     onSelect();
     mainEmblaApi.on("select", onSelect);
     mainEmblaApi.on("reInit", onSelect);
-    // Cleanup function
     return () => {
       mainEmblaApi.off("select", onSelect);
       mainEmblaApi.off("reInit", onSelect);
@@ -179,31 +161,19 @@ export default function ProductGallery({
 
   if (images.length === 0) return null;
 
-  // Magnifier is enabled if there are images
   const isZoomEnabled = images.length > 0;
 
   return (
-    // 1. Grid setup: Mobile is 1 column (main image on top, thumbs below), Desktop is 8 columns.
-    <div className="grid grid-cols-1 lg:grid-cols-8 lg:sticky top-32 self-start overflow-hidden lg:gap-4">
-      {/* Thumbnail Container - Goes first on desktop, second on mobile */}
-      {/* 2. Layout: Mobile uses col-span-1/8 for full width, Desktop uses lg:col-span-1 */}
-      {/* 3. Spacing/Alignment: Use mt-6 for mobile, lg:mt-0 to remove top margin on desktop */}
-      <div className="order-2 lg:order-1 col-span-1 lg:col-span-1 mx-auto mt-6 lg:mt-0 max-w-2xl w-full sm:block lg:max-w-none">
+    <div className="grid grid-cols-1 gap-4 lg:sticky lg:top-24 lg:grid-cols-[minmax(0,128px)_minmax(0,1fr)] lg:items-start">
+      <div className="order-2 w-full lg:order-1 lg:max-w-[140px]">
         {enableThumbCarousel ? (
-          // Thumbnail Carousel (Embla) for 5+ images
-          // 4. Embla Layout: Mobile is horizontal, Desktop is vertical with a fixed height and overflow
           <div
-            className="embla overflow-hidden lg:h-[600px] lg:overflow-y-scroll px-3 py-2"
+            className="embla rounded-3xl border border-slate-200 bg-slate-50/90 px-3 py-3 shadow-sm lg:max-h-[520px] lg:overflow-y-auto"
             ref={thumbEmblaRef}
           >
-            {/* The lg:flex-col and lg:space-y-2 are key for vertical stacking */}
-            <div className="embla__container flex space-x-2 lg:flex-col lg:space-y-4 lg:space-x-0 ">
-              {images.map((image: string, index: number) => (
-                // Important for vertical layout: min-width: 0 and full width on desktop
-                <div
-                  key={index}
-                  className="embla__slide shrink-0 min-w-[25%] lg:min-w-full"
-                >
+            <div className="embla__container flex gap-3 lg:flex-col lg:gap-4">
+              {images.map((image, index) => (
+                <div key={image} className="embla__slide shrink-0 min-w-[25%] lg:min-w-full">
                   <ThumbButton
                     selected={index === selectedIndex}
                     onClick={() => onThumbClick(index)}
@@ -215,12 +185,10 @@ export default function ProductGallery({
             </div>
           </div>
         ) : (
-          // Simple grid/flex layout for 4 or fewer images
-          // 5. Grid Layout: Mobile is grid-cols-4, Desktop is lg:grid-cols-1
-          <div className="grid grid-cols-4 gap-4 lg:grid-cols-1 lg:gap-6 px-2 py-2 ">
-            {images.map((image: string, index: number) => (
+          <div className="grid grid-cols-4 gap-3 lg:grid-cols-1 lg:gap-4">
+            {images.map((image, index) => (
               <ThumbButton
-                key={index}
+                key={image}
                 selected={index === selectedIndex}
                 onClick={() => onThumbClick(index)}
                 image={image}
@@ -231,22 +199,20 @@ export default function ProductGallery({
         )}
       </div>
 
-      {/* Main Image Carousel */}
-      {/* 6. Main Image Layout: Order-1 (top) on mobile, lg:col-span-7 on desktop */}
-      <div className="order-1 lg:order-2 col-span-1 lg:col-span-7 w-full h-auto mt-6 lg:mt-0 rounded-lg overflow-hidden bg-white relative">
+      <div className="order-1 w-full overflow-hidden rounded-3xl border border-slate-200 bg-white/95 shadow-sm lg:order-2 relative">
         <div className="embla" ref={mainEmblaRef}>
           <div className="embla__container flex">
-            {images.map((image: string, idx: number) => (
+            {images.map((image, idx) => (
               <div
-                key={idx}
-                className="embla__slide shrink-0 flex justify-center items-center w-full"
+                key={image}
+                className="embla__slide flex w-full items-center justify-center"
                 style={{ minWidth: "100%" }}
               >
                 <Magnifier
                   src={image}
                   alt={`${productName} image ${idx + 1}`}
-                  width={600}
-                  height={600}
+                  width={800}
+                  height={800}
                   isZoomEnabled={isZoomEnabled}
                 />
               </div>
@@ -254,20 +220,23 @@ export default function ProductGallery({
           </div>
         </div>
 
-        {/* Navigation Arrows */}
         {images.length > 1 && (
           <>
             <button
-              className="absolute top-1/2 left-3 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg z-10 transition-opacity hover:opacity-100 opacity-70"
+              className="absolute left-6 top-1/2 hidden -translate-y-1/2 transform rounded-full bg-white/90 p-2 text-slate-700 shadow-md transition hover:bg-indigo-50 focus:outline-hidden lg:block"
               onClick={scrollPrev}
+              type="button"
+              aria-label="Previous image"
             >
-              <ChevronLeftIcon className="w-6 h-6 text-gray-800" />
+              <ChevronLeftIcon className="h-6 w-6" />
             </button>
             <button
-              className="absolute top-1/2 right-3 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-lg z-10 transition-opacity hover:opacity-100 opacity-70"
+              className="absolute right-6 top-1/2 hidden -translate-y-1/2 transform rounded-full bg-white/90 p-2 text-slate-700 shadow-md transition hover:bg-indigo-50 focus:outline-hidden lg:block"
               onClick={scrollNext}
+              type="button"
+              aria-label="Next image"
             >
-              <ChevronRightIcon className="w-6 h-6 text-gray-800" />
+              <ChevronRightIcon className="h-6 w-6" />
             </button>
           </>
         )}
@@ -276,28 +245,20 @@ export default function ProductGallery({
   );
 }
 
-// Export a placeholder for Next.js dynamic import loading state
 export const ProductGalleryPlaceholder = () => (
-  <div className="lg:sticky top-10 self-start grid grid-cols-1 lg:grid-cols-8 lg:gap-4">
-    {/* Desktop Thumbnail Placeholder (lg:col-span-1) */}
-    <div className="hidden lg:block lg:col-span-1 space-y-2">
-      <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
+  <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,128px)_minmax(0,1fr)] lg:items-start">
+    <div className="hidden lg:block lg:max-w-[140px] space-y-3">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="h-24 w-full rounded-2xl bg-slate-200/70 animate-pulse" />
+      ))}
     </div>
 
-    {/* Main Image Placeholder (lg:col-span-7) */}
-    <div className="col-span-1 lg:col-span-7">
-      <div className="w-full h-[600px] bg-gray-200 rounded-lg animate-pulse" />
-    </div>
+    <div className="rounded-3xl border border-slate-200 bg-slate-200/80 pb-[75%] animate-pulse" />
 
-    {/* Mobile Thumbnail Placeholder (full width below main image) */}
-    <div className="mt-6 flex space-x-4 lg:hidden col-span-1">
-      <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
+    <div className="mt-4 flex items-center justify-center gap-3 lg:hidden">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="h-20 w-20 rounded-2xl bg-slate-200/80 animate-pulse" />
+      ))}
     </div>
   </div>
 );
