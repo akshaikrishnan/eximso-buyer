@@ -1,18 +1,53 @@
 "use client";
 
-import { useAddToCart } from "@/hooks/use-add-to-cart";
-import api from "@/lib/api/axios.interceptor";
-import { endpoints } from "@/lib/data/endpoints";
+import { ShoppingBagIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
-import { Price } from "../common/price";
 import Image from "next/image";
 import Link from "next/link";
 
-// --- helpers (inlined so you don't add new files)
-function toSlug(s?: string) {
-  if (!s) return "";
-  return s
+import { useAddToCart } from "@/hooks/use-add-to-cart";
+import api from "@/lib/api/axios.interceptor";
+import { endpoints } from "@/lib/data/endpoints";
+
+import { Price } from "../common/price";
+import type { ProductShape } from "./product-detail";
+
+type RelatedProductShape = Pick<
+  ProductShape,
+  | "_id"
+  | "name"
+  | "slug"
+  | "thumbnail"
+  | "price"
+  | "offerPrice"
+  | "discountPercentage"
+  | "brand"
+  | "images"
+>;
+
+type ProductEntry =
+  | RelatedProductShape
+  | { product?: RelatedProductShape | null | undefined }
+  | null
+  | undefined;
+
+type ProductListResponse = {
+  result?: { data?: ProductEntry[]; items?: ProductEntry[] };
+  data?: ProductEntry[];
+  items?: ProductEntry[];
+};
+
+interface RelatedProductProps {
+  product: RelatedProductShape;
+}
+
+interface RelatedProductsProps {
+  product: ProductShape;
+}
+
+function toSlug(value?: string | null): string {
+  if (!value) return "";
+  return value
     .toString()
     .trim()
     .toLowerCase()
@@ -21,107 +56,224 @@ function toSlug(s?: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
-function pickProducts(payload: any) {
-  return payload?.result?.data ?? payload?.data ?? payload ?? [];
-}
-// ---
 
-export function RelatedProduct({ product }: any) {
+function extractProductEntries(payload: unknown): ProductEntry[] {
+  if (!payload) {
+    return [];
+  }
+
+  if (Array.isArray(payload)) {
+    return payload as ProductEntry[];
+  }
+
+  if (typeof payload === "object") {
+    const candidate = payload as ProductListResponse;
+
+    if (candidate.result?.data && Array.isArray(candidate.result.data)) {
+      return candidate.result.data;
+    }
+
+    if (candidate.result?.items && Array.isArray(candidate.result.items)) {
+      return candidate.result.items;
+    }
+
+    if (candidate.data && Array.isArray(candidate.data)) {
+      return candidate.data;
+    }
+
+    if (candidate.items && Array.isArray(candidate.items)) {
+      return candidate.items;
+    }
+  }
+
+  return [];
+}
+
+function normalizeProduct(value: ProductEntry): RelatedProductShape | null {
+  if (!value) {
+    return null;
+  }
+
+  const rawProduct =
+    value && typeof value === "object" && "product" in value
+      ? value.product
+      : value;
+
+  if (!rawProduct) {
+    return null;
+  }
+
+  const candidate = rawProduct as Partial<RelatedProductShape> & {
+    price?: number | string | null;
+    offerPrice?: number | string | null;
+    discountPercentage?: number | string | null;
+  };
+
+  const id = candidate._id;
+  const name = candidate.name;
+  const rawPrice = candidate.price;
+  const normalizedPrice =
+    typeof rawPrice === "number" ? rawPrice : Number(rawPrice ?? NaN);
+
+  if (
+    typeof id !== "string" ||
+    typeof name !== "string" ||
+    !Number.isFinite(normalizedPrice)
+  ) {
+    return null;
+  }
+
+  const rawOffer = candidate.offerPrice;
+  const normalizedOffer =
+    typeof rawOffer === "number" ? rawOffer : Number(rawOffer ?? NaN);
+
+  const rawDiscount = candidate.discountPercentage;
+  const normalizedDiscount =
+    typeof rawDiscount === "number" ? rawDiscount : Number(rawDiscount ?? NaN);
+
+  return {
+    _id: id,
+    name,
+    slug: candidate.slug,
+    thumbnail: candidate.thumbnail,
+    images: candidate.images,
+    price: normalizedPrice,
+    offerPrice: Number.isFinite(normalizedOffer)
+      ? normalizedOffer
+      : undefined,
+    discountPercentage: Number.isFinite(normalizedDiscount)
+      ? normalizedDiscount
+      : undefined,
+    brand: candidate.brand,
+  };
+}
+
+function pickProducts(payload: unknown): RelatedProductShape[] {
+  return extractProductEntries(payload)
+    .map((entry) => normalizeProduct(entry))
+    .filter((item): item is RelatedProductShape => Boolean(item));
+}
+
+export function RelatedProduct({ product }: RelatedProductProps) {
   const addToCart = useAddToCart(product);
 
+  const imageSrc =
+    (product.thumbnail && product.thumbnail.trim().length > 0
+      ? product.thumbnail
+      : product.images?.[0]) ?? "/images/products/p-3.png";
+
+  const hasDiscount =
+    (product.discountPercentage ?? 0) > 0 && (product.offerPrice ?? 0) > 0;
+  const currentPrice = hasDiscount
+    ? product.offerPrice ?? product.price
+    : product.price;
+  const discountLabel = Math.round(product.discountPercentage ?? 0);
+  const href = product.slug ? `/${product.slug}` : `/product/${product._id}`;
+
   return (
-    <div key={product._id}>
-      <div className="relative">
-        <Link href={"/" + product.slug}>
-          <div className="relative h-72 w-full overflow-hidden rounded-lg">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg">
+      <div className="relative flex flex-1 flex-col">
+        <Link href={href} className="group/link flex flex-1 flex-col" aria-label={`View details for ${product.name}`}>
+          <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
             <Image
-              width={277}
-              height={288}
-              src={product.thumbnail}
+              fill
+              sizes="(min-width: 1536px) 220px, (min-width: 1280px) 200px, (min-width: 1024px) 180px, (min-width: 640px) 45vw, 80vw"
+              src={imageSrc}
               alt={product.name}
-              className="h-full w-full object-contain object-center"
+              className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
             />
+
+            {hasDiscount && (
+              <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                -{discountLabel}%
+              </span>
+            )}
           </div>
-          <div className="relative mt-4">
-            <h3 className="text-sm font-medium text-gray-900">
+
+          <div className="mt-4 space-y-2">
+            <h3 className="line-clamp-2 text-sm font-semibold text-slate-900 transition group-hover/link:text-indigo-600">
               {product.name}
             </h3>
-          </div>
-          <div className="absolute inset-x-0 top-0 flex h-72 items-end justify-end overflow-hidden rounded-lg p-4">
-            <div
-              aria-hidden="true"
-              className="absolute inset-x-0 bottom-0 h-36 bg-linear-to-t from-black opacity-50"
-            />
-            <p className="relative text-lg font-semibold text-white">
-              <Price
-                amount={
-                  product?.discountPercentage > 0
-                    ? product?.offerPrice
-                    : product?.price
-                }
-              />
-            </p>
+            {product.brand && (
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                {product.brand}
+              </p>
+            )}
+            <div className="flex items-baseline gap-2">
+              <p className="text-lg font-semibold text-indigo-600">
+                <Price amount={currentPrice} />
+              </p>
+              {hasDiscount && (
+                <p className="text-sm text-slate-400 line-through">
+                  <Price amount={product.price} />
+                </p>
+              )}
+            </div>
           </div>
         </Link>
       </div>
-      <div className="mt-6">
-        <button
-          onClick={() => {
-            addToCart();
-          }}
-          className="relative flex w-full items-center justify-center rounded-md border border-transparent bg-gray-100 px-8 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
-        >
-          Add to bag
-          <span className="sr-only">, {product.name}</span>
-        </button>
-      </div>
-    </div>
+
+      <button
+        type="button"
+        onClick={() => addToCart()}
+        className="mt-4 inline-flex items-center justify-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:border-indigo-200 hover:bg-indigo-100"
+      >
+        <ShoppingBagIcon className="h-4 w-4" aria-hidden="true" />
+        Add to bag
+      </button>
+    </article>
   );
 }
 
-export default function RelatedProducts({ product }: any) {
-  const categoryName: string | undefined =
-    product?.category?.name ?? product?.categoryName;
-  const subcategoryName: string | undefined =
-    product?.subcategory?.name ?? product?.subcategoryName;
+export default function RelatedProducts({ product }: RelatedProductsProps) {
+  const categoryName = product.category?.name ?? product.categoryName;
+  const subcategoryName = product.subcategory?.name ?? product.subcategoryName;
 
   const catSlug = toSlug(categoryName);
   const subSlug = toSlug(subcategoryName);
 
-  const { data: related, isLoading, error } = useQuery({
+  const {
+    data: relatedProducts = [],
+    isLoading,
+    isError,
+  } = useQuery<RelatedProductShape[]>({
     queryKey: ["products", "related", catSlug, subSlug, product?._id],
-    enabled: !!catSlug,
+    enabled: Boolean(catSlug),
+    staleTime: 1000 * 60 * 10,
     queryFn: async () => {
       try {
-        // 1) same category by slug (✅ backend expects slug)
+        const params = { limit: 6 } as Record<string, string | number>;
+
         const categoryRes = await api.get(endpoints.products, {
-          params: { category: catSlug, limit: 5 },
+          params: { ...params, category: catSlug },
         });
         const categoryProducts = pickProducts(categoryRes.data).filter(
-          (p: any) => p._id !== product._id
+          (item) => item._id !== product._id
         );
-        if (categoryProducts.length) return categoryProducts;
-
-        // 2) try subcategory by slug for tighter matches
-        if (subSlug) {
-          const subRes = await api.get(endpoints.products, {
-            params: { subcategory: subSlug, limit: 5 },
-          });
-          const subProducts = pickProducts(subRes.data).filter(
-            (p: any) => p._id !== product._id
-          );
-          if (subProducts.length) return subProducts;
+        if (categoryProducts.length > 0) {
+          return categoryProducts;
         }
 
-        // 3) fallback: newest/popular
+        if (subSlug) {
+          const subcategoryRes = await api.get(endpoints.products, {
+            params: { ...params, subcategory: subSlug },
+          });
+          const subcategoryProducts = pickProducts(subcategoryRes.data).filter(
+            (item) => item._id !== product._id
+          );
+          if (subcategoryProducts.length > 0) {
+            return subcategoryProducts;
+          }
+        }
+
         const fallbackRes = await api.get(endpoints.products, {
-          params: { limit: 5, sort: "-createdAt" }, // or your "popular" key if supported
+          params: { ...params, sort: "-createdAt" },
         });
         return pickProducts(fallbackRes.data).filter(
-          (p: any) => p._id !== product._id
+          (item) => item._id !== product._id
         );
-      } catch (err) {
-        console.error("Error fetching related products:", err);
+      } catch (error) {
+        console.error("Error fetching related products", error);
         return [];
       }
     },
@@ -130,39 +282,37 @@ export default function RelatedProducts({ product }: any) {
   return (
     <section
       aria-labelledby="related-heading"
-      className="mt-10 border-t border-gray-200 px-4 py-16 sm:px-0"
+      className="mt-10 border-t border-slate-200 px-4 py-16 sm:px-0"
     >
-      <h2 id="related-heading" className="text-xl font-bold text-gray-900">
+      <h2 id="related-heading" className="text-xl font-bold text-slate-900">
         Customers also bought
       </h2>
 
-      {!isLoading && related?.length > 0 && (
-        <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-          {related.map((p: any) => (
-            <RelatedProduct product={p} key={p._id} />
-          ))}
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-          {[...Array(4)].map((_, index) => (
-            <div key={index} className="animate-pulse">
-              <div className="relative h-72 w-full overflow-hidden rounded-lg bg-gray-200"></div>
-              <div className="mt-4 h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="mt-6 h-10 bg-gray-200 rounded"></div>
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {isLoading &&
+          Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={`related-skeleton-${index}`}
+              className="flex flex-col rounded-3xl border border-slate-200 bg-white/60 p-4 shadow-sm"
+            >
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-slate-100" />
+              <div className="mt-4 h-4 w-3/4 rounded bg-slate-200" />
+              <div className="mt-2 h-3 w-1/2 rounded bg-slate-200" />
+              <div className="mt-4 h-10 rounded-2xl bg-slate-200" />
             </div>
           ))}
-        </div>
-      )}
 
-      {error && (
-        <div className="mt-8 text-center py-8">
-          <p className="text-red-500">
-            Error loading related products. Please try again later.
-          </p>
-        </div>
-      )}
+        {!isLoading && !isError && relatedProducts.length > 0 &&
+          relatedProducts.map((relatedProduct) => (
+            <RelatedProduct product={relatedProduct} key={relatedProduct._id} />
+          ))}
+
+        {isError && (
+          <div className="col-span-full rounded-3xl border border-red-200 bg-red-50/80 p-6 text-center text-sm text-red-600">
+            Unable to load related products right now. Please try again later.
+          </div>
+        )}
+      </div>
     </section>
   );
 }

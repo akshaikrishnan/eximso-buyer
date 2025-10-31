@@ -1,7 +1,12 @@
 "use client";
 
 import { Disclosure } from "@headlessui/react";
-import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  MinusIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 import { StarIcon } from "@heroicons/react/20/solid";
 import {
   ArrowsPointingOutIcon,
@@ -20,7 +25,14 @@ import {
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import { useMemo, type ComponentType, type SVGProps } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentType,
+  type SVGProps,
+} from "react";
 
 import { useProductReviews } from "@/hooks/use-product-reviews";
 import api from "@/lib/api/axios.interceptor";
@@ -123,6 +135,8 @@ type ProductListResponse = {
   items?: ProductEntry[];
 };
 
+const DESCRIPTION_CLAMP_HEIGHT = 512;
+
 function classNames(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
@@ -204,6 +218,46 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     0;
   const averageRating = reviewStats?.averageRating ?? fallbackAverage;
   const totalReviews = reviewStats?.total ?? fallbackTotal;
+
+  const descriptionRef = useRef<HTMLElement | null>(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [shouldClampDescription, setShouldClampDescription] = useState(false);
+
+  useEffect(() => {
+    setIsDescriptionExpanded(false);
+  }, [productId]);
+
+  useEffect(() => {
+    const element = descriptionRef.current;
+
+    if (!element) {
+      setShouldClampDescription(false);
+      return;
+    }
+
+    const clampHeight = DESCRIPTION_CLAMP_HEIGHT;
+
+    const updateClampState = () => {
+      const requiresClamp = element.scrollHeight > clampHeight;
+      setShouldClampDescription(requiresClamp);
+    };
+
+    updateClampState();
+
+    if (typeof ResizeObserver === "function") {
+      const observer = new ResizeObserver(() => {
+        updateClampState();
+      });
+      observer.observe(element);
+
+      return () => {
+        observer.disconnect();
+      };
+    }
+
+    const timeout = window.setTimeout(updateClampState, 200);
+    return () => window.clearTimeout(timeout);
+  }, [product.detailedDescription]);
 
   const specificationSections = useMemo(() => {
     const sections: Array<{ name: string; data: string[] }> = [];
@@ -390,7 +444,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   return (
     <div className="bg-gradient-to-b from-slate-50 via-white to-white">
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1800px] px-4 py-12 sm:px-6 lg:px-10 2xl:px-16">
         <div className="grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] xl:items-start">
           <div className="space-y-8">
             <article className="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur">
@@ -594,12 +648,43 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           </div>
 
           <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-            <article
-              className="prose prose-slate max-w-none text-base text-slate-700"
-              dangerouslySetInnerHTML={{
-                __html: product.detailedDescription ?? "Full product details coming soon...",
-              }}
-            />
+            <div className="flex flex-col">
+              <div className="relative">
+                <article
+                  ref={descriptionRef}
+                  className={classNames(
+                    "prose prose-slate max-w-none text-base text-slate-700 transition-[max-height] duration-300 ease-in-out",
+                    shouldClampDescription && !isDescriptionExpanded
+                      ? "max-h-[32rem] overflow-hidden"
+                      : ""
+                  )}
+                  dangerouslySetInnerHTML={{
+                    __html: product.detailedDescription ?? "Full product details coming soon...",
+                  }}
+                />
+
+                {shouldClampDescription && !isDescriptionExpanded && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 rounded-b-3xl bg-gradient-to-t from-white/95 via-white/75 to-transparent" />
+                )}
+              </div>
+
+              {shouldClampDescription && (
+                <div className="mt-6 flex justify-center lg:justify-start">
+                  <button
+                    type="button"
+                    onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+                    className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-5 py-2 text-sm font-semibold text-indigo-600 transition hover:border-indigo-200 hover:bg-indigo-100"
+                  >
+                    {isDescriptionExpanded ? "Show less" : "View more"}
+                    {isDescriptionExpanded ? (
+                      <ChevronUpIcon className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <ChevronDownIcon className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
 
             <div className="space-y-4">
               {specificationSections.length === 0 ? (
@@ -657,7 +742,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
 
             {!relatedLoading && (
-              <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 auto-rows-fr">
                 {related.map((relatedProduct) => (
                   <RelatedProduct product={relatedProduct} key={relatedProduct._id} />
                 ))}
@@ -674,7 +759,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
 
             {!recentLoading && (
-              <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 auto-rows-fr">
                 {normalizedRecentProducts.map((recentProduct) => (
                   <RelatedProduct product={recentProduct} key={recentProduct._id} />
                 ))}
