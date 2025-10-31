@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { StarIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
-import type { UseInfiniteQueryResult } from "@tanstack/react-query";
+import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 
 import type { ProductReviewPage } from "@/hooks/use-product-reviews";
 import {
@@ -18,7 +18,7 @@ import {
 interface ProductReviewsProps {
   productId?: string;
   productName?: string;
-  reviewsQuery: UseInfiniteQueryResult<ProductReviewPage, unknown>;
+  reviewsQuery: UseInfiniteQueryResult<InfiniteData<ProductReviewPage>, Error>;
 }
 
 const stars = [1, 2, 3, 4, 5];
