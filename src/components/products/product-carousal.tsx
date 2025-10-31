@@ -96,21 +96,24 @@ const ThumbButton = ({
 }) => (
   <button
     className={classNames(
-      selected ? "ring-indigo-500" : "ring-transparent hover:ring-gray-300",
-      "w-full relative flex h-24 cursor-pointer items-center justify-center rounded-lg bg-white text-sm font-medium uppercase text-gray-900 focus:outline-hidden ring-2 ring-offset-2 transition-shadow duration-200"
+      "group relative w-full cursor-pointer overflow-hidden rounded-xl border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500",
+      selected
+        ? "border-indigo-400 ring-2 ring-indigo-200 shadow-lg shadow-indigo-100"
+        : "border-transparent hover:border-indigo-200 hover:shadow-sm"
     )}
     onClick={onClick}
     type="button"
+    aria-label={alt}
   >
-    <span className="absolute inset-0 overflow-hidden rounded-md flex items-center justify-center p-1">
+    <div className="relative aspect-square w-full min-w-[72px] max-w-full bg-white p-2">
       <Image
         src={image}
-        width={100}
-        height={100}
         alt={alt}
-        className="max-h-full max-w-full object-contain"
+        fill
+        sizes="(min-width: 1024px) 110px, 25vw"
+        className="object-contain drop-shadow-sm transition-transform duration-200 group-hover:scale-105"
       />
-    </span>
+    </div>
   </button>
 );
 
@@ -183,26 +186,18 @@ export default function ProductGallery({
   const isZoomEnabled = images.length > 0;
 
   return (
-    // 1. Grid setup: Mobile is 1 column (main image on top, thumbs below), Desktop is 8 columns.
-    <div className="grid grid-cols-1 lg:grid-cols-8 lg:sticky top-32 self-start overflow-hidden lg:gap-4">
-      {/* Thumbnail Container - Goes first on desktop, second on mobile */}
-      {/* 2. Layout: Mobile uses col-span-1/8 for full width, Desktop uses lg:col-span-1 */}
-      {/* 3. Spacing/Alignment: Use mt-6 for mobile, lg:mt-0 to remove top margin on desktop */}
-      <div className="order-2 lg:order-1 col-span-1 lg:col-span-1 mx-auto mt-6 lg:mt-0 max-w-2xl w-full sm:block lg:max-w-none">
+    <div className="grid grid-cols-1 lg:grid-cols-[120px_minmax(0,_1fr)] lg:sticky top-28 self-start overflow-visible lg:gap-6">
+      <div className="order-2 lg:order-1 col-span-1 mx-auto mt-6 w-full max-w-2xl sm:block lg:mt-0 lg:max-w-none">
         {enableThumbCarousel ? (
-          // Thumbnail Carousel (Embla) for 5+ images
-          // 4. Embla Layout: Mobile is horizontal, Desktop is vertical with a fixed height and overflow
           <div
-            className="embla overflow-hidden lg:h-[600px] lg:overflow-y-scroll px-3 py-2"
+            className="embla rounded-2xl border border-slate-200/70 bg-white/70 px-2 py-3 shadow-sm backdrop-blur lg:max-h-[560px] lg:overflow-y-auto"
             ref={thumbEmblaRef}
           >
-            {/* The lg:flex-col and lg:space-y-2 are key for vertical stacking */}
-            <div className="embla__container flex space-x-2 lg:flex-col lg:space-y-4 lg:space-x-0 ">
+            <div className="embla__container flex space-x-2 lg:flex-col lg:space-y-4 lg:space-x-0">
               {images.map((image: string, index: number) => (
-                // Important for vertical layout: min-width: 0 and full width on desktop
                 <div
                   key={index}
-                  className="embla__slide shrink-0 min-w-[25%] lg:min-w-full"
+                  className="embla__slide min-w-[30%] shrink-0 lg:min-w-full"
                 >
                   <ThumbButton
                     selected={index === selectedIndex}
@@ -215,9 +210,7 @@ export default function ProductGallery({
             </div>
           </div>
         ) : (
-          // Simple grid/flex layout for 4 or fewer images
-          // 5. Grid Layout: Mobile is grid-cols-4, Desktop is lg:grid-cols-1
-          <div className="grid grid-cols-4 gap-4 lg:grid-cols-1 lg:gap-6 px-2 py-2 ">
+          <div className="grid grid-cols-4 gap-4 px-2 py-2 lg:grid-cols-1 lg:gap-6">
             {images.map((image: string, index: number) => (
               <ThumbButton
                 key={index}
@@ -231,9 +224,7 @@ export default function ProductGallery({
         )}
       </div>
 
-      {/* Main Image Carousel */}
-      {/* 6. Main Image Layout: Order-1 (top) on mobile, lg:col-span-7 on desktop */}
-      <div className="order-1 lg:order-2 col-span-1 lg:col-span-7 w-full h-auto mt-6 lg:mt-0 rounded-lg overflow-hidden bg-white relative">
+      <div className="order-1 col-span-1 mt-6 w-full overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur lg:order-2 lg:mt-0">
         <div className="embla" ref={mainEmblaRef}>
           <div className="embla__container flex">
             {images.map((image: string, idx: number) => (
@@ -278,22 +269,19 @@ export default function ProductGallery({
 
 // Export a placeholder for Next.js dynamic import loading state
 export const ProductGalleryPlaceholder = () => (
-  <div className="lg:sticky top-10 self-start grid grid-cols-1 lg:grid-cols-8 lg:gap-4">
-    {/* Desktop Thumbnail Placeholder (lg:col-span-1) */}
-    <div className="hidden lg:block lg:col-span-1 space-y-2">
+  <div className="grid grid-cols-1 lg:grid-cols-[120px_minmax(0,_1fr)] lg:gap-6">
+    <div className="hidden lg:block space-y-3">
       <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
       <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
       <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
       <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse" />
     </div>
 
-    {/* Main Image Placeholder (lg:col-span-7) */}
-    <div className="col-span-1 lg:col-span-7">
-      <div className="w-full h-[600px] bg-gray-200 rounded-lg animate-pulse" />
+    <div className="col-span-1">
+      <div className="h-[420px] w-full rounded-2xl border border-slate-200 bg-gray-200/70 animate-pulse lg:h-[560px]" />
     </div>
 
-    {/* Mobile Thumbnail Placeholder (full width below main image) */}
-    <div className="mt-6 flex space-x-4 lg:hidden col-span-1">
+    <div className="col-span-1 mt-6 flex space-x-4 lg:hidden">
       <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
       <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />
       <div className="w-1/4 h-24 bg-gray-200 rounded-lg animate-pulse" />

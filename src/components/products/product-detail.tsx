@@ -10,7 +10,6 @@ import AddToBagBtn from "./add-to-bag";
 import AddToWishlistBtn from "./add-to-wishlist";
 import { RelatedProduct } from "./related-products";
 import { Price } from "../common/price";
-import Image from "next/image";
 
 // 💡 NEW: Dynamic Import for the Product Gallery
 import dynamic from "next/dynamic";
@@ -41,28 +40,6 @@ function pickProducts(payload: any) {
   return payload?.result?.data ?? payload?.data ?? payload ?? [];
 }
 // ---
-
-// Dummy Reviews Data (for display)
-const reviews = [
-  {
-    id: 1,
-    rating: 5,
-    title: "Absolutely fantastic!",
-    content:
-      "The product exceeded my expectations in quality and design. Highly recommend to everyone.",
-    author: "Aarav S.",
-    date: "September 1, 2024",
-  },
-  {
-    id: 2,
-    rating: 4,
-    title: "Great value for money.",
-    content:
-      "A solid purchase, though the color was slightly different than expected from the photos.",
-    author: "Priya K.",
-    date: "August 28, 2024",
-  },
-];
 
 export default function ProductDetail({ product }: any) {
   const images: string[] = Array.isArray(product?.images)
@@ -154,135 +131,245 @@ export default function ProductDetail({ product }: any) {
     !product?.isActive ||
     product?.stock <= 0;
 
+  const ratingValue =
+    product?.ratingSummary?.averageRating ?? product?.rating ?? 0;
+  const reviewCount =
+    product?.ratingSummary?.totalReviews ??
+    product?.reviewCount ??
+    product?.ratingSummary?.total ??
+    0;
+  const normalizedTags = Array.isArray(product?.tags)
+    ? product.tags.filter(Boolean)
+    : [];
+  const sellerName = product?.seller?.name;
+  const sellerCountry = product?.seller?.country;
+  const quickFacts = (
+    [
+      {
+        label: "Minimum Order",
+        value: product?.minimumOrderQuantity
+          ? `${product.minimumOrderQuantity} ${product?.uom ?? "units"}`
+          : "Flexible",
+      },
+      {
+        label: "Availability",
+        value: isOutOfStock
+          ? "Out of stock"
+          : product?.stock <= 3
+          ? `Only ${product?.stock} left`
+          : "In stock",
+      },
+      {
+        label: "Country of Origin",
+        value: product?.countryOfOrigin ?? "—",
+      },
+      {
+        label: "Brand",
+        value: product?.brand ?? "—",
+      },
+      {
+        label: "Seller",
+        value: sellerName
+          ? sellerCountry
+            ? `${sellerName} · ${sellerCountry}`
+            : sellerName
+          : "—",
+      },
+      {
+        label: "SKU",
+        value: product?.sku ?? "—",
+      },
+    ] as { label: string; value: string }[]
+  ).filter((fact) => fact.value && fact.value !== "—");
+
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <main className="mx-auto  px-4 sm:px-6 py-10 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:max-w-none">
-          {/* Product */}
-          <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12">
-            {/* 💡 IMAGE GALLERY: Dynamically Imported Component */}
-            <ProductGallery
-              images={images?.length ? images : [product?.thumbnail]}
-              productName={product?.name}
-            />
+    <div className="bg-gradient-to-b from-slate-50 via-white to-white">
+      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+          <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+            {categoryName ?? "Product"}
+          </span>
+          {subcategoryName && (
+            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">
+              {subcategoryName}
+            </span>
+          )}
+          {product?.sku && (
+            <span className="text-xs uppercase tracking-wide text-slate-400">
+              SKU: {product.sku}
+            </span>
+          )}
+        </div>
 
-            {/* Product Info */}
-            <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-2">
-                {product?.name}
-              </h1>
+        <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,_1.05fr)_minmax(0,_1fr)]">
+          <ProductGallery
+            images={images?.length ? images : [product?.thumbnail]}
+            productName={product?.name}
+          />
 
-              {/* Price Section */}
-              <div className="mt-4 flex items-center space-x-3">
-                <h2 className="sr-only">Product information</h2>
-                <p className="text-4xl font-semibold tracking-tight text-gray-900">
-                  <span className="text-indigo-600">
-                    <Price
-                      amount={
-                        product?.discountPercentage > 0
-                          ? product?.offerPrice
-                          : product?.price
-                      }
-                    />
-                  </span>
-                </p>
-                {/* Original Price and Discount Tag */}
-                {product?.discountPercentage > 0 && (
-                  <>
-                    <p className="text-xl text-gray-500 line-through">
-                      <Price amount={product?.price} />
-                    </p>
-                    <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-0.5 text-sm font-medium text-red-800">
-                      {product?.discountPercentage}% OFF
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {/* Reviews & Stock Status */}
-              <div className="mt-4 flex items-center justify-between border-b pb-4">
-                <div className="flex items-center">
-                  <div className="flex items-center">
-                    {[0, 1, 2, 3, 4].map((rating) => (
-                      <StarIcon
-                        key={rating}
-                        className={classNames(
-                          (product?.rating ?? 0) > rating
-                            ? "text-yellow-400"
-                            : "text-gray-300",
-                          "h-5 w-5 shrink-0"
-                        )}
-                        aria-hidden="true"
-                      />
-                    ))}
+          <div className="space-y-8">
+            <section className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur">
+              <div className="flex flex-col gap-4">
+                <div className="space-y-3">
+                  <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+                    {product?.name}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                    <div className="flex items-center gap-1">
+                      {[0, 1, 2, 3, 4].map((rating) => (
+                        <StarIcon
+                          key={rating}
+                          className={classNames(
+                            ratingValue > rating
+                              ? "text-amber-400"
+                              : "text-slate-200",
+                            "h-5 w-5"
+                          )}
+                          aria-hidden="true"
+                        />
+                      ))}
+                      <span className="font-medium text-slate-700">
+                        {ratingValue.toFixed(1)}
+                      </span>
+                      <a
+                        href="#reviews"
+                        className="ml-1 text-indigo-600 hover:text-indigo-500"
+                      >
+                        ({reviewCount} reviews)
+                      </a>
+                    </div>
+                    {sellerName && (
+                      <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
+                        Sold by {sellerName}
+                      </span>
+                    )}
                   </div>
-                  <a
-                    href="#reviews"
-                    className="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                  >
-                    ({product?.reviewCount ?? 0} reviews)
-                  </a>
                 </div>
 
-                <p
-                  className={classNames(
-                    isOutOfStock ? "text-red-600" : (product?.stock <= 3 ? "text-orange-600" : "text-green-600"),
-                    "text-sm font-semibold uppercase"
-                  )}
-                >
-                  {isOutOfStock ? "Out of Stock" : (product?.stock <= 3 ? `Only ${product?.stock} left ` : `In Stock `)}
-                </p>
-              </div>
+                <div className="flex flex-col gap-3 rounded-2xl bg-slate-900/95 p-5 text-white shadow-inner">
+                  <div className="flex flex-wrap items-end gap-3">
+                    <p className="text-4xl font-semibold">
+                      <Price
+                        amount={
+                          product?.discountPercentage > 0
+                            ? product?.offerPrice
+                            : product?.price
+                        }
+                      />
+                    </p>
+                    {product?.discountPercentage > 0 && (
+                      <>
+                        <span className="text-lg text-slate-300 line-through">
+                          <Price amount={product?.price} />
+                        </span>
+                        <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                          Save {product.discountPercentage}%
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <p
+                    className={classNames(
+                      "text-sm font-semibold uppercase tracking-wide",
+                      isOutOfStock
+                        ? "text-rose-200"
+                        : product?.stock <= 3
+                        ? "text-amber-200"
+                        : "text-emerald-200"
+                    )}
+                  >
+                    {isOutOfStock
+                      ? "Currently unavailable"
+                      : product?.stock <= 3
+                      ? `Hurry! Only ${product?.stock} left`
+                      : "Ready to ship"}
+                  </p>
+                </div>
 
-              {/* Short Description */}
-              <div className="mt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  About This Product
-                </h3>
-                <div
-                  className="space-y-6 text-base text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      product?.shortDescription ??
-                      "No short description provided.",
-                  }}
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="mt-10 flex items-center flex-row gap-4">
-                <AddToBagBtn product={product} />
-                <AddToWishlistBtn
-                  product={product}
-                  className="flex-1 rounded-md border border-gray-300 bg-white px-8 py-3 text-base font-medium text-gray-700 hover:bg-gray-100"
-                  iconClassName="h-6 w-6"
-                />
-              </div>
-
-              {/* Detailed Description and Specs */}
-              <section aria-labelledby="details-heading" className="mt-12">
-                <h2
-                  id="details-heading"
-                  className="text-2xl font-bold tracking-tight text-gray-900"
-                >
-                  Product Specifications & Details
-                </h2>
-
-                {/* Long Description */}
-                <div className="mt-6">
-                  <h3 className="sr-only">Detailed Description</h3>
+                <div className="space-y-3 text-sm leading-relaxed text-slate-600">
                   <div
-                    className="space-y-6 text-base text-gray-700 leading-relaxed border-b pb-6"
                     dangerouslySetInnerHTML={{
                       __html:
-                        product?.detailedDescription ??
-                        "Full product details coming soon...",
+                        product?.shortDescription ??
+                        "No short description provided.",
                     }}
                   />
                 </div>
 
-                {/* Additional Details (Accordion) */}
-                <div className="divide-y divide-gray-200">
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <AddToBagBtn product={product} />
+                  <AddToWishlistBtn
+                    product={product}
+                    className="flex-1 rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-medium text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50"
+                    iconClassName="h-6 w-6"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {quickFacts.length > 0 && (
+              <section className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Quick Facts
+                </h2>
+                <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {quickFacts.map((fact) => (
+                    <div
+                      key={fact.label}
+                      className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4"
+                    >
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {fact.label}
+                      </dt>
+                      <dd className="mt-1 text-sm font-medium text-slate-800">
+                        {fact.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+
+            {normalizedTags.length > 0 && (
+              <section className="rounded-3xl border border-dashed border-indigo-200 bg-indigo-50/60 p-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-indigo-700">
+                  Tags & keywords
+                </h3>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {normalizedTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-medium text-indigo-600 shadow-sm"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section
+              aria-labelledby="details-heading"
+              className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm backdrop-blur"
+            >
+              <h2
+                id="details-heading"
+                className="text-xl font-semibold tracking-tight text-slate-900"
+              >
+                Product specifications & details
+              </h2>
+
+              <div className="mt-4 space-y-6 text-sm leading-relaxed text-slate-600">
+                <div
+                  className="border border-slate-100/70 bg-slate-50/70 p-4 rounded-2xl"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      product?.detailedDescription ??
+                      "Full product details coming soon...",
+                  }}
+                />
+
+                <div className="divide-y divide-slate-200">
                   {productDetail.map((detail) => (
                     <Disclosure
                       as="div"
@@ -290,128 +377,61 @@ export default function ProductDetail({ product }: any) {
                       defaultOpen={detail.name === "Dimensions"}
                     >
                       {({ open }) => (
-                        <>
-                          <h3 className="mb-0">
-                            <Disclosure.Button className="group relative flex w-full items-center justify-between py-4 text-left">
-                              <span
-                                className={classNames(
-                                  open
-                                    ? "text-indigo-600 font-semibold"
-                                    : "text-gray-900",
-                                  "text-lg font-medium transition-colors duration-200"
-                                )}
-                              >
-                                {detail.name}
-                              </span>
-                              <span className="ml-6 flex items-center">
-                                {open ? (
-                                  <MinusIcon
-                                    className="block h-6 w-6 text-indigo-400 group-hover:text-indigo-500"
-                                    aria-hidden="true"
-                                  />
-                                ) : (
-                                  <PlusIcon
-                                    className="block h-6 w-6 text-gray-400 group-hover:text-gray-500"
-                                    aria-hidden="true"
-                                  />
-                                )}
-                              </span>
-                            </Disclosure.Button>
-                          </h3>
-                          <Disclosure.Panel as="div" className="pb-6">
-                            <ul
-                              role="list"
-                              className="list-disc space-y-2 pl-5 text-gray-600 text-sm"
+                        <div>
+                          <Disclosure.Button className="flex w-full items-center justify-between py-4 text-left">
+                            <span
+                              className={classNames(
+                                "text-base font-medium transition-colors duration-200",
+                                open ? "text-indigo-600" : "text-slate-800"
+                              )}
                             >
+                              {detail.name}
+                            </span>
+                            <span className="ml-4 flex items-center">
+                              {open ? (
+                                <MinusIcon
+                                  className="h-6 w-6 text-indigo-400"
+                                  aria-hidden="true"
+                                />
+                              ) : (
+                                <PlusIcon
+                                  className="h-6 w-6 text-slate-300"
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </span>
+                          </Disclosure.Button>
+                          <Disclosure.Panel className="pb-4">
+                            <ul className="list-disc space-y-2 pl-5 text-sm text-slate-600">
                               {detail.data.map((item) => (
-                                <li key={item} className="text-gray-700">
-                                  {item}
-                                </li>
+                                <li key={item}>{item}</li>
                               ))}
                             </ul>
                           </Disclosure.Panel>
-                        </>
+                        </div>
                       )}
                     </Disclosure>
                   ))}
                 </div>
-              </section>
-            </div>
+              </div>
+            </section>
           </div>
+        </div>
 
-          {/* <hr className="my-16 border-gray-200" /> */}
-
-          {/* Review Section */}
-          {/* <section
-            id="reviews"
-            aria-labelledby="reviews-heading"
-            className="mt-10"
-          >
-            <h2
-              id="reviews-heading"
-              className="text-3xl font-bold tracking-tight text-gray-900 mb-6"
-            >
-              Customer Reviews ({product?.rating ?? "—"} out of 5)
-            </h2>
-            <div className="space-y-8">
-              {reviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="border p-6 rounded-xl bg-white shadow-xs hover:shadow-md transition duration-300"
-                >
-                  <div className="flex items-center mb-2">
-                    {[0, 1, 2, 3, 4].map((rating) => (
-                      <StarIcon
-                        key={rating}
-                        className={classNames(
-                          review.rating > rating
-                            ? "text-yellow-500"
-                            : "text-gray-300",
-                          "h-5 w-5 shrink-0"
-                        )}
-                        aria-hidden="true"
-                      />
-                    ))}
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                    {review.title}
-                  </h3>
-                  <p className="text-gray-600 italic mb-3">
-                    "{review.content}"
-                  </p>
-                  <div className="flex justify-between items-center text-sm text-gray-500 border-t pt-2">
-                    <span>
-                      Reviewed by{" "}
-                      <span className="font-medium text-gray-700">
-                        {review.author}
-                      </span>
-                    </span>
-                    <span>on {review.date}</span>
-                  </div>
-                </div>
-              ))}
-              {reviews.length === 0 && (
-                <p className="text-gray-500">
-                  Be the first to leave a review for this product!
-                </p>
-              )}
-              <button className="mt-6 w-full sm:w-auto inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700">
-                Write a Review
-              </button>
-            </div>
-          </section> */}
-
-          <hr className="my-16 border-gray-200" />
-
-          {/* Related Products */}
+        <div className="mt-16 space-y-16">
           {related?.length > 0 && (
-            <section aria-labelledby="related-heading" className="mt-10 pb-16">
-              <h2
-                id="related-heading"
-                className="text-2xl font-bold text-gray-900"
-              >
-                Customers also bought
-              </h2>
+            <section aria-labelledby="related-heading">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2
+                  id="related-heading"
+                  className="text-2xl font-semibold text-slate-900"
+                >
+                  Customers also bought
+                </h2>
+                <span className="text-sm text-slate-500">
+                  Curated based on category insights
+                </span>
+              </div>
 
               {!isLoading && (
                 <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:grid-cols-5 xl:gap-x-8">
@@ -423,18 +443,22 @@ export default function ProductDetail({ product }: any) {
             </section>
           )}
 
-          {/* Recent Products */}
           {recent?.length > 0 && (
-            <section aria-labelledby="related-heading" className="mt-10 pb-16">
-              <h2
-                id="related-heading"
-                className="text-2xl font-bold text-gray-900"
-              >
-                Recently Viewed
-              </h2>
+            <section aria-labelledby="recent-heading">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2
+                  id="recent-heading"
+                  className="text-2xl font-semibold text-slate-900"
+                >
+                  Recently viewed
+                </h2>
+                <span className="text-sm text-slate-500">
+                  Continue exploring where you left off
+                </span>
+              </div>
 
               {!recentLoading && (
-                <div className="mt-8 gap-x-4 grid grid-cols-2 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:grid-cols-5 xl:gap-x-8">
+                <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:grid-cols-5 xl:gap-x-8">
                   {recent.map((rp: any) => (
                     <RelatedProduct
                       product={rp?.product}
