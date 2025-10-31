@@ -7,6 +7,7 @@ import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { Price } from "../common/price";
 import { useQuery, useQueries } from "@tanstack/react-query";
+import ReviewManager from "@/components/reviews/review-manager";
 
 type OrderItem = {
   product?: {
@@ -301,6 +302,17 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                     <p className="text-sm dark:text-gray-300">
                       Qty: {qty}
                     </p>
+                    {p._id && (
+                      <div className="mt-3">
+                        <ReviewManager
+                          productId={p._id}
+                          productName={p.name}
+                          orderId={orderRes._id}
+                          orderNumber={orderRes.orderNumber ?? orderNumber}
+                          className="px-3 py-1.5 text-xs sm:text-sm"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 

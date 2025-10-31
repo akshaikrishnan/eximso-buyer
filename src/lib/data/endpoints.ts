@@ -8,6 +8,7 @@ export const endpoints = {
   address: "address",
   checkout: "checkout",
   order: "order",
+  reviews: "reviews",
   banner: "banner",
   homepageLayout: "homepage-layout",
   collection: "collection",
