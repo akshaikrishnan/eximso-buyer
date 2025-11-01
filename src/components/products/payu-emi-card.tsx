@@ -1,7 +1,7 @@
 "use client";
 
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { useEffect, useMemo, useState } from "react";
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
 import api from "@/lib/api/axios.interceptor";
@@ -192,7 +192,7 @@ export default function PayuEmiCard({ amount }: PayuEmiCardProps) {
           type="button"
           onClick={() => setIsModalOpen(true)}
           disabled={isDisabled}
-          className="w-full text-left"
+          className="w-full cursor-pointer text-left disabled:cursor-not-allowed"
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -258,111 +258,134 @@ export default function PayuEmiCard({ amount }: PayuEmiCardProps) {
         )}
       </div>
 
-      <Dialog open={isModalOpen} onClose={setIsModalOpen} className="relative z-50">
-        <div className="fixed inset-0 bg-slate-900/40" aria-hidden="true" />
+      <Transition show={isModalOpen} as={Fragment} appear>
+        <Dialog open={isModalOpen} onClose={setIsModalOpen} className="relative z-50">
+          <TransitionChild
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-slate-900/40" aria-hidden="true" />
+          </TransitionChild>
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <DialogPanel className="w-full max-w-3xl transform rounded-3xl bg-white p-6 shadow-2xl transition-all">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <DialogTitle className="text-xl font-semibold text-slate-900">PayU EMI plans</DialogTitle>
-                  <p className="mt-1 text-sm text-slate-600">
-                    Review the available instalment plans before completing your payment on PayU. Final approval, pricing,
-                    and fulfilment are handled by PayU and the issuing bank.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-full border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-slate-300 hover:text-slate-700"
-                  aria-label="Close"
-                >
-                  <span aria-hidden>×</span>
-                </button>
-              </div>
-
-              <div className="mt-6 space-y-6">
-                {Object.keys(groupedPlans).length === 0 && (
-                  <p className="text-sm text-slate-500">EMI details will be available soon.</p>
-                )}
-
-                {Object.entries(groupedPlans)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([bankCode, bankPlans]) => (
-                    <div key={bankCode} className="rounded-2xl border border-slate-200">
-                      <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-                        <h3 className="text-base font-semibold text-slate-900">{bankCode}</h3>
-                        <p className="text-xs uppercase tracking-wide text-slate-500">
-                          {bankPlans[0]?.plan.card_type ?? "EMI"}
-                        </p>
-                      </div>
-                      <div className="divide-y divide-slate-200">
-                        {bankPlans.map(({ planCode, plan }) => {
-                          const monthlyEmi = getPlanDisplayValue(plan);
-                          const interestAmount = typeof plan.emi_interest_paid === "number" ? plan.emi_interest_paid : null;
-                          const tenureLabel = plan.tenure ?? planCode;
-                          const parsedInterest =
-                            typeof plan.emiBankInterest === "number"
-                              ? plan.emiBankInterest
-                              : typeof plan.emiBankInterest === "string"
-                              ? Number.parseFloat(plan.emiBankInterest)
-                              : null;
-                          const interestRate =
-                            parsedInterest !== null && Number.isFinite(parsedInterest)
-                              ? `${parsedInterest.toFixed(2).replace(/\.00$/, "")} %`
-                              : plan.emiBankInterest || "As per bank";
-                          const additionalCost =
-                            plan.additionalCost && Number.parseFloat(plan.additionalCost) > 0
-                              ? Number.parseFloat(plan.additionalCost)
-                              : null;
-
-                          return (
-                            <div key={planCode} className="grid gap-4 px-4 py-4 sm:grid-cols-3">
-                              <div>
-                                <p className="text-sm font-semibold text-slate-900">{tenureLabel}</p>
-                                <p className="text-xs text-slate-500">Plan code: {planCode}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs uppercase tracking-wide text-slate-500">Monthly EMI</p>
-                                {monthlyEmi !== null ? (
-                                  <Price amount={monthlyEmi} className="text-base font-semibold text-indigo-600" />
-                                ) : (
-                                  <p className="text-sm text-slate-500">Will be shared during checkout</p>
-                                )}
-                                {additionalCost !== null && (
-                                  <p className="mt-1 text-xs text-amber-600">
-                                    Additional cost: <Price amount={additionalCost} className="font-semibold" />
-                                  </p>
-                                )}
-                              </div>
-                              <div>
-                                <p className="text-xs uppercase tracking-wide text-slate-500">Indicative interest</p>
-                                <p className="text-sm font-medium text-slate-700">{interestRate}</p>
-                                {interestAmount !== null && (
-                                  <p className="text-xs text-slate-500">
-                                    Total interest payable: <Price amount={interestAmount} className="font-semibold" />
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <TransitionChild
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <DialogPanel className="w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
+                  <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+                    <div>
+                      <DialogTitle className="text-xl font-semibold text-slate-900">PayU EMI plans</DialogTitle>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Review the available instalment plans before completing your payment on PayU. Final approval,
+                        pricing, and fulfilment are handled by PayU and the issuing bank.
+                      </p>
                     </div>
-                  ))}
-              </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
+                      className="cursor-pointer rounded-full border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-slate-300 hover:text-slate-700"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden>×</span>
+                    </button>
+                  </div>
 
-              <p className="mt-6 rounded-2xl bg-slate-50 p-4 text-xs text-slate-500">
-                PayU provides these EMI services independently as a third-party facilitator. By proceeding, you acknowledge
-                that Eximso neither originates credit nor assumes any legal or financial obligations arising from the EMI
-                arrangements. All loan terms, approvals, and repayments remain strictly between you, PayU, and the issuing
-                bank.
-              </p>
-            </DialogPanel>
+                  <div className="max-h-[60vh] space-y-6 overflow-y-auto px-6 py-6">
+                    {Object.keys(groupedPlans).length === 0 && (
+                      <p className="text-sm text-slate-500">EMI details will be available soon.</p>
+                    )}
+
+                    {Object.entries(groupedPlans)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([bankCode, bankPlans]) => (
+                        <div key={bankCode} className="rounded-2xl border border-slate-200">
+                          <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
+                            <h3 className="text-base font-semibold text-slate-900">{bankCode}</h3>
+                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                              {bankPlans[0]?.plan.card_type ?? "EMI"}
+                            </p>
+                          </div>
+                          <div className="divide-y divide-slate-200">
+                            {bankPlans.map(({ planCode, plan }) => {
+                              const monthlyEmi = getPlanDisplayValue(plan);
+                              const interestAmount =
+                                typeof plan.emi_interest_paid === "number" ? plan.emi_interest_paid : null;
+                              const tenureLabel = plan.tenure ?? planCode;
+                              const parsedInterest =
+                                typeof plan.emiBankInterest === "number"
+                                  ? plan.emiBankInterest
+                                  : typeof plan.emiBankInterest === "string"
+                                  ? Number.parseFloat(plan.emiBankInterest)
+                                  : null;
+                              const interestRate =
+                                parsedInterest !== null && Number.isFinite(parsedInterest)
+                                  ? `${parsedInterest.toFixed(2).replace(/\.00$/, "")} %`
+                                  : plan.emiBankInterest || "As per bank";
+                              const additionalCost =
+                                plan.additionalCost && Number.parseFloat(plan.additionalCost) > 0
+                                  ? Number.parseFloat(plan.additionalCost)
+                                  : null;
+
+                              return (
+                                <div key={planCode} className="grid gap-4 px-4 py-4 sm:grid-cols-3">
+                                  <div>
+                                    <p className="text-sm font-semibold text-slate-900">{tenureLabel}</p>
+                                    <p className="text-xs text-slate-500">Plan code: {planCode}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs uppercase tracking-wide text-slate-500">Monthly EMI</p>
+                                    {monthlyEmi !== null ? (
+                                      <Price amount={monthlyEmi} className="text-base font-semibold text-indigo-600" />
+                                    ) : (
+                                      <p className="text-sm text-slate-500">Will be shared during checkout</p>
+                                    )}
+                                    {additionalCost !== null && (
+                                      <p className="mt-1 text-xs text-amber-600">
+                                        Additional cost: <Price amount={additionalCost} className="font-semibold" />
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <p className="text-xs uppercase tracking-wide text-slate-500">Indicative interest</p>
+                                    <p className="text-sm font-medium text-slate-700">{interestRate}</p>
+                                    {interestAmount !== null && (
+                                      <p className="text-xs text-slate-500">
+                                        Total interest payable: <Price amount={interestAmount} className="font-semibold" />
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+
+                  <div className="border-t border-slate-200 bg-slate-50 px-6 py-5 text-xs text-slate-500">
+                    PayU provides these EMI services independently as a third-party facilitator. By proceeding, you
+                    acknowledge that Eximso neither originates credit nor assumes any legal or financial obligations
+                    arising from the EMI arrangements. All loan terms, approvals, and repayments remain strictly between
+                    you, PayU, and the issuing bank.
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
           </div>
-        </div>
-      </Dialog>
+        </Dialog>
+      </Transition>
     </>
   );
 }
