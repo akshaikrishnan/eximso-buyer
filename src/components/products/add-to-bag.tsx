@@ -115,7 +115,7 @@ export default function AddToBagBtn({ product }: AddToBagBtnProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex w-full items-center justify-center gap-3 sm:w-auto sm:justify-end">
               <button
                 type="button"
                 onClick={handleDecrement}
