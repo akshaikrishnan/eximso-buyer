@@ -25,6 +25,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import {
   useEffect,
   useMemo,
@@ -59,6 +60,7 @@ interface ProductDimension {
 interface ProductCategory {
   _id?: string;
   name?: string;
+  slug?: string;
 }
 
 interface ProductSeller {
@@ -86,6 +88,7 @@ export interface ProductShape {
   shortDescription?: string;
   detailedDescription?: string;
   tags?: string[];
+  keywords?: string[];
   thumbnail?: string;
   images?: string[];
   slug?: string;
@@ -205,6 +208,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   const categoryName = product.category?.name ?? product.categoryName;
   const subcategoryName = product.subcategory?.name ?? product.subcategoryName;
+  const categorySlug = product.category?.slug ?? (categoryName ? toSlug(categoryName) : "");
+  const subcategorySlug =
+    product.subcategory?.slug ?? (subcategoryName ? toSlug(subcategoryName) : "");
+  const categoryPath = categorySlug ? `/products/${categorySlug}` : undefined;
+  const subcategoryPath =
+    categorySlug && subcategorySlug ? `/products/${categorySlug}/${subcategorySlug}` : undefined;
   const productId = product._id ?? product.id;
 
   const reviewsQuery = useProductReviews(productId, 6);
@@ -258,6 +267,24 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const timeout = window.setTimeout(updateClampState, 200);
     return () => window.clearTimeout(timeout);
   }, [product.detailedDescription]);
+
+  const tagKeywords = useMemo(() => {
+    const items = new Set<string>();
+
+    for (const tag of product.tags ?? []) {
+      if (typeof tag === "string" && tag.trim()) {
+        items.add(tag.trim());
+      }
+    }
+
+    for (const keyword of product.keywords ?? []) {
+      if (typeof keyword === "string" && keyword.trim()) {
+        items.add(keyword.trim());
+      }
+    }
+
+    return Array.from(items);
+  }, [product.keywords, product.tags]);
 
   const specificationSections = useMemo(() => {
     const sections: Array<{ name: string; data: string[] }> = [];
@@ -444,7 +471,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   return (
     <div className="bg-gradient-to-b from-slate-50 via-white to-white">
-      <main className="mx-auto w-full max-w-[1800px] px-4 py-12 sm:px-6 lg:px-10 2xl:px-16">
+      <main className="mx-auto w-full max-w-none px-4 py-12 sm:px-6 lg:px-10 2xl:px-16">
         <div className="grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] xl:items-start">
           <div className="space-y-8">
             <article className="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur">
@@ -491,16 +518,36 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <header className="flex flex-col gap-4">
                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
                   {categoryName && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1">
-                      <CubeIcon className="h-4 w-4" aria-hidden="true" />
-                      {categoryName}
-                    </span>
+                    categoryPath ? (
+                      <Link
+                        href={categoryPath}
+                        className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                      >
+                        <CubeIcon className="h-4 w-4" aria-hidden="true" />
+                        {categoryName}
+                      </Link>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1">
+                        <CubeIcon className="h-4 w-4" aria-hidden="true" />
+                        {categoryName}
+                      </span>
+                    )
                   )}
                   {subcategoryName && (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-indigo-700">
-                      <Squares2X2Icon className="h-4 w-4" aria-hidden="true" />
-                      {subcategoryName}
-                    </span>
+                    subcategoryPath ? (
+                      <Link
+                        href={subcategoryPath}
+                        className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"
+                      >
+                        <Squares2X2Icon className="h-4 w-4" aria-hidden="true" />
+                        {subcategoryName}
+                      </Link>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-indigo-700">
+                        <Squares2X2Icon className="h-4 w-4" aria-hidden="true" />
+                        {subcategoryName}
+                      </span>
+                    )
                   )}
                 </div>
 
@@ -594,18 +641,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </div>
               </div>
 
-              {product.tags && product.tags.length > 0 && (
+              {tagKeywords.length > 0 && (
                 <div className="mt-8">
                   <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Tags</h3>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {product.tags.map((tag) => (
-                      <span
+                    {tagKeywords.map((tag) => (
+                      <Link
                         key={tag}
-                        className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-indigo-600"
+                        href={`/search?q=${encodeURIComponent(tag)}`}
+                        className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-indigo-600 transition hover:border-indigo-200 hover:bg-indigo-100 hover:text-indigo-700"
                       >
                         <TagIcon className="h-4 w-4" aria-hidden="true" />
                         {tag}
-                      </span>
+                      </Link>
                     ))}
                   </div>
                 </div>
