@@ -12,18 +12,21 @@ import { endpoints } from "@/lib/data/endpoints";
 import { Price } from "../common/price";
 import type { ProductShape } from "./product-detail";
 
-type RelatedProductShape = Pick<
-  ProductShape,
-  | "_id"
-  | "name"
-  | "slug"
-  | "thumbnail"
-  | "price"
-  | "offerPrice"
-  | "discountPercentage"
-  | "brand"
-  | "images"
->;
+type RelatedProductShape = Omit<
+  Pick<
+    ProductShape,
+    | "_id"
+    | "name"
+    | "slug"
+    | "thumbnail"
+    | "price"
+    | "offerPrice"
+    | "discountPercentage"
+    | "brand"
+    | "images"
+  >,
+  "_id"
+> & { _id: string };
 
 type ProductEntry =
   | RelatedProductShape
