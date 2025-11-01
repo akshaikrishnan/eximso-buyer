@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -19,7 +19,11 @@ interface AddToWishlistBtnProps {
   iconClassName?: string;
 }
 
-const heartTransition = { type: "spring", stiffness: 400, damping: 20 };
+const heartTransition: Transition = {
+  type: "spring",
+  stiffness: 400,
+  damping: 20,
+};
 
 export default function AddToWishlistBtn({
   product,

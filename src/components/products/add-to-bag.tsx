@@ -67,7 +67,10 @@ export default function AddToBagBtn({ product }: AddToBagBtnProps) {
     updateCartMutation.isPending || removeMutation.isPending || false;
 
   const disableIncrement = Boolean(
-    product.stock && cartItem && cartItem.quantity >= product.stock
+    cartItem &&
+      product.stock !== undefined &&
+      product.stock !== null &&
+      cartItem.quantity >= product.stock
   );
   const handleAddToCart = () => {
     if (isOutOfStock || addToCartMutation.isPending) return;
