@@ -42,12 +42,18 @@ import { Price } from "../common/price";
 import AddToBagBtn from "./add-to-bag";
 import AddToWishlistBtn from "./add-to-wishlist";
 import { ProductGalleryPlaceholder } from "./product-carousal";
-import { RelatedProduct } from "./related-products";
 import ProductReviews from "./product-reviews";
+import { PayuEmiCardSkeleton } from "./payu-emi-card-skeleton";
+import { RelatedProduct } from "./related-products";
 
 const ProductGallery = dynamic(() => import("./product-carousal"), {
   ssr: false,
   loading: () => <ProductGalleryPlaceholder />,
+});
+
+const PayuEmiCard = dynamic(() => import("./payu-emi-card"), {
+  ssr: false,
+  loading: () => <PayuEmiCardSkeleton />,
 });
 
 interface ProductDimension {
@@ -379,6 +385,18 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     return facts.filter((fact): fact is QuickFact => fact !== null);
   }, [categoryName, product.brand, product.countryOfOrigin, product.manufacturer, product.minimumOrderQuantity, product.seller?.country, product.seller?.name, product.sku, product.uom]);
 
+  const emiEligibleAmount = useMemo(() => {
+    if (typeof product.offerPrice === "number" && product.offerPrice > 0) {
+      return product.offerPrice;
+    }
+
+    if (typeof product.price === "number" && product.price > 0) {
+      return product.price;
+    }
+
+    return 0;
+  }, [product.offerPrice, product.price]);
+
   const dimensionHighlights: DimensionHighlight[] = useMemo(
     () => [
       {
@@ -684,6 +702,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </div>
               </section>
             )}
+
+            {emiEligibleAmount > 0 && <PayuEmiCard amount={emiEligibleAmount} />}
           </aside>
         </div>
 
