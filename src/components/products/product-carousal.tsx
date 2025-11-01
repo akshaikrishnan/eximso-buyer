@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, type CSSProperties } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -162,6 +162,10 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
   if (images.length === 0) return null;
 
   const isZoomEnabled = images.length > 0;
+  const emblaResetStyles: CSSProperties = {
+    "--slide-spacing": "0px",
+    "--slide-size": "100%",
+  };
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:sticky lg:top-24 lg:grid-cols-[minmax(0,128px)_minmax(0,1fr)] lg:items-start">
@@ -170,6 +174,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
           <div
             className="embla rounded-3xl border border-slate-200 bg-slate-50/90 px-3 py-3 shadow-sm lg:max-h-[520px] lg:overflow-y-auto"
             ref={thumbEmblaRef}
+            style={emblaResetStyles}
           >
             <div className="embla__container flex gap-3 lg:flex-col lg:gap-4">
               {images.map((image, index) => (
@@ -200,7 +205,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
       </div>
 
       <div className="order-1 w-full overflow-hidden rounded-3xl border border-slate-200 bg-white/95 shadow-sm lg:order-2 relative">
-        <div className="embla" ref={mainEmblaRef}>
+        <div className="embla" ref={mainEmblaRef} style={emblaResetStyles}>
           <div className="embla__container flex">
             {images.map((image, idx) => (
               <div
