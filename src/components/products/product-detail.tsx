@@ -633,11 +633,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <AddToBagBtn product={product} />
-                  <AddToWishlistBtn
-                    product={product}
-                    className="flex-1 rounded-xl border border-slate-200 bg-white px-6 py-3 text-base font-medium text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50"
-                    iconClassName="h-6 w-6"
-                  />
+                  <AddToWishlistBtn product={product} className="sm:flex-1" />
                 </div>
               </div>
 
