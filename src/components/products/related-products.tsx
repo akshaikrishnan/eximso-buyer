@@ -12,18 +12,21 @@ import { endpoints } from "@/lib/data/endpoints";
 import { Price } from "../common/price";
 import type { ProductShape } from "./product-detail";
 
-type RelatedProductShape = Pick<
-  ProductShape,
-  | "_id"
-  | "name"
-  | "slug"
-  | "thumbnail"
-  | "price"
-  | "offerPrice"
-  | "discountPercentage"
-  | "brand"
-  | "images"
->;
+type RelatedProductShape = Omit<
+  Pick<
+    ProductShape,
+    | "_id"
+    | "name"
+    | "slug"
+    | "thumbnail"
+    | "price"
+    | "offerPrice"
+    | "discountPercentage"
+    | "brand"
+    | "images"
+  >,
+  "_id"
+> & { _id: string };
 
 type ProductEntry =
   | RelatedProductShape
@@ -215,11 +218,12 @@ export function RelatedProduct({ product }: RelatedProductProps) {
 
       <button
         type="button"
-        onClick={() => addToCart()}
-        className="mt-4 inline-flex items-center justify-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:border-indigo-200 hover:bg-indigo-100"
+        onClick={() => addToCart.mutate()}
+        disabled={addToCart.isPending}
+        className="mt-4 inline-flex items-center justify-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:border-indigo-200 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <ShoppingBagIcon className="h-4 w-4" aria-hidden="true" />
-        Add to bag
+        {addToCart.isPending ? "Adding..." : "Add to bag"}
       </button>
     </article>
   );

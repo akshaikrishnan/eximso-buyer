@@ -130,6 +130,8 @@ interface DimensionHighlight {
   icon: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
+type ProductWithRequiredId = ProductShape & { _id: string };
+
 type ProductEntry = ProductShape | { product?: ProductShape | null | undefined };
 
 type ProductListResponse = {
@@ -186,7 +188,7 @@ function extractProductEntries(payload: unknown): ProductEntry[] {
   return [];
 }
 
-function pickProducts(payload: unknown): ProductShape[] {
+function pickProducts(payload: unknown): ProductWithRequiredId[] {
   return extractProductEntries(payload)
     .map((entry) => {
       if (entry && typeof entry === "object" && "product" in entry) {
@@ -194,7 +196,9 @@ function pickProducts(payload: unknown): ProductShape[] {
       }
       return entry as ProductShape;
     })
-    .filter((item): item is ProductShape => Boolean(item && item._id));
+    .filter((item): item is ProductWithRequiredId =>
+      Boolean(item && typeof item._id === "string" && item._id.trim().length > 0)
+    );
 }
 
 export default function ProductDetail({ product }: ProductDetailProps) {
@@ -414,7 +418,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const {
     data: related = [],
     isLoading: relatedLoading,
-  } = useQuery<ProductShape[]>({
+  } = useQuery<ProductWithRequiredId[]>({
     queryKey: ["products", "related", catSlug, product._id],
     enabled: Boolean(catSlug),
     staleTime: 1000 * 60 * 5,
@@ -453,7 +457,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     },
   });
 
-  const normalizedRecentProducts: ProductShape[] = useMemo(() => {
+  const normalizedRecentProducts: ProductWithRequiredId[] = useMemo(() => {
     return recent
       .map((entry) => {
         if (entry && typeof entry === "object" && "product" in entry) {
@@ -461,7 +465,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         }
         return entry as ProductShape;
       })
-      .filter((item): item is ProductShape => Boolean(item && item._id));
+      .filter((item): item is ProductWithRequiredId =>
+        Boolean(item && typeof item._id === "string" && item._id.trim().length > 0)
+      );
   }, [recent]);
 
   const isOutOfStock =
@@ -633,11 +639,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <AddToBagBtn product={product} />
-                  <AddToWishlistBtn
-                    product={product}
-                    className="flex-1 rounded-xl border border-slate-200 bg-white px-6 py-3 text-base font-medium text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50"
-                    iconClassName="h-6 w-6"
-                  />
+                  <AddToWishlistBtn product={product} className="sm:flex-1" />
                 </div>
               </div>
 

@@ -6,24 +6,28 @@ import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useRouter } from "next/navigation";
 
-export const useAddToCart = (product: any) => {
+interface AddToCartProductShape {
+  _id: string;
+  name: string;
+  minimumOrderQuantity?: number;
+}
+
+export const useAddToCart = (product: AddToCartProductShape) => {
   const { toast } = useToast();
   const router = useRouter();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const response = await api.post(endpoints.cart + "/add", {
+      const response = await api.post(`${endpoints.cart}/add`, {
         productId: product._id,
-        quantity: product.minimumOrderQuantity,
+        quantity: product.minimumOrderQuantity ?? 1,
       });
-
-      console.log(response.data); // For debugging purposes
 
       return response.data;
     },
     onError: (error: any) => {
-      console.error(error); // Log the error for debugging
+      console.error(error);
 
       toast({
         title: `Error while adding to cart`,
@@ -38,12 +42,14 @@ export const useAddToCart = (product: any) => {
         ),
       });
     },
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] }); // Invalidate cart data
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
 
       toast({
         title: `${product.name} added to cart`,
-        description: `Added minimum order quantity ${product.minimumOrderQuantity}`,
+        description: `Added minimum order quantity ${
+          product.minimumOrderQuantity ?? 1
+        }`,
         action: (
           <ToastAction
             onClick={() => router.push("/cart")}
@@ -56,5 +62,5 @@ export const useAddToCart = (product: any) => {
     },
   });
 
-  return mutation.mutate;
+  return mutation;
 };
