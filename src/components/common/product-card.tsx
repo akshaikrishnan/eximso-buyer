@@ -138,16 +138,20 @@ export default function ProductCard({
     product?.flashSaleId ?? null,
   );
 
-  const flashSaleActive = useMemo(() => {
-    if (!flashSale) return false;
-    if (product?.flashSaleHidden) return false;
-    if (flashSale.product?.flashSaleHidden) return false;
-    return isFlashSaleActive(flashSale);
-  }, [flashSale, product?.flashSaleHidden]);
+  const flashSaleVisible = Boolean(
+    flashSale &&
+      !product?.flashSaleHidden &&
+      !flashSale.product?.flashSaleHidden,
+  );
 
   const flashSaleCountdown = useCountdown(
-    flashSaleActive ? flashSale?.endDate ?? null : null,
+    flashSaleVisible ? flashSale?.endDate ?? null : null,
   );
+
+  const flashSaleActive =
+    flashSaleVisible &&
+    !flashSaleCountdown.expired &&
+    isFlashSaleActive(flashSale);
 
   const flashSaleProgress = useMemo(
     () => getFlashSaleProgress(flashSaleActive ? flashSale : undefined),
