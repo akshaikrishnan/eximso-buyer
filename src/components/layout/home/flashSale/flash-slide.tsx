@@ -17,7 +17,7 @@ import { useCountdown } from "@/hooks/use-countdown";
 const sanitize = (value?: string) =>
   value?.replace(/<[^>]+>/g, " ")?.replace(/\s+/g, " ")?.trim();
 
-const truncate = (value: string | undefined, limit = 120) => {
+const truncate = (value: string | undefined, limit = 90) => {
   if (!value) return "";
   return value.length > limit ? `${value.slice(0, limit - 1)}…` : value;
 };
@@ -30,15 +30,16 @@ export default function FlashSlide({ sale }: FlashSlideProps) {
   const product = sale.product ?? {};
   const link = product.slug ? `/${product.slug}` : "#";
   const countdown = useCountdown(sale.endDate ?? null);
-  const { claimed, total, left, percentClaimed } = getFlashSaleProgress(sale);
+  const { claimed, left, percentClaimed } = getFlashSaleProgress(sale);
   const progressWidth = Math.min(100, Math.max(0, percentClaimed));
 
   const originalPrice = product.price ?? sale.originalProduct?.price ?? 0;
   const flashPrice =
     sale.flashPrice ?? product.flashPrice ?? product.offerPrice ?? originalPrice;
-  const youSave = originalPrice > 0 ? originalPrice - flashPrice : 0;
   const discountPercent =
-    originalPrice > 0 ? Math.round((youSave / originalPrice) * 100) : 0;
+    originalPrice > 0
+      ? Math.round(((originalPrice - flashPrice) / originalPrice) * 100)
+      : 0;
   const description =
     truncate(
       sanitize(product.shortDescription) ??
@@ -46,15 +47,15 @@ export default function FlashSlide({ sale }: FlashSlideProps) {
         sanitize(sale.originalProduct?.shortDescription) ??
         sanitize(sale.originalProduct?.detailedDescription),
     ) ||
-    "Limited-time offer. Claim yours before the timer hits zero.";
+    "Limited-time offer. Grab it while it's available.";
 
   return (
     <Link
       href={link}
       prefetch={false}
-      className="group flex h-full w-full flex-col gap-5 rounded-3xl border border-rose-100 bg-gradient-to-br from-white via-rose-50 to-orange-50 p-5 shadow transition hover:border-rose-200 hover:shadow-lg"
+      className="group flex h-full w-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
     >
-      <div className="relative overflow-hidden rounded-2xl bg-white">
+      <div className="relative overflow-hidden rounded-xl bg-slate-50">
         <Image
           className="h-60 w-full object-cover transition duration-300 group-hover:scale-105"
           src={product.thumbnail ?? product.images?.[0] ?? "/placeholder-image.jpg"}
@@ -62,71 +63,65 @@ export default function FlashSlide({ sale }: FlashSlideProps) {
           width={640}
           height={480}
         />
-        <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-rose-600/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+        <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-white/30 bg-slate-900/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
           <ShoppingBagIcon className="h-4 w-4" aria-hidden />
-          Limited Deal
+          Flash Deal
         </div>
-        <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-rose-600 backdrop-blur">
+        <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700 backdrop-blur">
           <span>{countdown.label}</span>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-slate-900 line-clamp-2">
+      <div className="space-y-2">
+        <h3 className="line-clamp-2 text-lg font-semibold text-slate-900">
           {product.name ?? "Flash sale product"}
         </h3>
-        <p className="text-sm leading-relaxed text-slate-600">{description}</p>
+        {description && (
+          <p className="line-clamp-2 text-sm text-slate-500">{description}</p>
+        )}
 
-        <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Flash price
             </p>
-            <p className="text-2xl font-bold text-rose-600">
+            <p className="text-2xl font-bold text-slate-900">
               <Price amount={flashPrice} />
             </p>
           </div>
           {originalPrice > flashPrice && (
-            <div className="flex flex-col text-sm text-slate-500">
-              <span className="line-through">
+            <div className="text-right text-sm text-slate-500">
+              <span className="block line-through">
                 <Price amount={originalPrice} />
               </span>
               {discountPercent > 0 && (
-                <span className="inline-flex items-center gap-1 text-emerald-600">
-                  Save <Price amount={youSave} /> ({discountPercent}% off)
+                <span className="text-xs font-semibold text-emerald-600">
+                  Save {discountPercent}%
                 </span>
               )}
             </div>
           )}
         </div>
 
-        <div className="rounded-2xl border border-rose-100 bg-white/70 p-4 shadow-inner">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <span>
-              Claimed {claimed}
-              {total > 0 ? ` / ${total}` : ""}
-            </span>
-            <span className="text-rose-600">
+        <div className="rounded-xl border border-slate-200/60 bg-slate-50 p-4">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <span>Claimed {claimed}</span>
+            <span className="text-slate-700">
               {left > 0 ? `${left} left` : "Almost gone"}
             </span>
           </div>
-          <div className="mt-3 h-2.5 w-full rounded-full bg-rose-100">
+          <div className="mt-3 h-2 w-full rounded-full bg-white/80">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400 transition-all"
+              className="h-full rounded-full bg-slate-900 transition-all"
               style={{ width: `${progressWidth}%` }}
             />
           </div>
-          {sale.maxUnitsPerUser && sale.maxUnitsPerUser > 0 && (
-            <p className="mt-3 text-xs text-slate-500">
-              Max {sale.maxUnitsPerUser} per customer. Stock updates live as shoppers claim the deal.
-            </p>
-          )}
         </div>
       </div>
 
-      <span className="mt-auto inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white shadow transition group-hover:bg-rose-500">
+      <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
         Shop this deal
-        <ArrowRightIcon className="h-4 w-4" aria-hidden />
+        <ArrowRightIcon className="h-4 w-4 text-slate-500 transition group-hover:translate-x-1" aria-hidden />
       </span>
     </Link>
   );

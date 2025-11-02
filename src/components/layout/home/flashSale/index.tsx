@@ -15,7 +15,6 @@ import {
   isFlashSaleActive,
   useFlashSales,
 } from "@/hooks/use-flash-sales";
-import { useCountdown } from "@/hooks/use-countdown";
 
 import FlashSlide from "./flash-slide";
 
@@ -65,9 +64,6 @@ export default function FlashSale() {
     },
     activeSales.length > 1 ? [autoplayRef.current] : [],
   );
-
-  const firstSale = activeSales[0];
-  const countdown = useCountdown(firstSale?.endDate ?? null);
 
   const handlePrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -131,56 +127,43 @@ export default function FlashSale() {
 
   return (
     <section
-      className={`${containerClasses} flex w-full max-w-none flex-col gap-6 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur`}
+      className={`${containerClasses} flex w-full max-w-none flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm`}
     >
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-3">
-          <p className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-orange-500 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow">
-            <SparklesIcon className="h-4 w-4" aria-hidden />
-            Flash Sale
-          </p>
-          <h2 className="text-2xl font-semibold text-slate-900">
-            Grab these limited-time steals
-          </h2>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600">
+            <SparklesIcon className="h-5 w-5" aria-hidden />
+          </span>
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Flash Sale
+            </p>
+            <h2 className="text-xl font-semibold text-slate-900">
+              Hand-picked limited deals
+            </h2>
+          </div>
         </div>
 
-        <div className="flex w-full flex-col gap-4 text-sm sm:flex-row sm:items-center sm:justify-end">
-          <div className="flex flex-col items-start gap-1 text-left sm:items-end sm:text-right">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Ends in
-            </span>
-            <span
-              className={mergeClasses(
-                "inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold",
-                countdown.expired
-                  ? "bg-slate-100 text-slate-500"
-                  : "bg-rose-100 text-rose-600",
-              )}
+        {canNavigate && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous flash deal"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
             >
-              {countdown.label}
-            </span>
+              <ChevronLeftIcon className="h-5 w-5" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next flash deal"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+            >
+              <ChevronRightIcon className="h-5 w-5" aria-hidden />
+            </button>
           </div>
-          {canNavigate && (
-            <div className="flex items-center gap-2 sm:justify-end">
-              <button
-                type="button"
-                onClick={handlePrev}
-                aria-label="Previous flash deal"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-rose-300 hover:text-rose-600"
-              >
-                <ChevronLeftIcon className="h-5 w-5" aria-hidden />
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                aria-label="Next flash deal"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-rose-300 hover:text-rose-600"
-              >
-                <ChevronRightIcon className="h-5 w-5" aria-hidden />
-              </button>
-            </div>
-          )}
-        </div>
+        )}
       </header>
 
       <div className="w-full overflow-hidden" ref={emblaRef}>
@@ -188,7 +171,7 @@ export default function FlashSale() {
           {activeSales.map((sale) => (
             <div
               key={sale.flashSaleId}
-              className="min-w-0 shrink-0 grow-0 basis-full snap-start md:basis-5/6 lg:basis-2/3 xl:basis-1/2 2xl:basis-2/5"
+              className="min-w-0 shrink-0 grow-0 basis-full snap-start"
             >
               <FlashSlide sale={sale} />
             </div>
