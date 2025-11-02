@@ -162,7 +162,8 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
   if (images.length === 0) return null;
 
   const isZoomEnabled = images.length > 0;
-  const emblaResetStyles: CSSProperties = {
+  type CSSVariableStyles = CSSProperties & { [key: `--${string}`]: string };
+  const emblaResetStyles: CSSVariableStyles = {
     "--slide-spacing": "0px",
     "--slide-size": "100%",
   };
