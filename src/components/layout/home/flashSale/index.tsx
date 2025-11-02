@@ -19,7 +19,7 @@ import { useCountdown } from "@/hooks/use-countdown";
 
 import FlashSlide from "./flash-slide";
 
-const containerClasses = "col-span-full lg:col-span-2 2xl:col-span-2";
+const containerClasses = "col-span-full w-full lg:col-span-2 2xl:col-span-2";
 
 const FlashSaleSkeleton = () => (
   <section
@@ -128,22 +128,24 @@ export default function FlashSale() {
     );
   }
 
+  const canNavigate = activeSales.length > 1;
+
   return (
     <section
-      className={`${containerClasses} flex flex-col gap-6 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur`}
+      className={`${containerClasses} flex w-full flex-col gap-6 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur`}
     >
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-3">
           <p className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-orange-500 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow">
             <SparklesIcon className="h-4 w-4" aria-hidden />
             Flash Sale
           </p>
-          <h2 className="mt-3 text-2xl font-semibold text-slate-900">
+          <h2 className="text-2xl font-semibold text-slate-900">
             Grab these limited-time steals
           </h2>
         </div>
 
-        <div className="flex flex-col items-end gap-2 text-right text-sm">
+        <div className="flex flex-col gap-3 text-sm sm:items-end sm:text-right">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             Ends in
           </span>
@@ -157,33 +159,35 @@ export default function FlashSale() {
           >
             {countdown.label}
           </span>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="Previous flash deal"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-rose-300 hover:text-rose-600"
-            >
-              <ChevronLeftIcon className="h-5 w-5" aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="Next flash deal"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-rose-300 hover:text-rose-600"
-            >
-              <ChevronRightIcon className="h-5 w-5" aria-hidden />
-            </button>
-          </div>
+          {canNavigate && (
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={handlePrev}
+                aria-label="Previous flash deal"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-rose-300 hover:text-rose-600"
+              >
+                <ChevronLeftIcon className="h-5 w-5" aria-hidden />
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                aria-label="Next flash deal"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-rose-300 hover:text-rose-600"
+              >
+                <ChevronRightIcon className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-6">
+      <div className="w-full overflow-hidden" ref={emblaRef}>
+        <div className="flex w-full gap-6">
           {activeSales.map((sale) => (
             <div
               key={sale.flashSaleId}
-              className="min-w-0 flex-[0_0_100%] md:flex-[0_0_calc(50%-12px)] xl:flex-[0_0_calc(100%/3-16px)]"
+              className="min-w-0 shrink-0 grow-0 basis-full snap-start md:basis-1/2 xl:basis-1/3"
             >
               <FlashSlide sale={sale} />
             </div>

@@ -39,12 +39,20 @@ export default function FlashSlide({ sale }: FlashSlideProps) {
   const youSave = originalPrice > 0 ? originalPrice - flashPrice : 0;
   const discountPercent =
     originalPrice > 0 ? Math.round((youSave / originalPrice) * 100) : 0;
+  const description =
+    truncate(
+      sanitize(product.shortDescription) ??
+        sanitize(product.detailedDescription) ??
+        sanitize(sale.originalProduct?.shortDescription) ??
+        sanitize(sale.originalProduct?.detailedDescription),
+    ) ||
+    "Limited-time offer. Claim yours before the timer hits zero.";
 
   return (
     <Link
       href={link}
       prefetch={false}
-      className="group flex h-full flex-col gap-5 rounded-3xl border border-rose-100 bg-gradient-to-br from-white via-rose-50 to-orange-50 p-5 shadow hover:border-rose-200 hover:shadow-lg"
+      className="group flex h-full w-full flex-col gap-5 rounded-3xl border border-rose-100 bg-gradient-to-br from-white via-rose-50 to-orange-50 p-5 shadow transition hover:border-rose-200 hover:shadow-lg"
     >
       <div className="relative overflow-hidden rounded-2xl bg-white">
         <Image
@@ -67,9 +75,7 @@ export default function FlashSlide({ sale }: FlashSlideProps) {
         <h3 className="text-lg font-semibold text-slate-900 line-clamp-2">
           {product.name ?? "Flash sale product"}
         </h3>
-        <p className="text-sm leading-relaxed text-slate-600">
-          {truncate(sanitize(product.shortDescription) ?? product.description)}
-        </p>
+        <p className="text-sm leading-relaxed text-slate-600">{description}</p>
 
         <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
           <div>
