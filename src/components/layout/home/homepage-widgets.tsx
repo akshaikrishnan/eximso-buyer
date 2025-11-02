@@ -34,12 +34,16 @@ export default function HomePageWidgets() {
         );
 
         if (!response.ok) {
-          throw new Error(`Failed to load homepage widgets: ${response.status}`);
+          throw new Error(
+            `Failed to load homepage widgets: ${response.status}`
+          );
         }
 
         const payload = await response.json();
         const items: HomeWidgetResponse[] =
-          payload?.result ?? payload?.data ?? [];
+          payload?.result?.layouts ?? payload?.data ?? [];
+
+        console.log(items, "response widgets");
 
         if (isMounted) {
           setWidgets(items);
@@ -47,7 +51,9 @@ export default function HomePageWidgets() {
       } catch (err) {
         console.error("Unable to load homepage widgets", err);
         if (isMounted) {
-          setError("We couldn't load the latest highlights. Please try again later.");
+          setError(
+            "We couldn't load the latest highlights. Please try again later."
+          );
         }
       } finally {
         if (isMounted) {
@@ -65,14 +71,16 @@ export default function HomePageWidgets() {
 
   const availableWidgets = useMemo(
     () =>
-      Array.isArray(widgets) ? widgets.filter((widget) => {
-        if (homeBentoGrids[widget.widget]) {
-          return true;
-        }
+      Array.isArray(widgets)
+        ? widgets.filter((widget) => {
+            if (homeBentoGrids[widget.widget]) {
+              return true;
+            }
 
-        console.warn(`Unknown homepage widget received: ${widget.widget}`);
-        return false;
-      }) : [],
+            console.warn(`Unknown homepage widget received: ${widget.widget}`);
+            return false;
+          })
+        : [],
     [widgets]
   );
 
