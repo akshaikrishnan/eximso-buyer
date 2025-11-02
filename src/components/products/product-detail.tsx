@@ -138,7 +138,9 @@ interface DimensionHighlight {
 
 type ProductWithRequiredId = ProductShape & { _id: string };
 
-type ProductEntry = ProductShape | { product?: ProductShape | null | undefined };
+type ProductEntry =
+  | ProductShape
+  | { product?: ProductShape | null | undefined };
 
 type ProductListResponse = {
   result?: { data?: ProductEntry[]; items?: ProductEntry[] };
@@ -148,7 +150,9 @@ type ProductListResponse = {
 
 const DESCRIPTION_CLAMP_HEIGHT = 512;
 
-function classNames(...classes: Array<string | false | null | undefined>): string {
+function classNames(
+  ...classes: Array<string | false | null | undefined>
+): string {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -203,7 +207,9 @@ function pickProducts(payload: unknown): ProductWithRequiredId[] {
       return entry as ProductShape;
     })
     .filter((item): item is ProductWithRequiredId =>
-      Boolean(item && typeof item._id === "string" && item._id.trim().length > 0)
+      Boolean(
+        item && typeof item._id === "string" && item._id.trim().length > 0
+      )
     );
 }
 
@@ -218,12 +224,16 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   const categoryName = product.category?.name ?? product.categoryName;
   const subcategoryName = product.subcategory?.name ?? product.subcategoryName;
-  const categorySlug = product.category?.slug ?? (categoryName ? toSlug(categoryName) : "");
+  const categorySlug =
+    product.category?.slug ?? (categoryName ? toSlug(categoryName) : "");
   const subcategorySlug =
-    product.subcategory?.slug ?? (subcategoryName ? toSlug(subcategoryName) : "");
+    product.subcategory?.slug ??
+    (subcategoryName ? toSlug(subcategoryName) : "");
   const categoryPath = categorySlug ? `/products/${categorySlug}` : undefined;
   const subcategoryPath =
-    categorySlug && subcategorySlug ? `/products/${categorySlug}/${subcategorySlug}` : undefined;
+    categorySlug && subcategorySlug
+      ? `/products/${categorySlug}/${subcategorySlug}`
+      : undefined;
   const productId = product._id ?? product.id;
 
   const reviewsQuery = useProductReviews(productId, 6);
@@ -320,11 +330,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     }
 
     if (product.countryOfOrigin) {
-      sections.push({ name: "Country of Origin", data: [product.countryOfOrigin] });
+      sections.push({
+        name: "Country of Origin",
+        data: [product.countryOfOrigin],
+      });
     }
 
     return sections;
-  }, [categoryName, subcategoryName, product.brand, product.countryOfOrigin, product.description, product.material]);
+  }, [
+    categoryName,
+    subcategoryName,
+    product.brand,
+    product.countryOfOrigin,
+    product.description,
+    product.material,
+  ]);
 
   const quickFacts = useMemo(() => {
     const facts: Array<QuickFact | null> = [
@@ -387,7 +407,17 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     ];
 
     return facts.filter((fact): fact is QuickFact => fact !== null);
-  }, [categoryName, product.brand, product.countryOfOrigin, product.manufacturer, product.minimumOrderQuantity, product.seller?.country, product.seller?.name, product.sku, product.uom]);
+  }, [
+    categoryName,
+    product.brand,
+    product.countryOfOrigin,
+    product.manufacturer,
+    product.minimumOrderQuantity,
+    product.seller?.country,
+    product.seller?.name,
+    product.sku,
+    product.uom,
+  ]);
 
   const emiEligibleAmount = useMemo(() => {
     if (typeof product.offerPrice === "number" && product.offerPrice > 0) {
@@ -433,10 +463,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   const catSlug = toSlug(categoryName);
 
-  const {
-    data: related = [],
-    isLoading: relatedLoading,
-  } = useQuery<ProductWithRequiredId[]>({
+  const { data: related = [], isLoading: relatedLoading } = useQuery<
+    ProductWithRequiredId[]
+  >({
     queryKey: ["products", "related", catSlug, product._id],
     enabled: Boolean(catSlug),
     staleTime: 1000 * 60 * 5,
@@ -448,22 +477,26 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         },
       });
 
-      return pickProducts(response.data).filter((item) => item._id !== product._id);
+      return pickProducts(response.data).filter(
+        (item) => item._id !== product._id
+      );
     },
   });
 
-  const {
-    data: recent = [],
-    isLoading: recentLoading,
-  } = useQuery<ProductEntry[]>({
+  const { data: recent = [], isLoading: recentLoading } = useQuery<
+    ProductEntry[]
+  >({
     queryKey: ["products", "recent"],
     staleTime: 1000 * 60 * 5,
     queryFn: async () => {
-      const response = await api.get<ProductListResponse>(`${endpoints.products}/recent`, {
-        params: {
-          limit: 10,
-        },
-      });
+      const response = await api.get<ProductListResponse>(
+        `${endpoints.products}/recent`,
+        {
+          params: {
+            limit: 13,
+          },
+        }
+      );
 
       return extractProductEntries(response.data).filter((entry) => {
         const candidate =
@@ -484,7 +517,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         return entry as ProductShape;
       })
       .filter((item): item is ProductWithRequiredId =>
-        Boolean(item && typeof item._id === "string" && item._id.trim().length > 0)
+        Boolean(
+          item && typeof item._id === "string" && item._id.trim().length > 0
+        )
       );
   }, [recent]);
 
@@ -507,8 +542,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
             <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-xl font-semibold text-slate-900">Dimensions at a Glance</h2>
-                <SparklesIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
+                <h2 className="text-xl font-semibold text-slate-900">
+                  Dimensions at a Glance
+                </h2>
+                <SparklesIcon
+                  className="h-6 w-6 text-indigo-500"
+                  aria-hidden="true"
+                />
               </div>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {dimensionHighlights.map(({ key, label, unit, icon: Icon }) => {
@@ -527,8 +567,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                         <Icon className="h-6 w-6" aria-hidden="true" />
                       </span>
                       <div>
-                        <p className="text-sm font-medium text-slate-600">{label}</p>
-                        <p className="text-lg font-semibold text-slate-900">{formattedValue}</p>
+                        <p className="text-sm font-medium text-slate-600">
+                          {label}
+                        </p>
+                        <p className="text-lg font-semibold text-slate-900">
+                          {formattedValue}
+                        </p>
                       </div>
                     </div>
                   );
@@ -541,8 +585,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <article className="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm backdrop-blur">
               <header className="flex flex-col gap-4">
                 <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                  {categoryName && (
-                    categoryPath ? (
+                  {categoryName &&
+                    (categoryPath ? (
                       <Link
                         href={categoryPath}
                         className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
@@ -555,32 +599,40 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                         <CubeIcon className="h-4 w-4" aria-hidden="true" />
                         {categoryName}
                       </span>
-                    )
-                  )}
-                  {subcategoryName && (
-                    subcategoryPath ? (
+                    ))}
+                  {subcategoryName &&
+                    (subcategoryPath ? (
                       <Link
                         href={subcategoryPath}
                         className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"
                       >
-                        <Squares2X2Icon className="h-4 w-4" aria-hidden="true" />
+                        <Squares2X2Icon
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
                         {subcategoryName}
                       </Link>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-indigo-700">
-                        <Squares2X2Icon className="h-4 w-4" aria-hidden="true" />
+                        <Squares2X2Icon
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
                         {subcategoryName}
                       </span>
-                    )
-                  )}
+                    ))}
                 </div>
 
                 <div>
-                  <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl">{product.name}</h1>
+                  <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl">
+                    {product.name}
+                  </h1>
                   <div
                     className="prose prose-sm mt-3 max-w-none text-base leading-relaxed text-slate-600"
                     dangerouslySetInnerHTML={{
-                      __html: product.shortDescription ?? "No short description provided.",
+                      __html:
+                        product.shortDescription ??
+                        "No short description provided.",
                     }}
                   />
                 </div>
@@ -589,12 +641,15 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <div className="mt-6 flex flex-col gap-4">
                 <div className="flex flex-wrap items-end gap-4">
                   <div>
-                    <p className="text-sm font-medium uppercase tracking-wide text-slate-500">Price</p>
+                    <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+                      Price
+                    </p>
                     <p className="text-4xl font-semibold text-slate-900">
                       <span className="text-indigo-600">
                         <Price
                           amount={
-                            product.discountPercentage && product.discountPercentage > 0
+                            product.discountPercentage &&
+                            product.discountPercentage > 0
                               ? product.offerPrice ?? product.price
                               : product.price
                           }
@@ -603,16 +658,17 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     </p>
                   </div>
 
-                  {product.discountPercentage && product.discountPercentage > 0 && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg text-slate-400 line-through">
-                        <Price amount={product.price} />
-                      </span>
-                      <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">
-                        {product.discountPercentage}% OFF
-                      </span>
-                    </div>
-                  )}
+                  {product.discountPercentage &&
+                    product.discountPercentage > 0 && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg text-slate-400 line-through">
+                          <Price amount={product.price} />
+                        </span>
+                        <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">
+                          {product.discountPercentage}% OFF
+                        </span>
+                      </div>
+                    )}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -622,7 +678,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                         <StarIcon
                           key={ratingIndex}
                           className={classNames(
-                            averageRating > ratingIndex ? "text-yellow-400" : "text-slate-300",
+                            averageRating > ratingIndex
+                              ? "text-yellow-400"
+                              : "text-slate-300",
                             "h-5 w-5"
                           )}
                           aria-hidden="true"
@@ -663,7 +721,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
               {tagKeywords.length > 0 && (
                 <div className="mt-8">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Tags</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                    Tags
+                  </h3>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {tagKeywords.map((tag) => (
                       <Link
@@ -683,8 +743,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             {quickFacts.length > 0 && (
               <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <ShieldCheckIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
-                  <h2 className="text-lg font-semibold text-slate-900">Quick Facts</h2>
+                  <ShieldCheckIcon
+                    className="h-6 w-6 text-indigo-500"
+                    aria-hidden="true"
+                  />
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Quick Facts
+                  </h2>
                 </div>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   {quickFacts.map(({ label, value, icon: Icon }) => (
@@ -696,8 +761,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                         <Icon className="h-5 w-5" aria-hidden="true" />
                       </span>
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-                        <p className="text-sm font-medium text-slate-800">{value}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          {label}
+                        </p>
+                        <p className="text-sm font-medium text-slate-800">
+                          {value}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -705,14 +774,25 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </section>
             )}
 
-            {emiEligibleAmount > 0 && <PayuEmiCard amount={emiEligibleAmount} />}
+            {emiEligibleAmount > 0 && (
+              <PayuEmiCard amount={emiEligibleAmount} />
+            )}
           </aside>
         </div>
 
-        <section aria-labelledby="details-heading" className="mt-12 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+        <section
+          aria-labelledby="details-heading"
+          className="mt-12 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm"
+        >
           <div className="flex items-center gap-3">
-            <SparklesIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
-            <h2 id="details-heading" className="text-2xl font-semibold text-slate-900">
+            <SparklesIcon
+              className="h-6 w-6 text-indigo-500"
+              aria-hidden="true"
+            />
+            <h2
+              id="details-heading"
+              className="text-2xl font-semibold text-slate-900"
+            >
               Product Story & Specifications
             </h2>
           </div>
@@ -729,7 +809,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                       : ""
                   )}
                   dangerouslySetInnerHTML={{
-                    __html: product.detailedDescription ?? "Full product details coming soon...",
+                    __html:
+                      product.detailedDescription ??
+                      "Full product details coming soon...",
                   }}
                 />
 
@@ -758,7 +840,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
             <div className="space-y-4">
               {specificationSections.length === 0 ? (
-                <p className="text-sm text-slate-500">Additional specifications will be available soon.</p>
+                <p className="text-sm text-slate-500">
+                  Additional specifications will be available soon.
+                </p>
               ) : (
                 specificationSections.map((detail) => (
                   <Disclosure
@@ -779,9 +863,15 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                             {detail.name}
                           </span>
                           {open ? (
-                            <MinusIcon className="h-5 w-5 text-indigo-500" aria-hidden="true" />
+                            <MinusIcon
+                              className="h-5 w-5 text-indigo-500"
+                              aria-hidden="true"
+                            />
                           ) : (
-                            <PlusIcon className="h-5 w-5 text-slate-400" aria-hidden="true" />
+                            <PlusIcon
+                              className="h-5 w-5 text-slate-400"
+                              aria-hidden="true"
+                            />
                           )}
                         </Disclosure.Button>
                         <Disclosure.Panel className="border-t border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700">
@@ -801,20 +891,35 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         </section>
 
         <section id="reviews" className="mt-12">
-          <ProductReviews productId={productId} productName={product.name} reviewsQuery={reviewsQuery} />
+          <ProductReviews
+            productId={productId}
+            productName={product.name}
+            reviewsQuery={reviewsQuery}
+          />
         </section>
 
         {related.length > 0 && (
           <section aria-labelledby="related-heading" className="mt-16">
             <div className="flex items-center gap-3">
-              <SparklesIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
-              <h2 id="related-heading" className="text-2xl font-semibold text-slate-900">Customers also bought</h2>
+              <SparklesIcon
+                className="h-6 w-6 text-indigo-500"
+                aria-hidden="true"
+              />
+              <h2
+                id="related-heading"
+                className="text-2xl font-semibold text-slate-900"
+              >
+                Customers also bought
+              </h2>
             </div>
 
             {!relatedLoading && (
               <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 auto-rows-fr">
                 {related.map((relatedProduct) => (
-                  <RelatedProduct product={relatedProduct} key={relatedProduct._id} />
+                  <RelatedProduct
+                    product={relatedProduct}
+                    key={relatedProduct._id}
+                  />
                 ))}
               </div>
             )}
@@ -824,14 +929,25 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         {normalizedRecentProducts.length > 0 && (
           <section aria-labelledby="recent-heading" className="mt-16 pb-12">
             <div className="flex items-center gap-3">
-              <SparklesIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
-              <h2 id="recent-heading" className="text-2xl font-semibold text-slate-900">Recently Viewed</h2>
+              <SparklesIcon
+                className="h-6 w-6 text-indigo-500"
+                aria-hidden="true"
+              />
+              <h2
+                id="recent-heading"
+                className="text-2xl font-semibold text-slate-900"
+              >
+                Recently Viewed
+              </h2>
             </div>
 
             {!recentLoading && (
               <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 auto-rows-fr">
                 {normalizedRecentProducts.map((recentProduct) => (
-                  <RelatedProduct product={recentProduct} key={recentProduct._id} />
+                  <RelatedProduct
+                    product={recentProduct}
+                    key={recentProduct._id}
+                  />
                 ))}
               </div>
             )}

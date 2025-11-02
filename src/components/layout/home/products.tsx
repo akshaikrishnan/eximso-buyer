@@ -281,7 +281,8 @@ export default function ProductsGrid({
               />
             </div>
           ))}
-          {isFetchingNextPage && hasNextPage &&
+          {isFetchingNextPage &&
+            hasNextPage &&
             Array.from({ length: loadMoreSkeletonCount }).map((_, index) => (
               <ProductCardSkeleton
                 key={`next-page-skeleton-${index}`}
@@ -317,12 +318,14 @@ export default function ProductsGrid({
       )}
 
       {/* End Message */}
-      {!hasNextPage && displayedProducts.length > 0 && (
-        <div className="text-center text-gray-500 mt-6">
-          🎉 <span className="font-medium">You’ve reached the end!</span> No
-          more products to load.
-        </div>
-      )}
+      {!hasNextPage &&
+        !disableInfiniteScroll &&
+        displayedProducts.length > 0 && (
+          <div className="text-center text-gray-500 mt-6">
+            🎉 <span className="font-medium">You’ve reached the end!</span> No
+            more products to load.
+          </div>
+        )}
     </div>
   );
 }
