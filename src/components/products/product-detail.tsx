@@ -36,6 +36,12 @@ import {
 } from "react";
 
 import { useProductReviews } from "@/hooks/use-product-reviews";
+import {
+  getFlashSaleProgress,
+  isFlashSaleActive,
+  useFlashSaleForProduct,
+} from "@/hooks/use-flash-sales";
+import { useCountdown } from "@/hooks/use-countdown";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { Price } from "../common/price";
@@ -117,6 +123,15 @@ export interface ProductShape {
   description?: string;
   categoryName?: string;
   subcategoryName?: string;
+  flashSaleId?: string;
+  flashSaleParent?: string;
+  flashSaleHidden?: boolean;
+  isFlashSaleVariant?: boolean;
+  flashPrice?: number;
+  totalUnits?: number;
+  claimedUnits?: number;
+  maxUnitsPerUser?: number;
+  endDate?: string;
 }
 
 interface ProductDetailProps {
@@ -225,6 +240,75 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const subcategoryPath =
     categorySlug && subcategorySlug ? `/products/${categorySlug}/${subcategorySlug}` : undefined;
   const productId = product._id ?? product.id;
+
+  const { sale: flashSale } = useFlashSaleForProduct(
+    productId,
+    product.flashSaleId ?? null,
+  );
+
+  const flashSaleActive = useMemo(() => {
+    if (!flashSale) return false;
+    if (product.flashSaleHidden) return false;
+    if (flashSale.product?.flashSaleHidden) return false;
+    return isFlashSaleActive(flashSale);
+  }, [flashSale, product.flashSaleHidden]);
+
+  const flashSaleCountdown = useCountdown(
+    flashSaleActive ? flashSale?.endDate ?? null : null,
+  );
+
+  const flashSaleProgress = useMemo(
+    () => getFlashSaleProgress(flashSaleActive ? flashSale : undefined),
+    [flashSale, flashSaleActive],
+  );
+
+  const priceInfo = useMemo(() => {
+    const basePrice = product.price ?? 0;
+    const offerPrice =
+      product.offerPrice && product.offerPrice > 0
+        ? product.offerPrice
+        : basePrice;
+
+    if (flashSaleActive && flashSale) {
+      const flashSalePrice =
+        flashSale.flashPrice ??
+        flashSale.product?.flashPrice ??
+        product.flashPrice ??
+        offerPrice;
+
+      const original = basePrice > 0 ? basePrice : flashSalePrice;
+      const savings = original > 0 ? Math.max(0, original - flashSalePrice) : 0;
+      const discountPercent =
+        original > 0 ? Math.round((savings / original) * 100) : 0;
+
+      return {
+        displayPrice: flashSalePrice,
+        originalPrice: original,
+        discountPercent,
+        isFlashSale: true,
+        savings,
+      } as const;
+    }
+
+    const hasDiscount =
+      typeof product.discountPercentage === "number" &&
+      product.discountPercentage > 0 &&
+      offerPrice < basePrice;
+
+    const savings = hasDiscount && basePrice > 0 ? basePrice - offerPrice : 0;
+    const discountPercent =
+      hasDiscount && basePrice > 0
+        ? Math.round((savings / basePrice) * 100)
+        : 0;
+
+    return {
+      displayPrice: hasDiscount ? offerPrice : basePrice,
+      originalPrice: basePrice,
+      discountPercent,
+      isFlashSale: false,
+      savings,
+    } as const;
+  }, [flashSale, flashSaleActive, product.discountPercentage, product.flashPrice, product.offerPrice, product.price]);
 
   const reviewsQuery = useProductReviews(productId, 6);
   const reviewStats = reviewsQuery.data?.pages?.[0]?.stats;
@@ -589,31 +673,96 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <div className="mt-6 flex flex-col gap-4">
                 <div className="flex flex-wrap items-end gap-4">
                   <div>
-                    <p className="text-sm font-medium uppercase tracking-wide text-slate-500">Price</p>
+                    <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+                      {priceInfo.isFlashSale ? "Flash Price" : "Price"}
+                    </p>
                     <p className="text-4xl font-semibold text-slate-900">
-                      <span className="text-indigo-600">
-                        <Price
-                          amount={
-                            product.discountPercentage && product.discountPercentage > 0
-                              ? product.offerPrice ?? product.price
-                              : product.price
-                          }
-                        />
+                      <span
+                        className={classNames(
+                          priceInfo.isFlashSale ? "text-rose-600" : "text-indigo-600",
+                        )}
+                      >
+                        <Price amount={priceInfo.displayPrice} />
                       </span>
                     </p>
                   </div>
 
-                  {product.discountPercentage && product.discountPercentage > 0 && (
-                    <div className="flex items-center gap-3">
+                  {priceInfo.discountPercent > 0 && (
+                    <div className="flex flex-col items-start gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:gap-3">
                       <span className="text-lg text-slate-400 line-through">
-                        <Price amount={product.price} />
+                        <Price amount={priceInfo.originalPrice} />
                       </span>
-                      <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-600">
-                        {product.discountPercentage}% OFF
+                      <span
+                        className={classNames(
+                          "inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold",
+                          priceInfo.isFlashSale
+                            ? "bg-rose-100 text-rose-600"
+                            : "bg-red-50 text-red-600",
+                        )}
+                      >
+                        {priceInfo.isFlashSale ? "Flash Deal" : "Save"} {priceInfo.discountPercent}% OFF
                       </span>
                     </div>
                   )}
                 </div>
+
+                {priceInfo.savings > 0 && (
+                  <p className="text-sm font-semibold text-emerald-600">
+                    You save <Price amount={priceInfo.savings} />
+                    {priceInfo.isFlashSale ? " during this flash sale." : "."}
+                  </p>
+                )}
+
+                {flashSaleActive && (
+                  <div className="mt-4 space-y-4 rounded-2xl border border-rose-200 bg-rose-50/70 p-4 text-sm text-slate-700">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <span className="inline-flex items-center gap-2 font-semibold text-rose-600">
+                        <SparklesIcon className="h-5 w-5" aria-hidden />
+                        Flash sale live
+                      </span>
+                      <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-rose-600 shadow-sm">
+                        Ends in {flashSaleCountdown.label}
+                      </span>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Claimed</p>
+                        <p className="text-lg font-semibold text-rose-600">
+                          {flashSaleProgress.claimed}
+                          {flashSaleProgress.total > 0 ? ` / ${flashSaleProgress.total}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-end justify-between gap-3 sm:justify-end">
+                        {flashSale?.maxUnitsPerUser && flashSale.maxUnitsPerUser > 0 && (
+                          <p className="text-xs text-slate-500">
+                            Max {flashSale.maxUnitsPerUser} per customer
+                          </p>
+                        )}
+                        <p className="text-sm font-semibold text-rose-600">
+                          {flashSaleProgress.left > 0
+                            ? `${flashSaleProgress.left} left`
+                            : "Almost gone"}
+                        </p>
+                      </div>
+                    </div>
+                      <div className="h-2 w-full rounded-full bg-rose-100">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              Math.max(0, flashSaleProgress.percentClaimed),
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    <p className="text-xs text-slate-600">
+                      {flashSaleProgress.left > 0
+                        ? `Hurry! Only ${flashSaleProgress.left} units remain at the flash price.`
+                        : "Customers are checking out now—secure yours before it's gone."}
+                    </p>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                   <div className="flex items-center gap-3">
