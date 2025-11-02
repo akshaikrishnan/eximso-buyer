@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useRouter } from "next/navigation";
+import { redirectToLogin } from "@/lib/utils";
 
 type ToggleWishlistVariables = {
   shouldAdd: boolean;
@@ -36,14 +37,23 @@ export const useAddToWishlist = (product: WishlistProductShape) => {
           ? "Error while adding to wishlist"
           : "Error while removing from wishlist",
         description: error.response?.data?.message || "Something went wrong",
-        action: (
-          <ToastAction
-            onClick={() => router.push("/profile/my-wishlist")}
-            altText="Go to Wishlist"
-          >
-            Show Wishlist
-          </ToastAction>
-        ),
+        action:
+          //show login if the error is unauthorized
+          error.response?.status === 401 ? (
+            <ToastAction
+              onClick={() => redirectToLogin({})}
+              altText="Go to Login"
+            >
+              Login
+            </ToastAction>
+          ) : (
+            <ToastAction
+              onClick={() => router.push("/profile/my-wishlist")}
+              altText="Go to Wishlist"
+            >
+              Show Wishlist
+            </ToastAction>
+          ),
       });
     },
     onSuccess: (_data, { shouldAdd }) => {

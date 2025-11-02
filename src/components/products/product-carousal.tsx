@@ -189,7 +189,7 @@ export default function ProductGallery({
               {images.map((image, index) => (
                 <div
                   key={image}
-                  className="embla__slide shrink-0 min-w-[25%] lg:min-w-full"
+                  className="embla__slide shrink-0 min-w-[25%] lg:min-w-full max-w-32"
                 >
                   <ThumbButton
                     selected={index === selectedIndex}
