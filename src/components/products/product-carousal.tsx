@@ -5,7 +5,9 @@ import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
-function classNames(...classes: Array<string | false | null | undefined>): string {
+function classNames(
+  ...classes: Array<string | false | null | undefined>
+): string {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -31,8 +33,12 @@ const Magnifier = ({
   const handleMouseMove = (
     e: React.MouseEvent<HTMLImageElement, MouseEvent>
   ) => {
-    const { left, top, width: rectWidth, height: rectHeight } =
-      e.currentTarget.getBoundingClientRect();
+    const {
+      left,
+      top,
+      width: rectWidth,
+      height: rectHeight,
+    } = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - left;
     const y = e.clientY - top;
     const xPercentage = (x / rectWidth) * 100;
@@ -62,18 +68,17 @@ const Magnifier = ({
         className="h-full w-full object-contain"
         priority
       />
-      {isHovering &&
-        isZoomEnabled && (
-          <div
-            className="pointer-events-none absolute inset-0 hidden border-4 border-indigo-500/60 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100 lg:block"
-            style={{
-              backgroundImage: `url(${src})`,
-              backgroundPosition: `${position.x}% ${position.y}%`,
-              backgroundSize,
-              backgroundRepeat: "no-repeat",
-            }}
-          />
-        )}
+      {isHovering && isZoomEnabled && (
+        <div
+          className="pointer-events-none absolute inset-0 hidden border-4 border-indigo-500/60 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100 lg:block"
+          style={{
+            backgroundImage: `url(${src})`,
+            backgroundPosition: `${position.x}% ${position.y}%`,
+            backgroundSize,
+            backgroundRepeat: "no-repeat",
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -112,14 +117,17 @@ interface ProductGalleryProps {
   productName: string;
 }
 
-export default function ProductGallery({ images, productName }: ProductGalleryProps) {
+export default function ProductGallery({
+  images,
+  productName,
+}: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [mainEmblaRef, mainEmblaApi] = useEmblaCarousel({ loop: false });
   const enableThumbCarousel = images.length > 4;
   const [thumbEmblaRef, thumbEmblaApi] = useEmblaCarousel({
     containScroll: "keepSnaps",
     dragFree: true,
-    slidesToScroll: 1,
+    slidesToScroll: 5,
     align: "start",
   });
 
@@ -170,7 +178,7 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:sticky lg:top-24 lg:grid-cols-[minmax(0,128px)_minmax(0,1fr)] lg:items-start">
-      <div className="order-2 w-full lg:order-1 lg:max-w-[140px]">
+      <div className="order-2 w-full lg:order-1 lg:max-w-[140px] overflow-x-hidden">
         {enableThumbCarousel ? (
           <div
             className="embla rounded-3xl border border-slate-200 bg-slate-50/90 px-3 py-3 shadow-sm lg:max-h-[520px] lg:overflow-y-auto"
@@ -179,7 +187,10 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
           >
             <div className="embla__container flex gap-3 lg:flex-col lg:gap-4">
               {images.map((image, index) => (
-                <div key={image} className="embla__slide shrink-0 min-w-[25%] lg:min-w-full">
+                <div
+                  key={image}
+                  className="embla__slide shrink-0 min-w-[25%] lg:min-w-full"
+                >
                   <ThumbButton
                     selected={index === selectedIndex}
                     onClick={() => onThumbClick(index)}
@@ -255,7 +266,10 @@ export const ProductGalleryPlaceholder = () => (
   <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,128px)_minmax(0,1fr)] lg:items-start">
     <div className="hidden lg:block lg:max-w-[140px] space-y-3">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="h-24 w-full rounded-2xl bg-slate-200/70 animate-pulse" />
+        <div
+          key={index}
+          className="h-24 w-full rounded-2xl bg-slate-200/70 animate-pulse"
+        />
       ))}
     </div>
 
@@ -263,7 +277,10 @@ export const ProductGalleryPlaceholder = () => (
 
     <div className="mt-4 flex items-center justify-center gap-3 lg:hidden">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="h-20 w-20 rounded-2xl bg-slate-200/80 animate-pulse" />
+        <div
+          key={index}
+          className="h-20 w-20 rounded-2xl bg-slate-200/80 animate-pulse"
+        />
       ))}
     </div>
   </div>
