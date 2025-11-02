@@ -9,7 +9,8 @@ function HeroBanner({ banner }: { banner: BentoBanner }) {
   return (
     <Link
       href={banner.linkUrl || "#"}
-      className="group relative flex h-full min-h-[260px] w-full overflow-hidden rounded-2xl bg-muted/40"
+      className="group relative block w-full overflow-hidden rounded-2xl bg-muted/40
+                 aspect-[4/3] sm:aspect-[16/9] lg:aspect-[21/9]"
     >
       <Image
         src={banner.image}
@@ -43,7 +44,7 @@ export default function ThreeProductHeroBento({
   banners,
 }: BentoGridProps) {
   const heroBanner = (banners ?? [])[0];
-  const spotlightProducts: BentoProduct[] = (products ?? []).slice(0, 3);
+  const spotlightProducts: BentoProduct[] = (products ?? []).slice(0, 4); // 2x2
 
   return (
     <section className="space-y-4">
@@ -54,21 +55,26 @@ export default function ThreeProductHeroBento({
           </h2>
         </header>
       )}
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <div>
+
+      {/* 2 columns on lg: left banner, right 2x2 grid */}
+      <div className="grid gap-4 lg:grid-cols-2 items-stretch">
+        <div className="flex">
           {heroBanner ? (
             <HeroBanner banner={heroBanner} />
           ) : (
-            <div className="flex h-full min-h-[260px] items-center justify-center rounded-2xl border border-dashed border-muted-foreground/30 text-sm text-muted-foreground">
+            <div className="flex h-full min-h-[220px] w-full items-center justify-center rounded-2xl border border-dashed border-muted-foreground/30 text-sm text-muted-foreground">
               No hero banner available.
             </div>
           )}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          {spotlightProducts.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
-          {spotlightProducts.length === 0 && (
+
+        {/* Ensure 2x2 on desktop */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
+          {spotlightProducts.length > 0 ? (
+            spotlightProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))
+          ) : (
             <div className="flex h-full min-h-[200px] items-center justify-center rounded-xl border border-dashed border-muted-foreground/30 text-sm text-muted-foreground">
               No products available.
             </div>
