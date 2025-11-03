@@ -1,10 +1,23 @@
-import { BuildingStorefrontIcon, CubeIcon, GlobeAsiaAustraliaIcon } from "@heroicons/react/24/outline";
+"use client";
+
+import {
+  BuildingStorefrontIcon,
+  CubeIcon,
+  GlobeAsiaAustraliaIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
 import { StarIcon, TagIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useMemo } from "react";
 import mergeClasses from "@/lib/utils/classNames";
 import { Price } from "./price";
+import {
+  getFlashSaleProgress,
+  isFlashSaleActive,
+  useFlashSaleForProduct,
+} from "@/hooks/use-flash-sales";
+import { useCountdown } from "@/hooks/use-countdown";
 
 type ProductCardVariant = "grid" | "list";
 
@@ -49,7 +62,10 @@ const getLabel = (product: any) => {
 };
 
 const sanitizeText = (value?: string) =>
-  value?.replace(/<[^>]+>/g, " ")?.replace(/\s+/g, " ")?.trim();
+  value
+    ?.replace(/<[^>]+>/g, " ")
+    ?.replace(/\s+/g, " ")
+    ?.trim();
 
 const resolveLabelTheme = (label?: string) => {
   const baseTheme = {
@@ -120,31 +136,115 @@ export default function ProductCard({
     !product?.isActive ||
     product?.stock <= 0;
 
-  const labelText = getLabel(product) ?? undefined;
-  const labelTheme = resolveLabelTheme(labelText);
+  const { sale: flashSale } = useFlashSaleForProduct(
+    product?._id,
+    product?.flashSaleId ?? null
+  );
+
+  const flashSaleVisible = Boolean(
+    flashSale &&
+      !product?.flashSaleHidden &&
+      !flashSale.product?.flashSaleHidden
+  );
+
+  const flashSaleCountdown = useCountdown(
+    flashSaleVisible ? flashSale?.endDate ?? null : null
+  );
+
+  const flashSaleActive =
+    flashSaleVisible &&
+    !flashSaleCountdown.expired &&
+    isFlashSaleActive(flashSale);
+
+  const flashSaleProgress = useMemo(
+    () => getFlashSaleProgress(flashSaleActive ? flashSale : undefined),
+    [flashSale, flashSaleActive]
+  );
+
+  const flashSaleProgressWidth = useMemo(
+    () => Math.min(100, Math.max(0, flashSaleProgress.percentClaimed)),
+    [flashSaleProgress.percentClaimed]
+  );
+
+  const labelText = flashSaleActive
+    ? "Flash Sale"
+    : getLabel(product) ?? undefined;
+  const labelTheme = flashSaleActive
+    ? {
+        backgroundClass: "bg-gradient-to-r from-rose-600 to-orange-500",
+        textClass: "text-white",
+      }
+    : resolveLabelTheme(labelText);
 
   const brandName =
     sanitizeText(product?.brand) ||
     sanitizeText(product?.manufacturer) ||
     sanitizeText(product?.seller?.name);
   const shortDescription = sanitizeText(product?.shortDescription);
-  const hasDiscount =
-    Boolean(product?.offerPrice) && product.offerPrice < product.price;
-  const effectivePrice = hasDiscount ? product.offerPrice : product.price;
+
+  const basePrice = Number(product?.price ?? 0);
+  const defaultOfferPrice =
+    product?.offerPrice && product.offerPrice > 0
+      ? product.offerPrice
+      : basePrice;
+  const flashPrice = flashSaleActive
+    ? flashSale?.flashPrice ??
+      flashSale?.product?.flashPrice ??
+      product?.flashPrice ??
+      defaultOfferPrice
+    : undefined;
+
+  const flashPriceValue =
+    typeof flashPrice === "number"
+      ? flashPrice
+      : Number.isFinite(Number(flashPrice))
+      ? Number(flashPrice)
+      : undefined;
+
+  const hasDiscount = flashSaleActive
+    ? typeof flashPriceValue === "number" &&
+      basePrice > 0 &&
+      flashPriceValue < basePrice
+    : Boolean(product?.offerPrice) && product.offerPrice < product.price;
+
+  const effectivePrice =
+    flashPriceValue ?? (hasDiscount ? defaultOfferPrice : basePrice);
+  const strikePrice = flashSaleActive
+    ? basePrice
+    : hasDiscount
+    ? product.price
+    : undefined;
+
   const discountPercentage = useMemo(() => {
+    if (flashSaleActive && flashPriceValue && basePrice > 0) {
+      const discount = basePrice - flashPriceValue;
+      return Math.max(0, Math.round((discount / basePrice) * 100));
+    }
+
     if (typeof product?.discountPercentage === "number") {
       return product.discountPercentage;
     }
 
     if (hasDiscount && product?.price) {
-      const discount = ((product.price - product.offerPrice) / product.price) * 100;
+      const discount =
+        ((product.price - defaultOfferPrice) / product.price) * 100;
       return Math.round(discount);
     }
 
     return 0;
-  }, [hasDiscount, product?.discountPercentage, product?.offerPrice, product?.price]);
+  }, [
+    basePrice,
+    defaultOfferPrice,
+    flashPriceValue,
+    flashSaleActive,
+    hasDiscount,
+    product?.discountPercentage,
+    product?.price,
+  ]);
 
-  const ratingValue = Number(product?.rating ?? product?.averageRating ?? 0);
+  const ratingValue = Number(
+    product?.ratingSummary?.averageRating ?? product?.averageRating ?? 0
+  );
   const reviewsCount = product?.reviewsCount ?? product?.totalReviews;
   const dimensionText = formatDimensionText(product?.dimensions);
   const weightText =
@@ -163,12 +263,8 @@ export default function ProductCard({
       key={product._id}
       className={mergeClasses(
         "relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300",
-        isOutOfStock
-          ? "opacity-60"
-          : "hover:-translate-y-1 hover:shadow-xl",
-        isListLayout
-          ? "flex w-full gap-4 p-4"
-          : "flex h-full flex-col"
+        isOutOfStock ? "opacity-60" : "hover:-translate-y-1 hover:shadow-xl",
+        isListLayout ? "flex w-full gap-4 p-4" : "flex h-full flex-col"
       )}
     >
       {isOutOfStock && (
@@ -208,8 +304,10 @@ export default function ProductCard({
         )}
       >
         <Image
-          src={product.thumbnail}
-          alt={product.name}
+          src={
+            product.thumbnail ?? product.images?.[0] ?? "/placeholder-image.jpg"
+          }
+          alt={product.name ?? "Product image"}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={mergeClasses(
@@ -239,8 +337,15 @@ export default function ProductCard({
               </h3>
             </div>
             {discountPercentage > 0 && (
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600">
-                Save {discountPercentage}%
+              <span
+                className={mergeClasses(
+                  "rounded-full px-2.5 py-1 text-xs font-semibold",
+                  flashSaleActive
+                    ? "bg-rose-100 text-rose-600"
+                    : "bg-emerald-50 text-emerald-600"
+                )}
+              >
+                {flashSaleActive ? "Flash Deal" : "Save"} {discountPercentage}%
               </span>
             )}
           </div>
@@ -251,7 +356,9 @@ export default function ProductCard({
                 <StarIcon className="h-4 w-4" />
                 {ratingValue.toFixed(1)}
                 {reviewsCount ? (
-                  <span className="text-[11px] text-slate-500">({reviewsCount})</span>
+                  <span className="text-[11px] text-slate-500">
+                    ({reviewsCount})
+                  </span>
                 ) : null}
               </span>
             ) : (
@@ -283,7 +390,7 @@ export default function ProductCard({
             isListLayout ? "grid-cols-2" : "sm:grid-cols-2"
           )}
         >
-          {product?.minimumOrderQuantity ? (
+          {!flashSaleActive && product?.minimumOrderQuantity ? (
             <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
               <BuildingStorefrontIcon className="h-4 w-4 text-slate-400" />
               <div>
@@ -295,7 +402,9 @@ export default function ProductCard({
               </div>
             </div>
           ) : null}
-          {typeof product?.stock === "number" && product.stock >= 0 ? (
+          {!flashSaleActive &&
+          typeof product?.stock === "number" &&
+          product.stock >= 0 ? (
             <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
               <TagIcon className="h-4 w-4 text-slate-400" />
               <div>
@@ -304,7 +413,7 @@ export default function ProductCard({
               </div>
             </div>
           ) : null}
-          {dimensionText && (
+          {!flashSaleActive && dimensionText && (
             <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
               <CubeIcon className="h-4 w-4 text-slate-400" />
               <div>
@@ -313,7 +422,7 @@ export default function ProductCard({
               </div>
             </div>
           )}
-          {weightText && (
+          {!flashSaleActive && weightText && (
             <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
               <CubeIcon className="h-4 w-4 text-slate-400" />
               <div>
@@ -337,19 +446,56 @@ export default function ProductCard({
           </div>
         )}
 
+        {flashSaleActive && (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-3 text-xs text-slate-600 shadow-inner">
+            <div className="flex items-center justify-between gap-2 text-rose-600">
+              <span className="inline-flex items-center gap-1 font-semibold uppercase tracking-wide">
+                <SparklesIcon className="h-4 w-4" aria-hidden />
+                Flash sale
+              </span>
+              <span className="font-semibold">{flashSaleCountdown.label}</span>
+            </div>
+            <div className="mt-2 h-1.5 w-full rounded-full bg-rose-100">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400"
+                style={{ width: `${flashSaleProgressWidth}%` }}
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between text-[11px] font-medium">
+              <span>
+                Claimed {flashSaleProgress.claimed}
+                {flashSaleProgress.total > 0
+                  ? ` / ${flashSaleProgress.total}`
+                  : ""}
+              </span>
+              <span className="text-rose-600">
+                {flashSaleProgress.left > 0
+                  ? `${flashSaleProgress.left} left`
+                  : "Almost gone"}
+              </span>
+            </div>
+          </div>
+        )}
+
         <footer className="mt-auto flex items-end justify-between gap-3">
           <div className="space-y-1">
             <p className="text-lg font-semibold text-slate-900">
               <Price amount={effectivePrice} />
             </p>
-            {hasDiscount && (
+            {typeof strikePrice === "number" && strikePrice > 0 && (
               <p className="text-xs text-slate-400 line-through">
-                <Price amount={product.price} />
+                <Price amount={strikePrice} />
               </p>
             )}
             {hasDiscount && discountPercentage > 0 && (
-              <p className="text-xs font-medium text-emerald-600">
-                You save {discountPercentage}%
+              <p
+                className={mergeClasses(
+                  "text-xs font-medium",
+                  flashSaleActive ? "text-rose-600" : "text-emerald-600"
+                )}
+              >
+                {flashSaleActive ? "Flash savings" : "You save"}{" "}
+                {discountPercentage}%
               </p>
             )}
           </div>
