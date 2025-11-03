@@ -53,7 +53,7 @@ export default async function ProductsListing({ params, searchParams }: any) {
         searchParams={searchParams}
         title={title}
       >
-        <ProductsGrid params={params.params} searchParams={searchParams} />
+        <ProductsGrid params={params.params} />
       </ProductLayout>
     </HydrationBoundary>
   );

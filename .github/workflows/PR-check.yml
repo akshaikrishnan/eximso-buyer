@@ -34,7 +34,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: "🚨 Heads up! Please update the pull request in the *Eximso Developer* WhatsApp group 📱. \n\nAlso, remember: *With great PRs comes great responsibility!* 🕷️"
+              body: "🚨 Heads up! Please update the pull request in the *Eximso Developer* WhatsApp group 📱. \n\nAlso, remember: *With great PRs comes great responsibility!* 🕷️ \n\n @codex review"
             })
 
       # Cool extra — add a PR label

@@ -1,6 +1,16 @@
 "use client";
 
-import { ReactNode, useMemo, useState } from "react";
+import {
+  Children,
+  ReactElement,
+  ReactNode,
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -80,6 +90,101 @@ const filters = [
   },
 ];
 
+type GridLayoutConfig = {
+  mobile: number;
+  desktop: number;
+};
+
+type LayoutOption = {
+  label: string;
+  value: number;
+};
+
+const mobileLayoutOptions: LayoutOption[] = [
+  { label: "1 per row", value: 1 },
+  { label: "2 per row", value: 2 },
+];
+
+const desktopLayoutBreakpoints: {
+  minWidth: number;
+  options: LayoutOption[];
+  defaultValue: number;
+}[] = [
+  {
+    minWidth: 1536,
+    options: [
+      { label: "4 per row", value: 4 },
+      { label: "5 per row", value: 5 },
+      { label: "6 per row", value: 6 },
+    ],
+    defaultValue: 5,
+  },
+  {
+    minWidth: 1280,
+    options: [
+      { label: "4 per row", value: 4 },
+      { label: "5 per row", value: 5 },
+    ],
+    defaultValue: 4,
+  },
+  {
+    minWidth: 1024,
+    options: [
+      { label: "3 per row", value: 3 },
+      { label: "4 per row", value: 4 },
+    ],
+    defaultValue: 3,
+  },
+  {
+    minWidth: 0,
+    options: [{ label: "3 per row", value: 3 }],
+    defaultValue: 3,
+  },
+];
+
+const DEFAULT_GRID_LAYOUT: GridLayoutConfig = {
+  mobile: 2,
+  desktop: 4,
+};
+
+const LAYOUT_STORAGE_KEY = "product-grid-layout";
+
+const getDesktopPresetForWidth = (width: number) => {
+  for (const preset of desktopLayoutBreakpoints) {
+    if (width >= preset.minWidth) {
+      return preset;
+    }
+  }
+
+  return desktopLayoutBreakpoints[desktopLayoutBreakpoints.length - 1];
+};
+
+const LayoutPreview = ({ columns }: { columns: number }) => {
+  const totalItems = columns > 4 ? 6 : columns * 2;
+  const displayColumns = Math.min(columns, 3);
+
+  return (
+    <span
+      aria-hidden="true"
+      className="grid h-5 w-5 shrink-0 gap-0.5 text-gray-500"
+      style={{ gridTemplateColumns: `repeat(${displayColumns}, minmax(0, 1fr))` }}
+    >
+      {Array.from({ length: totalItems }).map((_, idx) => (
+        <span
+          key={idx}
+          className="block h-1.5 w-full rounded-sm bg-current"
+        ></span>
+      ))}
+    </span>
+  );
+};
+
+type GridLayoutChildProps = {
+  gridLayout?: GridLayoutConfig;
+  activeColumns?: number;
+  isMobileViewport?: boolean;
+};
+
 export default function ProductLayout({
   children,
   params,
@@ -92,10 +197,206 @@ export default function ProductLayout({
   title?: string;
 }) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const initialDesktopPreset = getDesktopPresetForWidth(0);
+  const [desktopOptions, setDesktopOptions] = useState<LayoutOption[]>(
+    initialDesktopPreset.options
+  );
+  const [desktopDefaultValue, setDesktopDefaultValue] = useState<number>(
+    initialDesktopPreset.defaultValue
+  );
+  const [preferredLayout, setPreferredLayout] = useState<GridLayoutConfig>(
+    () => ({ ...DEFAULT_GRID_LAYOUT })
+  );
   const [sort, setSort] = useQueryParamState<string>("sort", "", {
     parse: (v) => v ?? "",
     serialize: (v) => (v ? v : null),
   });
+
+  const mobileLayoutValues = useMemo(
+    () => new Set(mobileLayoutOptions.map((option) => option.value)),
+    []
+  );
+
+  const desktopLayoutValues = useMemo(
+    () => new Set(desktopOptions.map((option) => option.value)),
+    [desktopOptions]
+  );
+
+  const clampGridLayout = useCallback(
+    (layout: GridLayoutConfig): GridLayoutConfig => {
+      const mobile = mobileLayoutValues.has(layout.mobile)
+        ? layout.mobile
+        : DEFAULT_GRID_LAYOUT.mobile;
+
+      const fallbackDesktop =
+        typeof desktopDefaultValue === "number"
+          ? desktopDefaultValue
+          : DEFAULT_GRID_LAYOUT.desktop;
+
+      const desktop = desktopLayoutValues.has(layout.desktop)
+        ? layout.desktop
+        : fallbackDesktop;
+
+      return {
+        mobile,
+        desktop:
+          typeof desktop === "number" ? desktop : DEFAULT_GRID_LAYOUT.desktop,
+      };
+    },
+    [desktopDefaultValue, desktopLayoutValues, mobileLayoutValues]
+  );
+
+  const gridLayout = useMemo(
+    () => clampGridLayout(preferredLayout),
+    [preferredLayout, clampGridLayout]
+  );
+
+  const updateGridLayout = useCallback(
+    (updater: (prev: GridLayoutConfig) => GridLayoutConfig) => {
+      setPreferredLayout((prev) => {
+        const next = updater(prev);
+
+        if (prev.mobile === next.mobile && prev.desktop === next.desktop) {
+          return prev;
+        }
+
+        return next;
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storedLayout = window.localStorage.getItem(LAYOUT_STORAGE_KEY);
+    if (!storedLayout) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(storedLayout);
+      setPreferredLayout((prev) => {
+        const parsedMobile =
+          typeof parsed?.mobile === "number" && Number.isFinite(parsed.mobile)
+            ? parsed.mobile
+            : undefined;
+        const parsedDesktop =
+          typeof parsed?.desktop === "number" && Number.isFinite(parsed.desktop)
+            ? parsed.desktop
+            : undefined;
+
+        return {
+          mobile:
+            parsedMobile !== undefined && mobileLayoutValues.has(parsedMobile)
+              ? parsedMobile
+              : prev.mobile,
+          desktop:
+            parsedDesktop !== undefined ? parsedDesktop : prev.desktop,
+        };
+      });
+    } catch (error) {
+      console.error("Failed to parse stored grid layout", error);
+    }
+  }, [mobileLayoutValues]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const applyPreset = (width: number) => {
+      const preset = getDesktopPresetForWidth(width);
+
+      setDesktopOptions((prev) => {
+        const prevValues = prev.map((option) => option.value).join(",");
+        const nextValues = preset.options.map((option) => option.value).join(",");
+
+        if (prevValues === nextValues) {
+          return prev;
+        }
+
+        return preset.options;
+      });
+
+      setDesktopDefaultValue((prev) =>
+        prev === preset.defaultValue ? prev : preset.defaultValue
+      );
+    };
+
+    applyPreset(window.innerWidth);
+
+    const handleResize = () => {
+      applyPreset(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    const applyMatch = (matches: boolean) => {
+      setIsMobileViewport(matches);
+    };
+
+    applyMatch(mediaQuery.matches);
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      applyMatch(event.matches);
+    };
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.localStorage.setItem(
+      LAYOUT_STORAGE_KEY,
+      JSON.stringify({
+        mobile: preferredLayout.mobile,
+        desktop: preferredLayout.desktop,
+      })
+    );
+  }, [preferredLayout]);
+
+  const gridLayoutOptions = useMemo(
+    () => (isMobileViewport ? mobileLayoutOptions : desktopOptions),
+    [desktopOptions, isMobileViewport]
+  );
+
+  const activeLayoutValue = isMobileViewport
+    ? gridLayout.mobile
+    : gridLayout.desktop;
+
+  const isGridLayoutChild = (
+    element: ReactNode
+  ): element is ReactElement<GridLayoutChildProps> => isValidElement(element);
+
+  const enhancedChildren = useMemo(
+    () =>
+      Children.map(children, (child) => {
+        if (!isGridLayoutChild(child)) {
+          return child;
+        }
+
+        return cloneElement<GridLayoutChildProps>(child, {
+          gridLayout,
+          activeColumns: activeLayoutValue,
+          isMobileViewport,
+        });
+      }),
+    [children, gridLayout, activeLayoutValue, isMobileViewport]
+  );
 
   // annotate which option is currently active
   const sortOptions = useMemo(
@@ -120,8 +421,6 @@ export default function ProductLayout({
         })
         .then((res) => res.data),
   });
-  console.log("filterData", filterData);
-
   return (
     <div className="bg-white">
       <div>
@@ -252,13 +551,44 @@ export default function ProductLayout({
                 </MenuItems>
               </Menu>
 
-              <button
-                type="button"
-                className="-m-2 ml-5 p-2 text-gray-400 hover:text-gray-500 sm:ml-7"
-              >
-                <span className="sr-only">View grid</span>
-                <Squares2X2Icon aria-hidden="true" className="h-5 w-5" />
-              </button>
+              <Menu as="div" className="relative ml-3 sm:ml-5">
+                <MenuButton className="-m-2 flex items-center gap-2 rounded-md p-2 text-gray-400 hover:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                  <span className="sr-only">View grid</span>
+                  <Squares2X2Icon aria-hidden="true" className="h-5 w-5" />
+                  <LayoutPreview columns={activeLayoutValue} />
+                </MenuButton>
+                <MenuItems
+                  transition
+                  className="absolute right-0 z-20 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-leave:duration-75 data-enter:ease-out data-leave:ease-in"
+                >
+                  {gridLayoutOptions.map((option) => (
+                    <MenuItem key={`layout-${option.value}`}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateGridLayout((prev) => ({
+                            mobile: isMobileViewport
+                              ? option.value
+                              : prev.mobile,
+                            desktop: isMobileViewport
+                              ? prev.desktop
+                              : option.value,
+                          }))
+                        }
+                        className={mergeClasses(
+                          "flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-gray-600 transition data-focus:bg-gray-100",
+                          option.value === activeLayoutValue
+                            ? "text-gray-900"
+                            : ""
+                        )}
+                      >
+                        <LayoutPreview columns={option.value} />
+                        <span>{option.label}</span>
+                      </button>
+                    </MenuItem>
+                  ))}
+                </MenuItems>
+              </Menu>
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(true)}
@@ -275,9 +605,9 @@ export default function ProductLayout({
               Products
             </h2>
 
-            <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-10 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:gap-x-10">
               {/* Filters */}
-              <form className="hidden lg:block">
+              <form className="hidden lg:block lg:max-w-[260px] xl:max-w-[280px]">
                 <h3 className="sr-only">Categories</h3>
                 <ul
                   role="list"
@@ -334,7 +664,9 @@ export default function ProductLayout({
               </form>
 
               {/* Product grid */}
-              <div className="lg:col-span-3">{children}</div>
+              <div className="lg:col-start-2 lg:pl-2 xl:pl-4">
+                {enhancedChildren}
+              </div>
             </div>
           </section>
         </main>
