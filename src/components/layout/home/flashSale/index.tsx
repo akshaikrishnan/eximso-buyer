@@ -11,15 +11,11 @@ import Autoplay from "embla-carousel-autoplay";
 import useEmblaCarousel from "embla-carousel-react";
 
 import mergeClasses from "@/lib/utils/classNames";
-import {
-  isFlashSaleActive,
-  useFlashSales,
-} from "@/hooks/use-flash-sales";
+import { isFlashSaleActive, useFlashSales } from "@/hooks/use-flash-sales";
 
 import FlashSlide from "./flash-slide";
 
-const containerClasses =
-  "col-span-full w-full lg:col-span-7 lg:col-start-1 2xl:col-span-9 2xl:col-start-1";
+const containerClasses = "col-span-full lg:col-span-2";
 
 const FlashSaleSkeleton = () => (
   <section
@@ -43,7 +39,7 @@ export default function FlashSale() {
   } = useFlashSales();
 
   const activeSales = (flashSales ?? []).filter((sale) =>
-    isFlashSaleActive(sale),
+    isFlashSaleActive(sale)
   );
 
   const autoplayRef = useRef(
@@ -51,7 +47,7 @@ export default function FlashSale() {
       delay: 6000,
       stopOnInteraction: false,
       playOnInit: true,
-    }),
+    })
   );
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -62,7 +58,7 @@ export default function FlashSale() {
       skipSnaps: false,
       dragFree: false,
     },
-    activeSales.length > 1 ? [autoplayRef.current] : [],
+    activeSales.length > 1 ? [autoplayRef.current] : []
   );
 
   const handlePrev = useCallback(() => {
@@ -94,7 +90,7 @@ export default function FlashSale() {
           <ArrowPathIcon
             className={mergeClasses(
               "h-4 w-4",
-              isFetching ? "animate-spin" : "",
+              isFetching ? "animate-spin" : ""
             )}
             aria-hidden
           />
@@ -109,10 +105,7 @@ export default function FlashSale() {
       <section
         className={`${containerClasses} flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white/70 p-6 text-center shadow-sm`}
       >
-        <SparklesIcon
-          className="mx-auto h-8 w-8 text-amber-500"
-          aria-hidden
-        />
+        <SparklesIcon className="mx-auto h-8 w-8 text-amber-500" aria-hidden />
         <h3 className="text-lg font-semibold text-slate-900">
           No flash sale right now
         </h3>
@@ -131,11 +124,11 @@ export default function FlashSale() {
     >
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600">
+          <span className="flex h-10 w-15 items-center justify-center rounded-full border border-slate-200 bg-gradient-to-r from-rose-600 to-orange-500 text-white">
             <SparklesIcon className="h-5 w-5" aria-hidden />
           </span>
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 ">
               Flash Sale
             </p>
             <h2 className="text-xl font-semibold text-slate-900">
