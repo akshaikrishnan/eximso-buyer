@@ -106,7 +106,7 @@ export default async function HomePage() {
 
       <Container>
         <ThreeGridCollection />
-        <ProductsGrid disableInfiniteScroll={true} limit={10} />
+        <ProductsGrid disableInfiniteScroll={true} limit={8} />
       </Container>
     </main>
   );
