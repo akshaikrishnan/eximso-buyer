@@ -141,9 +141,7 @@ function normalizeProduct(value: ProductEntry): RelatedProductShape | null {
     thumbnail: candidate.thumbnail,
     images: candidate.images,
     price: normalizedPrice,
-    offerPrice: Number.isFinite(normalizedOffer)
-      ? normalizedOffer
-      : undefined,
+    offerPrice: Number.isFinite(normalizedOffer) ? normalizedOffer : undefined,
     discountPercentage: Number.isFinite(normalizedDiscount)
       ? normalizedDiscount
       : undefined,
@@ -176,7 +174,11 @@ export function RelatedProduct({ product }: RelatedProductProps) {
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg">
       <div className="relative flex flex-1 flex-col">
-        <Link href={href} className="group/link flex flex-1 flex-col" aria-label={`View details for ${product.name}`}>
+        <Link
+          href={href}
+          className="group/link flex flex-1 flex-col"
+          aria-label={`View details for ${product.name}`}
+        >
           <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
             <Image
               fill
@@ -294,7 +296,7 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {isLoading &&
-          Array.from({ length: 4 }).map((_, index) => (
+          Array.from({ length: 6 }).map((_, index) => (
             <div
               key={`related-skeleton-${index}`}
               className="flex flex-col rounded-3xl border border-slate-200 bg-white/60 p-4 shadow-sm"
@@ -306,7 +308,9 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
             </div>
           ))}
 
-        {!isLoading && !isError && relatedProducts.length > 0 &&
+        {!isLoading &&
+          !isError &&
+          relatedProducts.length > 0 &&
           relatedProducts.map((relatedProduct) => (
             <RelatedProduct product={relatedProduct} key={relatedProduct._id} />
           ))}

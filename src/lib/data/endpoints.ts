@@ -12,7 +12,7 @@ export const endpoints = {
   banner: "banner",
   homepageLayout: "homepage-layout",
   collection: "collection",
-  flashSale: "flashsale",
+  flashSale: "flash-sale",
   menu: "menu",
   pushSubscribe: "push/subscribe",
   filters: "products/filters",
