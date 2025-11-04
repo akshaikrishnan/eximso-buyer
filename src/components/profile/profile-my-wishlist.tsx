@@ -7,6 +7,7 @@ import { endpoints } from "@/lib/data/endpoints";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Loader from "@/components/common/loader/loader";
 import EmptyWishlist from "./empty-wishlist";
+import { RelatedProduct } from "@/components/products/related-products";
 
 interface WishlistItem {
   id: string;

@@ -40,6 +40,8 @@ export default function HomePageWidgets() {
         }
 
         const payload = await response.json();
+        console.log("");
+        
         const items: HomeWidgetResponse[] =
           payload?.result?.layouts ?? payload?.data ?? [];
 

@@ -5,9 +5,10 @@ import api from "@/lib/api/axios.interceptor";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { PlusIcon, XIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Loader from "../common/loader/loader";
 import { endpoints } from "@/lib/data/endpoints";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +17,7 @@ import EditAddressModal from "@/app/profile/edit-address-modal/address-modal";
 // Define the Address type with additional fields
 interface Address {
   _id: any;
-  id: string; // Added ID for tracking
+  id: string;
   addressLine1: string;
   addressLine2?: string;
   addressType: string;
@@ -34,11 +35,12 @@ interface Address {
 export default function AddressList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const router = useRouter();
+  const hasRedirected = useRef(false);
 
-  // delete address
+  // Delete address mutation
   const deleteAddressMutation = useMutation({
     mutationFn: async (addressId: string) => {
       await api.delete(`${endpoints.address}/${addressId}`);
@@ -61,6 +63,7 @@ export default function AddressList() {
     },
   });
 
+  // Fetch address list
   const {
     data: addresses,
     isLoading,
@@ -72,6 +75,14 @@ export default function AddressList() {
       return res.data.result;
     },
   });
+
+  // 🚀 Redirect to "Add Address" page if no addresses found ON INITIAL LOAD ONLY
+  useEffect(() => {
+    if (!isLoading && !hasRedirected.current && addresses && addresses.length === 0) {
+      hasRedirected.current = true;
+      router.push("/profile/my-addresses/add");
+    }
+  }, [isLoading, addresses, router]);
 
   const handleEditClick = (address: Address) => {
     setSelectedAddress(address);
@@ -87,6 +98,25 @@ export default function AddressList() {
     return <Loader fullScreen />;
   }
 
+  // ✅ Show empty state if no addresses (with option to add)
+  if (!addresses || addresses.length === 0) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">No Addresses Yet</h2>
+          <p className="text-gray-600 mb-6">Add your first address to get started</p>
+          <Link
+            href="/profile/my-addresses/add"
+            className="rounded-md flex items-center gap-2 bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            <PlusIcon />
+            Add Your First Address
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between">
@@ -99,6 +129,7 @@ export default function AddressList() {
           Add Address
         </Link>
       </div>
+
       <div className="grid grid-cols-1 gap-8 pt-10 xl:grid-cols-2">
         {addresses?.map((addr: Address, index: number) => (
           <AddressBlock
@@ -107,7 +138,7 @@ export default function AddressList() {
             onEditClick={handleEditClick}
             onDeleteClick={(addressId) =>
               deleteAddressMutation.mutate(addressId)
-            } // Pass delete function
+            }
           />
         ))}
       </div>
@@ -142,12 +173,14 @@ export function AddressBlock({
         <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-2 py-1 rounded-full inline-block mb-3">
           {address?.addressType}
         </span>
+
         <button
           className="text-gray-500 hover:text-red-600 absolute top-2 right-2 p-3 rounded-full hover:bg-gray-100"
-          onClick={() => onDeleteClick(address._id)} // Call delete function
+          onClick={() => onDeleteClick(address._id)}
         >
           <TrashIcon className="h-5 w-5" />
         </button>
+
         <h5 className="font-bold">{address?.name}</h5>
         <p>{address?.addressLine1}</p>
         {address?.addressLine2 && <p>{address?.addressLine2}</p>}
