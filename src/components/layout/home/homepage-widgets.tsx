@@ -6,6 +6,7 @@ import { homeBentoGrids, type HomeBentoGridKey } from "./bento-grids/directory";
 import type { BentoGridContent } from "./bento-grids/types";
 import HomePageWidgetsSkeleton from "./homepage-widgets-skeleton";
 import { endpoints } from "@/lib/data/endpoints";
+import { log } from "console";
 
 interface HomeWidgetResponse {
   widget: HomeBentoGridKey;
@@ -31,8 +32,11 @@ export default function HomePageWidgets() {
           {
             cache: "no-store",
           }
+
         );
 
+        console.log("response", response);
+        
         if (!response.ok) {
           throw new Error(
             `Failed to load homepage widgets: ${response.status}`
@@ -44,8 +48,6 @@ export default function HomePageWidgets() {
         
         const items: HomeWidgetResponse[] =
           payload?.result?.layouts ?? payload?.data ?? [];
-
-        console.log(items, "response widgets");
 
         if (isMounted) {
           setWidgets(items);

@@ -500,12 +500,13 @@ export default function ProductCard({
             )}
           </div>
 
-          {product?.minimumOrderQuantity ? (
+          {/* {product?.minimumOrderQuantity ? (
             <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
               MOQ: {product.minimumOrderQuantity}
               {product?.uom ? ` ${product.uom}` : " units"}
             </div>
-          ) : null}
+          ) : null} */}
+          
         </footer>
       </div>
     </article>

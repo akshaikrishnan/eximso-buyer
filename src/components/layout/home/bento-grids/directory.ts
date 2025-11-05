@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 
 import FourProductShowcaseBento from "./four-product-showcase-bento";
+import HeroBannerFourProductsPreview from "./hero-banner-four-products-bento";
 import ThreeProductHeroBento from "./three-product-hero-bento";
 import TwoProductOneBannerBento from "./two-product-one-banner-bento";
 import type { BentoGridProps } from "./types";
@@ -11,6 +12,7 @@ export const homeBentoGrids = {
   twoProductOneBanner: TwoProductOneBannerBento,
   threeProductHero: ThreeProductHeroBento,
   fourProductShowcase: FourProductShowcaseBento,
+  heroBannerFourProducts: HeroBannerFourProductsPreview,
 } satisfies Record<string, BentoGridComponent>;
 
 export type HomeBentoGridKey = keyof typeof homeBentoGrids;
