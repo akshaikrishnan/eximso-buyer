@@ -33,8 +33,9 @@ export default function HomePageWidgets() {
             cache: "no-store",
           }
 
+          
         );
-        
+
         if (!response.ok) {
           throw new Error(
             `Failed to load homepage widgets: ${response.status}`
