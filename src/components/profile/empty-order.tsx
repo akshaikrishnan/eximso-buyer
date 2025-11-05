@@ -120,12 +120,12 @@ export default function EmptyOrder() {
           <Image
             src="/images/common/empty-cart.svg"
             alt="empty order"
-            width={400}
-            height={400}
+            width={300}
+            height={300}
           />
           <div className="text-center mt-5">
             <div className="text-3xl font-bold">No order found</div>
-            <div className="text-xl text-gray-500">Add items to get started</div>
+            <div className="text-lg text-gray-500">Add items to get started</div>
             <Link
               href="/"
               className="mt-5 inline-block bg-eximblue-500 text-white px-4 py-2 rounded-md"
@@ -136,7 +136,7 @@ export default function EmptyOrder() {
         </div>
       </div>
       {normalizedRecentProducts.length > 0 && (
-        <section aria-labelledby="recent-heading" className="mt-16 pb-12">
+        <section aria-labelledby="recent-heading" className=" pb-12">
           <div className="flex items-center gap-3">
             <SparklesIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
             <h2 id="recent-heading" className="text-2xl font-semibold text-slate-900">Recently Viewed</h2>

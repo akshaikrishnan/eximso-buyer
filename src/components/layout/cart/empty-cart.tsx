@@ -9,12 +9,12 @@ export default function EmptyCart() {
         <Image
           src="/images/common/empty-cart.svg"
           alt="empty cart"
-          width={400}
-          height={400}
+          width={300}
+          height={300}
         />
         <div className="text-center mt-5">
           <div className="text-3xl font-bold">Your cart is empty</div>
-          <div className="text-xl text-gray-500">Add items to get started</div>
+          <div className="text-lg text-gray-500">Add items to get started</div>
           <Link
             href="/"
             className="mt-5 inline-block bg-eximblue-500 text-white px-4 py-2 rounded-md"

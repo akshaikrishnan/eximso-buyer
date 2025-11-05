@@ -114,17 +114,19 @@ export default function EmptyWishlist() {
     <>
       <div className="flex flex-col items-center justify-center py-10">
         <img
-          src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png"
+          src="/images/common/Empty-amico.svg"
           alt="Empty Wishlist"
-          className="h-32 w-32"
+        width={300}
+          height={300}
+
         />
-        <h2 className="text-xl font-semibold text-gray-800 mt-4">
+        <h2 className="text-3xl font-bold text-gray-800 mt-4">
           Your Wishlist is Empty
         </h2>
-        <p className="text-gray-500">Start adding your favorite items!</p>
+        <p className="text-lg text-gray-500">Start adding your favorite items!</p>
       </div>
       {normalizedRecentProducts.length > 0 && (
-        <section aria-labelledby="recent-heading" className="mt-16 pb-12">
+        <section aria-labelledby="recent-heading" className=" pb-12">
           <div className="flex items-center gap-3">
             <SparklesIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
             <h2 id="recent-heading" className="text-2xl font-semibold text-slate-900">Recently Viewed</h2>
