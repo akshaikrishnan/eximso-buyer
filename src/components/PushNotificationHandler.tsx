@@ -25,128 +25,101 @@ export default function PushNotificationHandler() {
   const { data: user } = useQuery({
     queryKey: ["user"],
     queryFn: () => api.get(endpoints.user).then((res) => res.data.result),
-    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    staleTime: 1000 * 60 * 5,
   });
 
   useEffect(() => {
     const setupPushNotifications = async () => {
       try {
-        console.log("[Push] Initializing push notifications...");
-
-        // 1. Check if Firebase Messaging is supported
         const isFirebaseSupported = await isSupported();
-        if (!isFirebaseSupported) {
-          console.warn(
-            "[Push] Firebase Messaging not supported in this browser"
-          );
-          return;
-        }
+        if (!isFirebaseSupported) return;
 
-        if (typeof window === "undefined" || !user?._id) {
-          console.log("[Push] Window undefined or user not available");
-          return;
-        }
+        if (typeof window === "undefined" || !user?._id) return;
 
-        // 2. Check service worker support
         if (!("serviceWorker" in navigator)) {
-          console.warn("[Push] Service Worker not supported");
           toast({
             title: "Push notifications unavailable",
             description: "Your browser does not support service workers",
-            variant: "destructive",
           });
           return;
         }
 
-        // 3. Register service worker
         let registration;
         try {
-          console.log("[Push] Registering service worker...");
           registration = await navigator.serviceWorker.register(
             "/firebase-messaging-sw.js",
-            {
-              scope: "/firebase-cloud-messaging-push-scope",
-            }
+            { scope: "/firebase-cloud-messaging-push-scope" }
           );
-          console.log("[Push] Service Worker registered:", registration);
-        } catch (swError) {
-          console.error("[Push] Service Worker registration failed:", swError);
+        } catch {
           toast({
             title: "Push setup failed",
             description: "Could not register service worker",
-            variant: "destructive",
           });
           return;
         }
 
-        // 4. Request notification permission
-        console.log("[Push] Requesting notification permission...");
         const permission = await Notification.requestPermission();
-        console.log("[Push] Notification permission:", permission);
 
+        // DAILY memory for "blocked"
         if (permission !== "granted") {
-          toast({
-            title: "Notifications blocked",
-            description: "Please enable notifications in your browser settings",
-            variant: "destructive",
-          });
+          const STORAGE_LAST_BLOCK = "push:lastBlockedToast";
+          const today = new Date().toDateString();
+          const blockedShownToday =
+            localStorage.getItem(STORAGE_LAST_BLOCK) === today;
+
+          if (!blockedShownToday) {
+            toast({
+              title: "Notifications blocked",
+              description: "Please enable notifications in your browser settings",
+            });
+            localStorage.setItem(STORAGE_LAST_BLOCK, today);
+          }
+
           return;
         }
 
-        // 5. Get FCM token
-        console.log("[Push] Getting FCM token...");
         const token = await getToken(messaging, {
           vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
           serviceWorkerRegistration: registration,
         });
 
         if (!token) {
-          console.warn("[Push] No registration token available.");
           toast({
             title: "Push setup failed",
             description: "Could not generate push token",
-            variant: "destructive",
           });
           return;
         }
 
-        console.log("[Push] FCM registration token:", token);
-
-        // 6. Send token to your server
         try {
-          console.log("[Push] Sending token to server...", {
-            userId: user._id,
-            token: token.substring(0, 10) + "...", // Log partial token
-            role: user.role || "buyer",
-          });
-
-          const response = await api.post(endpoints.pushSubscribe, {
+          await api.post(endpoints.pushSubscribe, {
             userId: user._id,
             token,
             role: user.role || "buyer",
           });
 
-          console.log("[Push] Token successfully sent to server:", response);
-          if (localStorage.getItem("push-subscribed") !== "true")
+          // DAILY memory for "enabled"
+          const STORAGE_LAST_NOTIF = "push:lastToast";
+          const today = new Date().toDateString();
+          const shownToday =
+            localStorage.getItem(STORAGE_LAST_NOTIF) === today;
+
+          if (!shownToday) {
             toast({
               title: "Notifications enabled",
               description: "You will now receive push notifications",
-              variant: "default",
             });
-          localStorage.setItem("push-subscribed", "true");
-        } catch (apiError) {
-          console.error("[Push] Failed to send token to server:", apiError);
+
+            localStorage.setItem(STORAGE_LAST_NOTIF, today);
+          }
+        } catch {
           toast({
             title: "Subscription failed",
             description: "Could not register for push notifications",
-            variant: "destructive",
           });
         }
 
-        // 7. Set up message listener
         const handleMessage = (payload: NotificationPayload) => {
-          console.log("[Push] Received message:", payload);
-
           const title = payload?.notification?.title || "New notification";
           const body = payload?.notification?.body || "You have a new message";
           const link = payload?.data?.link || payload?.fcmOptions?.link;
@@ -174,24 +147,11 @@ export default function PushNotificationHandler() {
         };
 
         const unsubscribe = onMessage(messaging, handleMessage);
-
-        return () => {
-          try {
-            console.log("[Push] Cleaning up message listener...");
-            unsubscribe();
-          } catch (cleanupError) {
-            console.error(
-              "[Push] Error cleaning up message listener:",
-              cleanupError
-            );
-          }
-        };
-      } catch (error) {
-        console.error("[Push] Setup failed:", error);
+        return () => unsubscribe();
+      } catch {
         toast({
           title: "Error setting up push notifications",
           description: "Failed to enable push notifications",
-          variant: "destructive",
         });
       }
     };
