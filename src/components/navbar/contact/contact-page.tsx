@@ -36,7 +36,7 @@ const contactMethods = [
   {
     title: "Visit us",
     description:
-      "No 15/1031, PM Kareem Centre, Athani Junction, Wonderla Road, Kakkanad, Kerala 682030",
+      "No 15/1031, PM Kareem Centre, Athani Junction, Wonderla Road, Kakkanad, Kerala, India 682030",
     icon: HiLocationMarker,
     href: "https://maps.google.com/?q=PM+Kareem+Centre+Athani+Junction+Wonderla+Road+Kakkanad",
   },
@@ -106,114 +106,115 @@ function Contact() {
               </p>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="px-8 py-8 space-y-6">
-          {/* First Name */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">First Name</label>
-            <div className="relative flex items-center">
-              <HiUser className="absolute left-4 text-gray-400 text-xl" />
-              <input
-                type="text"
-                {...register("firstName", { required: "First name is required" })}
-                placeholder="Enter your first name"
-                className="w-full rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
-              />
-            </div>
-            {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
-          </div>
+              {/* First Name */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">First Name</label>
+                <div className="relative flex items-center">
+                  <HiUser className="absolute left-4 text-gray-400 text-xl" />
+                  <input
+                    type="text"
+                    {...register("firstName", { required: "First name is required" })}
+                    placeholder="Enter your first name"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
+              </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Email</label>
-            <div className="relative flex items-center">
-              <HiMail className="absolute left-4 text-gray-400 text-xl" />
-              <input
-                type="email"
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: { value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, message: "Invalid email format" },
-                })}
-                placeholder="Enter your email"
-                className="w-full rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
-              />
-            </div>
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
-          </div>
+              {/* Email */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Email</label>
+                <div className="relative flex items-center">
+                  <HiMail className="absolute left-4 text-gray-400 text-xl" />
+                  <input
+                    type="email"
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: { value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, message: "Invalid email format" },
+                    })}
+                    placeholder="Enter your email"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+              </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Phone (optional)</label>
-            <div className="relative flex items-center">
-              <HiPhone className="absolute left-4 text-gray-400 text-xl" />
-              <input
-                type="tel"
-                {...register("phone", {
-                  pattern: { value: /^[0-9]{10,14}$/, message: "Invalid phone number" },
-                })}
-                placeholder="Enter your phone number"
-                className="w-full rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
-              />
-            </div>
-            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
-          </div>
+              {/* Phone */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Phone (optional)</label>
+                <div className="relative flex items-center">
+                  <HiPhone className="absolute left-4 text-gray-400 text-xl" />
+                  <input
+                    type="tel"
+                    {...register("phone", {
+                      pattern: { value: /^[0-9]{10,14}$/, message: "Invalid phone number" },
+                    })}
+                    placeholder="Enter your phone number"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
+              </div>
 
-          {/* Message */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Message</label>
-            <div className="relative">
-              <HiChatAlt2 className="absolute left-4 top-4 text-gray-400 text-xl" />
-              <textarea
-                {...register("message", { required: "Message is required" })}
-                placeholder="Type your message"
-                className="w-full h-32 rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
-              />
-            </div>
-            {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message.message}</p>}
-          </div>
+              {/* Message */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Message</label>
+                <div className="relative">
+                  <HiChatAlt2 className="absolute left-4 top-4 text-gray-400 text-xl" />
+                  <textarea
+                    {...register("message", { required: "Message is required" })}
+                    placeholder="Type your message"
+                    className="w-full h-32 rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message.message}</p>}
+              </div>
 
-          {/* Submit Button */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-gray-500">We respond within one business day.</p>
-            <button
-              type="submit"
-              className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-indigo-500 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              Send Message
-            </button>
-          </div>
-        </form>
+              {/* Submit Button */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-gray-500">We respond within one business day.</p>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-indigo-500 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Send Message
+                </button>
+              </div>
+            </form>
           </div>
 
           <div className="xl:col-span-2 space-y-8">
             <div className="rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-500 to-sky-500 p-[1px] shadow-lg">
               <div className="rounded-3xl bg-white p-8">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-gray-900">Office hours</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">Support Availability</h3>
                   <button
                     type="button"
                     onClick={() => setShowHours((prev) => !prev)}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 rounded-full px-3 py-1"
+                    aria-expanded={showHours}
+                    aria-controls="support-schedule"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full px-3 py-1 transition-colors"
                   >
                     <HiClock className="h-4 w-4" />
                     {showHours ? "Hide" : "View"} schedule
                   </button>
                 </div>
+
                 {showHours && (
-                  <dl className="mt-6 space-y-3 text-sm text-gray-700">
-                    <div className="flex justify-between">
-                      <dt>Monday – Friday</dt>
-                      <dd>09:00 – 18:30 IST</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt>Saturday</dt>
-                      <dd>10:00 – 14:00 IST</dd>
-                    </div>
-                    <div className="flex justify-between">
-                      <dt>Sunday & Holidays</dt>
-                      <dd>Emergency support only</dd>
-                    </div>
-                  </dl>
+                  <div
+                    id="support-schedule"
+                    className="mt-6 space-y-3 text-sm text-gray-700 animate-in fade-in slide-in-from-top-2 duration-200"
+                  >
+                    <p className="leading-relaxed">
+                      We provide 24/7 support, 365 days a year.
+                    </p>
+                    <p className="leading-relaxed">
+                      Whether it&apos;s weekdays, weekends, or public holidays — we&apos;re always here to assist you.
+                    </p>
+                  </div>
                 )}
-                <p className="mt-6 text-sm text-gray-600">
+
+                <p className="mt-6 text-sm text-gray-600 leading-relaxed">
                   Need immediate help? Call us and choose the emergency support option to connect with our on-call team.
                 </p>
               </div>

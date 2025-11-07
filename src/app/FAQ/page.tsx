@@ -285,7 +285,7 @@ const supportCards: SupportCard[] = [
     icon: Phone,
     title: "Call the support desk",
     description: "+91 90378 50541",
-    highlight: "Available Monday to Saturday, 9:00–19:00 IST.",
+    highlight: "We provide 24/7 support, 365 days a year.",
   },
   {
     icon: MessageCircle,

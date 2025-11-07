@@ -953,7 +953,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           </div>
         </section>
 
-        <section id="reviews" className="mt-12">
+        <section id="reviews" className="mt-12 scroll-mt-36">
           <ProductReviews productId={productId} productName={product.name} reviewsQuery={reviewsQuery} />
         </section>
 

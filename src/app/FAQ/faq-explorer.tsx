@@ -162,7 +162,7 @@ export function FAQExplorer({ sections }: FAQExplorerProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="space-y-4"
+          className="space-y-4 scroll-mt-34"
         >
           {currentSection.faqs.map((faq, index) => (
             <Disclosure key={`${currentSection.id}-${index}`}>
