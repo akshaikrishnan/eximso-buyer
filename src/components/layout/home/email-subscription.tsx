@@ -3,7 +3,6 @@
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { subscribeEmail } from "@/lib/api/email";
-import { useEffect, useState } from "react";
 
 interface SubscriptionFormValues {
   email: string;
@@ -11,26 +10,12 @@ interface SubscriptionFormValues {
 
 export default function EmailSubscription() {
   const { toast } = useToast();
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<SubscriptionFormValues>();
-
-  useEffect(() => {
-    const subscriptionDate = localStorage.getItem('subscriptionDate');
-    if (subscriptionDate) {
-      const date = new Date(subscriptionDate);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - date.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays <= 7) {
-        setIsSubscribed(true);
-      }
-    }
-  }, []);
 
   const onSubmit = async (data: SubscriptionFormValues) => {
     try {
@@ -39,8 +24,6 @@ export default function EmailSubscription() {
         title: "Subscribed successfully!",
         description: "You'll receive our updates soon.",
       });
-      localStorage.setItem('subscriptionDate', new Date().toISOString());
-      setIsSubscribed(true);
       reset();
     } catch (error: any) {
       if (error.message === "Email already subscribed") {
@@ -49,8 +32,6 @@ export default function EmailSubscription() {
           description: "This email is already in our database.",
           variant: "destructive",
         });
-        localStorage.setItem('subscriptionDate', new Date().toISOString());
-        setIsSubscribed(true);
       } else {
         toast({
           title: "Subscription failed",
@@ -60,21 +41,6 @@ export default function EmailSubscription() {
       }
     }
   };
-
-  if (isSubscribed) {
-    return (
-      <section className="bg-gray-50 py-6 border-t">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-lg font-medium text-gray-900">
-            You are already subscribed to our newsletter&apos;s!
-          </p>
-          <p className="text-gray-600 text-sm mt-1">
-            We&apos;ll keep you updated with our latest news and offers.
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="bg-gray-50 py-6 border-t">
