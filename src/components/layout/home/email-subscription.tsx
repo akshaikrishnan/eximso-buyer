@@ -66,10 +66,10 @@ export default function EmailSubscription() {
       <section className="bg-gray-50 py-6 border-t">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-lg font-medium text-gray-900">
-            You are already subscribed to our newsletter!
+            You are already subscribed to our newsletter&apos;s!
           </p>
           <p className="text-gray-600 text-sm mt-1">
-            We'll keep you updated with our latest news and offers.
+            We&apos;ll keep you updated with our latest news and offers.
           </p>
         </div>
       </section>
