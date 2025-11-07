@@ -1,0 +1,131 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
+import { subscribeEmail } from "@/lib/api/email";
+import { useEffect, useState } from "react";
+
+interface SubscriptionFormValues {
+  email: string;
+}
+
+export default function EmailSubscription() {
+  const { toast } = useToast();
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<SubscriptionFormValues>();
+
+  useEffect(() => {
+    const subscriptionDate = localStorage.getItem('subscriptionDate');
+    if (subscriptionDate) {
+      const date = new Date(subscriptionDate);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays <= 7) {
+        setIsSubscribed(true);
+      }
+    }
+  }, []);
+
+  const onSubmit = async (data: SubscriptionFormValues) => {
+    try {
+      await subscribeEmail(data);
+      toast({
+        title: "Subscribed successfully!",
+        description: "You'll receive our updates soon.",
+      });
+      localStorage.setItem('subscriptionDate', new Date().toISOString());
+      setIsSubscribed(true);
+      reset();
+    } catch (error: any) {
+      if (error.message === "Email already subscribed") {
+        toast({
+          title: "Already subscribed",
+          description: "This email is already in our database.",
+          variant: "destructive",
+        });
+        localStorage.setItem('subscriptionDate', new Date().toISOString());
+        setIsSubscribed(true);
+      } else {
+        toast({
+          title: "Subscription failed",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  if (isSubscribed) {
+    return (
+      <section className="bg-gray-50 py-6 border-t">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-lg font-medium text-gray-900">
+            You are already subscribed to our newsletter!
+          </p>
+          <p className="text-gray-600 text-sm mt-1">
+            We'll keep you updated with our latest news and offers.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="bg-gray-50 py-6 border-t">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Container for heading + form */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+
+          {/* Left: Heading + Subtext */}
+          <div className="text-center sm:text-left">
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Get our updates for more subscribe
+            </h2>
+            <p className="text-gray-600 text-sm mt-1">
+              Subscribe to our newsletter and stay updated.
+            </p>
+          </div>
+
+          {/* Right: Email form */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex w-full max-w-md mt-3 sm:mt-0"
+          >
+            <input
+              type="email"
+              placeholder="Write your email here"
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+$/i,
+                  message: "Please enter a valid email",
+                },
+              })}
+              className="flex-1 rounded-l-md border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-l-none rounded-r-md bg-eximblue-600 px-5 py-2 text-white hover:bg-eximblue-800 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 disabled:opacity-50"
+            >
+              {isSubmitting ? "Subscribing..." : "Subscribe"}
+            </button>
+          </form>
+        </div>
+
+        {/* Error message below */}
+        {errors.email && (
+          <p className="text-sm text-red-600 text-center sm:text-right mt-2">
+            {errors.email.message}
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}

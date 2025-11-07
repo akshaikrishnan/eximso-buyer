@@ -3,6 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import IncentivesFooter from "./incentives-footer";
+import EmailSubscription from "./home/email-subscription";
 import { FaFacebookF, FaYoutube, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
 const footerNavigation = {
@@ -46,6 +47,7 @@ export default function Footer() {
   return (
     <>
       {pathname === '/' && <IncentivesFooter />}
+      {pathname === '/' && <EmailSubscription />}
       <footer aria-labelledby="footer-heading" className="bg-white">
         <h2 id="footer-heading" className="sr-only">
           Footer

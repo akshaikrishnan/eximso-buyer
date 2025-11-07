@@ -22,4 +22,5 @@ export const endpoints = {
   paymentProviders: "payment-providers",
   tracking: "tracking",
   postRequirements: "post-requirements",
+  emailSubscribe: "email/subscribe",
 };
