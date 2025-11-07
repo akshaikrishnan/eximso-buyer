@@ -785,6 +785,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     <a
                       href="#reviews"
                       className="text-sm font-medium text-indigo-600 transition hover:text-indigo-500"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const element = document.getElementById('reviews');
+                        if (element) {
+                          const y = element.getBoundingClientRect().top + window.pageYOffset - 130;
+                          window.scrollTo({ top: y, behavior: 'smooth' });
+                        }
+                      }}
                     >
                       ({totalReviews} reviews)
                     </a>

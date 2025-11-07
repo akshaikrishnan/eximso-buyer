@@ -83,11 +83,19 @@ export function FAQExplorer({ sections }: FAQExplorerProps) {
       setActiveSectionId(sectionId);
       updateUrl(sectionId);
 
-      if (typeof window !== "undefined") {
-        window.requestAnimationFrame(() => {
-          questionContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
-      }
+            if (typeof window !== "undefined") {
+  window.requestAnimationFrame(() => {
+    const el = questionContainerRef.current;
+    if (!el) return;
+
+    const y = el.getBoundingClientRect().top + window.scrollY - 130; // 130 = margin top offset
+
+    window.scrollTo({
+      top: y,
+      behavior: "smooth"
+    });
+  });
+}
     },
     [activeSectionId, updateUrl],
   );

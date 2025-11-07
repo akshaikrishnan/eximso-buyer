@@ -60,19 +60,19 @@ export default function PushNotificationHandler() {
 
         const permission = await Notification.requestPermission();
 
-        // DAILY memory for "blocked"
+        // ---- 7 days lock for BLOCKED ----
         if (permission !== "granted") {
           const STORAGE_LAST_BLOCK = "push:lastBlockedToast";
-          const today = new Date().toDateString();
-          const blockedShownToday =
-            localStorage.getItem(STORAGE_LAST_BLOCK) === today;
+          const lastShown = Number(localStorage.getItem(STORAGE_LAST_BLOCK) || 0);
+          const now = Date.now();
+          const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
-          if (!blockedShownToday) {
+          if (now - lastShown > SEVEN_DAYS) {
             toast({
               title: "Notifications blocked",
-              description: "Please enable notifications in your browser settings",
+              description: "Enable push notifications to get our latest updates",
             });
-            localStorage.setItem(STORAGE_LAST_BLOCK, today);
+            localStorage.setItem(STORAGE_LAST_BLOCK, String(now));
           }
 
           return;
@@ -98,20 +98,20 @@ export default function PushNotificationHandler() {
             role: user.role || "buyer",
           });
 
-          // DAILY memory for "enabled"
+          // ---- 7 days lock for ENABLED ----
           const STORAGE_LAST_NOTIF = "push:lastToast";
-          const today = new Date().toDateString();
-          const shownToday =
-            localStorage.getItem(STORAGE_LAST_NOTIF) === today;
+          const lastShown = Number(localStorage.getItem(STORAGE_LAST_NOTIF) || 0);
+          const now = Date.now();
+          const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
-          if (!shownToday) {
+          if (now - lastShown > SEVEN_DAYS) {
             toast({
               title: "Notifications enabled",
               description: "You will now receive push notifications",
             });
-
-            localStorage.setItem(STORAGE_LAST_NOTIF, today);
+            localStorage.setItem(STORAGE_LAST_NOTIF, String(now));
           }
+
         } catch {
           toast({
             title: "Subscription failed",
@@ -150,7 +150,7 @@ export default function PushNotificationHandler() {
         return () => unsubscribe();
       } catch {
         toast({
-          title: "Error setting up push notifications",
+          title: "Push notifications are blocked",
           description: "Failed to enable push notifications",
         });
       }
