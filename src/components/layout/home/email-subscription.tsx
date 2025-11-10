@@ -27,16 +27,11 @@ export default function EmailSubscription() {
       reset();
     } catch (error: any) {
       if (error.message === "Email already subscribed") {
-        toast({
-          title: "Already subscribed",
-          description: "This email is already in our database.",
-          variant: "destructive",
-        });
+        reset();
       } else {
         toast({
           title: "Subscription failed",
           description: "Please try again later.",
-          variant: "destructive",
         });
       }
     }
