@@ -3,9 +3,15 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
-import { toast } from '@/hooks/use-toast';
+import { toast } from "@/hooks/use-toast";
 
-type CancellationReason = 'Ordered by mistake' | 'Item delayed' | 'Found a better price' | 'Changed my mind' | 'Duplicate order' | 'Other';
+type CancellationReason =
+  | "Ordered by mistake"
+  | "Item delayed"
+  | "Found a better price"
+  | "Changed my mind"
+  | "Duplicate order"
+  | "Other";
 
 interface TrackingStep {
   status: string;
@@ -25,20 +31,22 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
   onStatusChange,
 }) => {
   const [showCancelDropdown, setShowCancelDropdown] = useState(false);
-  const [selectedReason, setSelectedReason] = useState<CancellationReason | ''>('');
-  const [customReason, setCustomReason] = useState('');
+  const [selectedReason, setSelectedReason] = useState<CancellationReason | "">(
+    ""
+  );
+  const [customReason, setCustomReason] = useState("");
   const [isConfirming, setIsConfirming] = useState(false);
   const [localStatus, setLocalStatus] = useState(status);
 
   const currentStatus = localStatus || status;
 
   const cancellationReasons: CancellationReason[] = [
-    'Ordered by mistake',
-    'Item delayed',
-    'Found a better price',
-    'Changed my mind',
-    'Duplicate order',
-    'Other'
+    "Ordered by mistake",
+    "Item delayed",
+    "Found a better price",
+    "Changed my mind",
+    "Duplicate order",
+    "Other",
   ];
 
   const {
@@ -63,7 +71,9 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
     },
     enabled: !!orderId,
     retry: (failureCount, err: any) =>
-      err?.response?.status && err.response.status >= 400 && err.response.status < 500
+      err?.response?.status &&
+      err.response.status >= 400 &&
+      err.response.status < 500
         ? false
         : failureCount < 2,
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
@@ -72,25 +82,26 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
   const handleCancelClick = () => {
     setShowCancelDropdown(!showCancelDropdown);
     if (!showCancelDropdown) {
-      setSelectedReason('');
-      setCustomReason('');
+      setSelectedReason("");
+      setCustomReason("");
     }
   };
 
   const handleReasonSelect = (reason: CancellationReason) => {
     setSelectedReason(reason);
-    if (reason !== 'Other') {
-      setCustomReason('');
+    if (reason !== "Other") {
+      setCustomReason("");
     }
   };
 
   const handleConfirmCancel = async () => {
     setIsConfirming(true);
-    let reasonToSend = selectedReason === 'Other' ? customReason : selectedReason;
+    let reasonToSend =
+      selectedReason === "Other" ? customReason : selectedReason;
     reasonToSend = reasonToSend.trim();
 
     if (!reasonToSend) {
-      toast({ title: 'Cancellation reason is required.' });
+      toast({ title: "Cancellation reason is required." });
       setIsConfirming(false);
       return;
     }
@@ -100,31 +111,38 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
         cancellationReason: reasonToSend,
       });
 
-      setLocalStatus('cancelled');
+      setLocalStatus("cancelled");
 
       if (onStatusChange) {
-        onStatusChange('cancelled');
+        onStatusChange("cancelled");
       }
 
-      toast({ title: 'Order cancellation request submitted successfully!' });
+      toast({ title: "Order cancellation request submitted successfully!" });
       setShowCancelDropdown(false);
-      setSelectedReason('');
-      setCustomReason('');
+      setSelectedReason("");
+      setCustomReason("");
     } catch (error: any) {
-      toast({ title: `Error: ${error.response?.data?.message || error.message}` });
+      toast({
+        title: `Error: ${error.response?.data?.message || error.message}`,
+      });
     } finally {
       setIsConfirming(false);
     }
   };
 
-  const isConfirmDisabled = !selectedReason || (selectedReason === 'Other' && !customReason.trim());
+  const isConfirmDisabled =
+    !selectedReason || (selectedReason === "Other" && !customReason.trim());
 
   if (isLoading) {
     return (
       <div className="mt-6 grow sm:mt-8 lg:mt-0">
         <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Order history</h3>
-          <p className="text-gray-500 text-sm">Loading tracking information...</p>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Order history
+          </h3>
+          <p className="text-gray-500 text-sm">
+            Loading tracking information...
+          </p>
         </div>
       </div>
     );
@@ -135,7 +153,9 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
   return (
     <div className="mt-6 grow sm:mt-8 lg:mt-0">
       <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Order history</h3>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          Order history
+        </h3>
 
         {steps.length === 0 ? (
           <p className="text-gray-500 text-sm">Order processing...</p>
@@ -144,14 +164,34 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
             {steps.map((step, index) => (
               <li key={index} className="mb-10 ms-6">
                 <span className="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 ring-8 ring-blue-100 dark:bg-blue-600 dark:ring-blue-900">
-                  <svg className="h-4 w-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 11.917 9.724 16.5 19 7.5" />
+                  <svg
+                    className="h-4 w-4 text-white"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 11.917 9.724 16.5 19 7.5"
+                    />
                   </svg>
                 </span>
-                <h4 className="mb-0.5 text-base font-semibold text-blue-900 dark:text-blue-100">{step.date}</h4>
-                <p className="text-sm font-normal text-blue-700 dark:text-blue-300">{step.status}</p>
+                <h4 className="mb-0.5 text-base font-semibold text-blue-900 dark:text-blue-100">
+                  {step.date}
+                </h4>
+                <p className="text-sm font-normal text-blue-700 dark:text-blue-300">
+                  {step.status}
+                </p>
                 {step.description && (
-                  <p className="text-sm text-blue-600 dark:text-blue-400">{step.description}</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">
+                    {step.description}
+                  </p>
                 )}
               </li>
             ))}
@@ -160,14 +200,15 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
 
         {currentStatus && (
           <p className="mt-3 text-sm text-gray-800 dark:text-gray-400">
-            Current Status: <span className="font-semibold">{currentStatus}</span>
+            Current Status:{" "}
+            <span className="font-semibold">{currentStatus}</span>
           </p>
         )}
 
         {/* Cancel Order Section */}
         <div className="space-y-4">
           {/* Cancelled Status Notice */}
-          {currentStatus === 'cancelled' && (
+          {currentStatus === "cancelled" && (
             <div className="w-full rounded-lg border border-red-200 bg-red-50 px-5 py-3 dark:border-red-800 dark:bg-red-900/20">
               <div className="flex items-start space-x-2">
                 <svg
@@ -202,19 +243,19 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
             <button
               type="button"
               onClick={handleCancelClick}
-              disabled={currentStatus === 'cancelled'}
+              disabled={currentStatus === "cancelled"}
               className="w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-hidden focus:ring-4 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
             >
-              {currentStatus === 'cancelled' 
-                ? 'Order Cancelled' 
-                : showCancelDropdown 
-                  ? 'Close Cancel Options' 
-                  : 'Cancel the order'}
+              {currentStatus === "cancelled"
+                ? "Order Cancelled"
+                : showCancelDropdown
+                ? "Close Cancel Options"
+                : "Cancel the order"}
             </button>
           </div>
 
           {/* Cancellation Dropdown Panel */}
-          {showCancelDropdown && currentStatus !== 'cancelled' && (
+          {showCancelDropdown && currentStatus !== "cancelled" && (
             <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-700">
               <h4 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">
                 Please select a reason for cancellation:
@@ -223,7 +264,10 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
               {/* Reason Selection */}
               <div className="space-y-2">
                 {cancellationReasons.map((reason) => (
-                  <label key={reason} className="flex items-center cursor-pointer">
+                  <label
+                    key={reason}
+                    className="flex items-center cursor-pointer"
+                  >
                     <input
                       type="radio"
                       name="cancellationReason"
@@ -232,13 +276,15 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
                       onChange={() => handleReasonSelect(reason)}
                       className="mr-3 h-4 w-4 text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{reason}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {reason}
+                    </span>
                   </label>
                 ))}
               </div>
 
               {/* Custom Reason Input */}
-              {selectedReason === 'Other' && (
+              {selectedReason === "Other" && (
                 <div className="mt-3">
                   <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Please specify your reason:
@@ -264,14 +310,29 @@ const OrderTracking: React.FC<OrderTrackingProps> = ({
                   >
                     {isConfirming ? (
                       <span className="flex items-center">
-                        <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="mr-2 h-4 w-4 animate-spin"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Processing...
                       </span>
                     ) : (
-                      'Confirm Cancellation'
+                      "Confirm Cancellation"
                     )}
                   </button>
                   <button

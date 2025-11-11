@@ -81,7 +81,9 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
     },
     enabled: !!orderNumber,
     retry: (failureCount, err: any) =>
-      err?.response?.status && err.response.status >= 400 && err.response.status < 500
+      err?.response?.status &&
+      err.response.status >= 400 &&
+      err.response.status < 500
         ? false
         : failureCount < 2,
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
@@ -90,13 +92,22 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
   // Fetch connected orders data
   const connectedOrdersQueries = useQueries({
     queries: (orderRes?.connectedOrders || []).map((connectedOrder) => ({
-      queryKey: ["connectedOrder", connectedOrder.orderNumber || connectedOrder._id],
+      queryKey: [
+        "connectedOrder",
+        connectedOrder.orderNumber || connectedOrder._id,
+      ],
       queryFn: async () => {
-        const res = await api.get(`${endpoints.order}/${connectedOrder.orderNumber || connectedOrder._id}`);
+        const res = await api.get(
+          `${endpoints.order}/${
+            connectedOrder.orderNumber || connectedOrder._id
+          }`
+        );
         const data = res?.data?.result ?? res?.data;
         return data as OrderRes;
       },
-      enabled: !!(orderRes?.connectedOrders && orderRes.connectedOrders.length > 0),
+      enabled: !!(
+        orderRes?.connectedOrders && orderRes.connectedOrders.length > 0
+      ),
     })),
   });
 
@@ -123,23 +134,26 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
 
   // ----- Dynamic calculation -----
   // Check if there are connected orders
-  const hasConnectedOrders = orderRes.connectedOrders && orderRes.connectedOrders.length > 0;
+  const hasConnectedOrders =
+    orderRes.connectedOrders && orderRes.connectedOrders.length > 0;
 
   // Calculate total regular price (sum of all product prices)
-  const totalPrice = orderRes.items?.reduce((acc, item) => {
-    const regularPrice = item.product?.price || 0;
-    const qty = item.quantity || 1;
-    return acc + (regularPrice * qty);
-  }, 0) || 0;
+  const totalPrice =
+    orderRes.items?.reduce((acc, item) => {
+      const regularPrice = item.product?.price || 0;
+      const qty = item.quantity || 1;
+      return acc + regularPrice * qty;
+    }, 0) || 0;
 
   // Calculate subtotal (after applying offer prices)
-  const subtotal = orderRes.items?.reduce((acc, item) => {
-    const offerPrice = item.product?.offerPrice || 0;
-    const regularPrice = item.product?.price || 0;
-    const finalPrice = offerPrice > 0 ? offerPrice : regularPrice;
-    const qty = item.quantity || 1;
-    return acc + (finalPrice * qty);
-  }, 0) || 0;
+  const subtotal =
+    orderRes.items?.reduce((acc, item) => {
+      const offerPrice = item.product?.offerPrice || 0;
+      const regularPrice = item.product?.price || 0;
+      const finalPrice = offerPrice > 0 ? offerPrice : regularPrice;
+      const qty = item.quantity || 1;
+      return acc + finalPrice * qty;
+    }, 0) || 0;
 
   // Calculate total discount (difference between regular price and offer price)
   let totalDiscount = totalPrice - subtotal;
@@ -149,30 +163,36 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
 
   if (hasConnectedOrders) {
     // Sum up all regular prices from connected orders
-    const connectedOrdersTotalPrice = connectedOrdersQueries.reduce((acc, query) => {
-      if (query.data?.items) {
-        const orderPrice = query.data.items.reduce((itemAcc, item) => {
-          const regularPrice = item.product?.price || 0;
-          const qty = item.quantity || 1;
-          return itemAcc + (regularPrice * qty);
-        }, 0);
-        return acc + orderPrice;
-      }
-      return acc;
-    }, 0);
+    const connectedOrdersTotalPrice = connectedOrdersQueries.reduce(
+      (acc, query) => {
+        if (query.data?.items) {
+          const orderPrice = query.data.items.reduce((itemAcc, item) => {
+            const regularPrice = item.product?.price || 0;
+            const qty = item.quantity || 1;
+            return itemAcc + regularPrice * qty;
+          }, 0);
+          return acc + orderPrice;
+        }
+        return acc;
+      },
+      0
+    );
 
     // Sum up all offer prices from connected orders (only actual offer prices)
-    const connectedOrdersOfferPrice = connectedOrdersQueries.reduce((acc, query) => {
-      if (query.data?.items) {
-        const orderOfferPrice = query.data.items.reduce((itemAcc, item) => {
-          const offerPrice = item.product?.offerPrice || 0;
-          const qty = item.quantity || 1;
-          return itemAcc + (offerPrice * qty);
-        }, 0);
-        return acc + orderOfferPrice;
-      }
-      return acc;
-    }, 0);
+    const connectedOrdersOfferPrice = connectedOrdersQueries.reduce(
+      (acc, query) => {
+        if (query.data?.items) {
+          const orderOfferPrice = query.data.items.reduce((itemAcc, item) => {
+            const offerPrice = item.product?.offerPrice || 0;
+            const qty = item.quantity || 1;
+            return itemAcc + offerPrice * qty;
+          }, 0);
+          return acc + orderOfferPrice;
+        }
+        return acc;
+      },
+      0
+    );
 
     displayPrice = connectedOrdersTotalPrice;
     totalDiscount = connectedOrdersTotalPrice - connectedOrdersOfferPrice;
@@ -180,7 +200,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
 
   const shipping = orderRes.shippingAmount ?? orderRes.shippingPrice ?? 0;
   const tax = orderRes.taxAmount ?? 0;
-  const total = orderRes.totalAmount ?? orderRes.orderTotal ?? subtotal + shipping + tax;
+  const total =
+    orderRes.totalAmount ?? orderRes.orderTotal ?? subtotal + shipping + tax;
 
   return (
     <div className="py-14 px-4 md:px-6 2xl:px-6 2xl:container 2xl:mx-auto">
@@ -195,43 +216,53 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
       </div>
 
       {/* Connected Orders */}
-      {orderRes.connectedOrders && orderRes.connectedOrders.length > 0 && (() => {
-        const filteredOrders = orderRes.connectedOrders.filter(
-          (connectedOrder) =>
-            connectedOrder._id !== orderRes._id &&
-            connectedOrder.orderNumber !== orderRes.orderNumber
-        );
+      {orderRes.connectedOrders &&
+        orderRes.connectedOrders.length > 0 &&
+        (() => {
+          const filteredOrders = orderRes.connectedOrders.filter(
+            (connectedOrder) =>
+              connectedOrder._id !== orderRes._id &&
+              connectedOrder.orderNumber !== orderRes.orderNumber
+          );
 
-        return filteredOrders.length > 0 ? (
-          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">
-              Connected Orders
-            </h2>
-            <div className="space-y-2">
-              {filteredOrders.map((connectedOrder, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-800 dark:text-white">
-                      Order #{connectedOrder.orderNumber || connectedOrder._id}
-                    </p>
-                    {connectedOrder.createdAt && (
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {new Date(connectedOrder.createdAt).toLocaleDateString("en-GB")}
-                      </p>
-                    )}
-                  </div>
-                  <Link
-                    href={`/profile/my-orders/${connectedOrder.orderNumber || connectedOrder._id}`}
-                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          return filteredOrders.length > 0 ? (
+            <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">
+                Connected Orders
+              </h2>
+              <div className="space-y-2">
+                {filteredOrders.map((connectedOrder, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700"
                   >
-                    View Order →
-                  </Link>
-                </div>
-              ))}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-800 dark:text-white">
+                        Order #
+                        {connectedOrder.orderNumber || connectedOrder._id}
+                      </p>
+                      {connectedOrder.createdAt && (
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {new Date(
+                            connectedOrder.createdAt
+                          ).toLocaleDateString("en-GB")}
+                        </p>
+                      )}
+                    </div>
+                    <Link
+                      href={`/profile/my-orders/${
+                        connectedOrder.orderNumber || connectedOrder._id
+                      }`}
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      View Order →
+                    </Link>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ) : null;
-      })()}
+          ) : null;
+        })()}
 
       {/* Order Items */}
       <div className="mt-10">
@@ -247,7 +278,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
               p.thumbnail ||
               "https://via.placeholder.com/80";
             const qty = item.quantity || 1;
-            const hasOffer = (p.offerPrice ?? 0) > 0 && p.offerPrice! < (p.price ?? 0);
+            const hasOffer =
+              (p.offerPrice ?? 0) > 0 && p.offerPrice! < (p.price ?? 0);
             const regularPrice = p.price || 0;
             const offerPrice = hasOffer ? p.offerPrice! : regularPrice;
 
@@ -315,14 +347,12 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                     )}
                   </div>
                 </div>
-
               </div>
             );
           })
         ) : (
           <p>No items in this order.</p>
         )}
-
       </div>
 
       {/* Summary & Customer */}
@@ -342,7 +372,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
             <div className="flex justify-between items-center w-full">
               <div className="flex items-center gap-2">
                 <p className="text-base dark:text-white leading-5 text-gray-800">
-                  Price ({(() => {
+                  Price (
+                  {(() => {
                     if (hasConnectedOrders) {
                       // Calculate total items from all connected orders
                       return connectedOrdersQueries.reduce((acc, query) => {
@@ -350,7 +381,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                       }, 0);
                     }
                     return orderRes.items?.length || 0;
-                  })()} items)
+                  })()}{" "}
+                  items)
                 </p>
               </div>
               <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
@@ -374,7 +406,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                 Shipping Amount
               </p>
               <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
-                {shipping > 0 ? <Price amount={shipping} /> : 'Free'}
+                {shipping > 0 ? <Price amount={shipping} /> : "Free"}
               </p>
             </div>
 
@@ -404,11 +436,20 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
           {totalDiscount > 0 && (
             <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
               <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <svg
+                  className="w-5 h-5 text-green-600 dark:text-green-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
                 </svg>
                 <p className="text-sm font-medium text-green-700 dark:text-green-300">
-                  You&apos;ll save <Price amount={totalDiscount} /> on this order!
+                  You&apos;ll save <Price amount={totalDiscount} /> on this
+                  order!
                 </p>
               </div>
             </div>
@@ -427,8 +468,14 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                 <img
                   className="w-full h-full"
                   alt="logo"
+                  src="https://i.ibb.co/L8KSdNQ/image-3.png"
+                />
+                <img
+                  className="w-full h-full"
+                  alt="logo"
                   src={
-                    typeof orderRes?.shippingMethod === 'object' && orderRes?.shippingMethod?.icon
+                    typeof orderRes?.shippingMethod === "object" &&
+                    orderRes?.shippingMethod?.icon
                       ? orderRes.shippingMethod.icon
                       : "https://i.ibb.co/L8KSdNQ/image-3.png"
                   }
@@ -436,7 +483,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
               </div>
               <div className="flex flex-col justify-start items-center">
                 <p className="text-lg leading-6 dark:text-white font-semibold text-gray-800">
-                  {typeof orderRes?.shippingMethod === 'string'
+                  {typeof orderRes?.shippingMethod === "string"
                     ? orderRes.shippingMethod
                     : orderRes?.shippingMethod?.title || "Standard Delivery"}
                   <br />
@@ -453,7 +500,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
             <button
               onClick={() => {
                 if (orderRes?.paymentMethod?.apiUrl) {
-                  window.open(orderRes.paymentMethod.apiUrl, '_blank');
+                  window.open(orderRes.paymentMethod.apiUrl, "_blank");
                 }
               }}
               disabled={!orderRes?.paymentMethod?.apiUrl}
@@ -494,6 +541,9 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                   <p className="cursor-pointer text-sm leading-5">
                     {orderRes?.user?.email || "N/A"}
                   </p>
+                  <p className="cursor-pointer text-sm leading-5">
+                    {orderRes?.user?.email || "N/A"}
+                  </p>
                 </div>
               </div>
               {/* Payment Details */}
@@ -522,8 +572,13 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                     )}
                     <div className="mt-2">
                       <p className="text-xs font-medium text-gray-700 dark:text-gray-200">
-                        Payment Status: <span className="font-semibold text-blue-600 bg-blue-200 px-2 py-1 rounded">
-                          {orderRes.status === 'paid' ? 'Paid' : orderRes.status === 'pending' ? 'Pending' : orderRes.status || 'Unknown'}
+                        Payment Status:{" "}
+                        <span className="font-semibold text-blue-600 bg-blue-200 px-2 py-1 rounded">
+                          {orderRes.status === "paid"
+                            ? "Paid"
+                            : orderRes.status === "pending"
+                            ? "Pending"
+                            : orderRes.status || "Unknown"}
                         </span>
                       </p>
                     </div>
@@ -541,7 +596,9 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                     <div className="w-full lg:w-full dark:text-gray-300 xl:w-48 text-left text-sm leading-5 text-gray-600">
                       {orderRes?.shippingAddress ? (
                         <>
-                          <p>{orderRes.shippingAddress.addressLine1 || "N/A"}</p>
+                          <p>
+                            {orderRes.shippingAddress.addressLine1 || "N/A"}
+                          </p>
                           <p>{orderRes.shippingAddress.addressLine2 || ""}</p>
                           <p>
                             {orderRes.shippingAddress.city},{" "}

@@ -21,6 +21,8 @@ import { useCountdown } from "@/hooks/use-countdown";
 
 type ProductCardVariant = "grid" | "list";
 
+type ProductCardVariant = "grid" | "list";
+
 const getLabel = (product: any) => {
   // Check for out of stock first
   const isOutOfStock =

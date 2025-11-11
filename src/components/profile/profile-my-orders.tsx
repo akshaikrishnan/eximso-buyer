@@ -37,7 +37,11 @@ interface OrderGroup {
 const MyOrders = () => {
   const router = useRouter();
 
-  const { data: orderGroups, isLoading, isError } = useQuery({
+  const {
+    data: orderGroups,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["orders"],
     queryFn: async (): Promise<OrderGroup[]> => {
       const res = await api.get(`${endpoints.order}/grouped`);
@@ -102,7 +106,6 @@ const MyOrders = () => {
                       Grand Total:
                     </span>
                     <span className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">
-
                       <Price amount={Number(group.GrandTotal) || 0} />
                     </span>
                   </div>
@@ -126,14 +129,15 @@ const MyOrders = () => {
                             Order #{order.orderNumber}
                           </h3>
                           <span
-                            className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium w-fit ${order.status === "Delivered"
-                              ? "bg-green-100 text-green-800"
-                              : order.status === "Shipped"
+                            className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-xs font-medium w-fit ${
+                              order.status === "Delivered"
+                                ? "bg-green-100 text-green-800"
+                                : order.status === "Shipped"
                                 ? "bg-blue-100 text-blue-800"
                                 : order.status === "Cancelled"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                              }`}
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
                           >
                             {order.status}
                           </span>
@@ -189,7 +193,12 @@ const MyOrders = () => {
                                       <Price amount={item.price} />
                                     </span>
                                     <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-md text-xs font-semibold bg-red-100 text-red-700">
-                                      {Math.round(((item.price - item.offerPrice) / item.price) * 100)}% OFF
+                                      {Math.round(
+                                        ((item.price - item.offerPrice) /
+                                          item.price) *
+                                          100
+                                      )}
+                                      % OFF
                                     </span>
                                   </div>
                                 </div>
