@@ -3,6 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import IncentivesFooter from "./incentives-footer";
+import EmailSubscription from "./home/email-subscription";
 import { FaFacebookF, FaYoutube, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
 const footerNavigation = {
@@ -46,6 +47,7 @@ export default function Footer() {
   return (
     <>
       {pathname === '/' && <IncentivesFooter />}
+      {pathname === '/' && <EmailSubscription />}
       <footer aria-labelledby="footer-heading" className="bg-white">
         <h2 id="footer-heading" className="sr-only">
           Footer
@@ -115,7 +117,7 @@ export default function Footer() {
                   {footerNavigation.social.map((item) => (
                     <li key={item.name} className="text-sm">
                     <a
-                        href={item.href}
+                        href={item.href}  
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center text-gray-500 hover:text-gray-600"
