@@ -117,7 +117,7 @@ export default function Footer() {
                   {footerNavigation.social.map((item) => (
                     <li key={item.name} className="text-sm">
                     <a
-                        href={item.href}
+                        href={item.href}  
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center text-gray-500 hover:text-gray-600"
