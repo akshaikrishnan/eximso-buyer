@@ -1,6 +1,11 @@
 name: Promote Release PR (Merge, Tag, Release, Sync Back)
 
+# This workflow runs automatically every Saturday at 12:00 PM IST (06:30 UTC)
+# and can also be run manually with an optional version input.
 on:
+  schedule:
+    - cron: "30 7 * * 6" # 07:30 UTC on Saturday (1:00 PM IST)
+
   workflow_dispatch:
     inputs:
       pr_number:
