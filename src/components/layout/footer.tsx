@@ -117,12 +117,18 @@ export default function Footer() {
                 </div>
 
                 {/* ⭐ IMAGE COLUMN ⭐ */}
-                <div className="flex justify-start lg:justify-center items-start">
+                <div className="hidden lg:flex justify-start lg:justify-center items-start">
+                 <Link 
+                  href={process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >
                   <img
                     src="/images/common/footerImg.jpg"
                     alt="Footer Image"
                     className="w-full  h-auto object-contain rounded-md"
                   />
+                  </Link>
                 </div>
 
               </div>

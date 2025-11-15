@@ -46,7 +46,7 @@ export default function EmailSubscription() {
           {/* Left: Heading + Subtext */}
           <div className="text-center sm:text-left">
             <h2 className="text-2xl font-semibold text-gray-900">
-              Get our updates for more subscribe
+              Subscribe to get our latest updates
             </h2>
             <p className="text-gray-600 text-sm mt-1">
               Subscribe to our newsletter and stay updated.
