@@ -110,40 +110,40 @@ const desktopLayoutBreakpoints: {
   options: LayoutOption[];
   defaultValue: number;
 }[] = [
-  {
-    minWidth: 1536,
-    options: [
-      { label: "4 per row", value: 4 },
-      { label: "5 per row", value: 5 },
-      { label: "6 per row", value: 6 },
-    ],
-    defaultValue: 5,
-  },
-  {
-    minWidth: 1280,
-    options: [
-      { label: "4 per row", value: 4 },
-      { label: "5 per row", value: 5 },
-    ],
-    defaultValue: 4,
-  },
-  {
-    minWidth: 1024,
-    options: [
-      { label: "3 per row", value: 3 },
-      { label: "4 per row", value: 4 },
-    ],
-    defaultValue: 3,
-  },
-  {
-    minWidth: 0,
-    options: [{ label: "3 per row", value: 3 }],
-    defaultValue: 3,
-  },
-];
+    {
+      minWidth: 1536,
+      options: [
+        { label: "4 per row", value: 4 },
+        { label: "5 per row", value: 5 },
+        { label: "6 per row", value: 6 },
+      ],
+      defaultValue: 5,
+    },
+    {
+      minWidth: 1280,
+      options: [
+        { label: "4 per row", value: 4 },
+        { label: "5 per row", value: 5 },
+      ],
+      defaultValue: 4,
+    },
+    {
+      minWidth: 1024,
+      options: [
+        { label: "3 per row", value: 3 },
+        { label: "4 per row", value: 4 },
+      ],
+      defaultValue: 3,
+    },
+    {
+      minWidth: 0,
+      options: [{ label: "3 per row", value: 3 }],
+      defaultValue: 3,
+    },
+  ];
 
 const DEFAULT_GRID_LAYOUT: GridLayoutConfig = {
-  mobile: 2,
+  mobile: 1,
   desktop: 4,
 };
 
@@ -511,7 +511,7 @@ export default function ProductLayout({
 
         <main className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-5">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl font-bold">
               {title}
             </h1>
 

@@ -109,6 +109,7 @@ type ProductCardProps = {
   product: any;
   layoutVariant?: ProductCardVariant;
   isMobileViewport?: boolean;
+  isMinimal?: boolean;
 };
 
 const formatDimensionText = (dimensions?: any) => {
@@ -130,6 +131,7 @@ export default function ProductCard({
   product,
   layoutVariant = "grid",
   isMobileViewport = false,
+  isMinimal = false,
 }: ProductCardProps) {
   const isOutOfStock =
     product?.stock < product?.minimumOrderQuantity ||
@@ -327,11 +329,11 @@ export default function ProductCard({
         <header className="flex flex-col gap-2">
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1">
-              {brandName && (
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                  {brandName}
-                </p>
-              )}
+          
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              {brandName}
+            </p>
+          {/* )} */}
               <h3 className="text-base font-semibold leading-tight text-slate-900 line-clamp-2">
                 {product.name}
               </h3>
@@ -350,30 +352,32 @@ export default function ProductCard({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-            {ratingValue > 0 ? (
-              <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-600">
-                <StarIcon className="h-4 w-4" />
-                {ratingValue.toFixed(1)}
-                {reviewsCount ? (
-                  <span className="text-[11px] text-slate-500">
-                    ({reviewsCount})
-                  </span>
-                ) : null}
-              </span>
-            ) : (
-              <span className="text-xs text-slate-500">No ratings yet</span>
-            )}
-            {product?.countryOfOrigin && (
-              <span className="flex items-center gap-1 text-xs text-slate-500">
-                <GlobeAsiaAustraliaIcon className="h-4 w-4" />
-                {product.countryOfOrigin}
-              </span>
-            )}
-          </div>
+          
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+              {ratingValue > 0 ? (
+                <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-600">
+                  <StarIcon className="h-4 w-4" />
+                  {ratingValue.toFixed(1)}
+                  {reviewsCount ? (
+                    <span className="text-[11px] text-slate-500">
+                      ({reviewsCount})
+                    </span>
+                  ) : null}
+                </span>
+              ) : (
+                <span className="text-xs text-slate-500">No ratings yet</span>
+              )}
+              {product?.countryOfOrigin && (
+                <span className="flex items-center gap-1 text-xs text-slate-500">
+                  <GlobeAsiaAustraliaIcon className="h-4 w-4" />
+                  {product.countryOfOrigin}
+                </span>
+              )}
+            </div>
+          
         </header>
 
-        {shortDescription && (
+        {!isMinimal && shortDescription && (
           <p
             className={mergeClasses(
               "text-sm text-slate-600",
@@ -384,56 +388,58 @@ export default function ProductCard({
           </p>
         )}
 
-        <dl
-          className={mergeClasses(
-            "grid gap-3 text-xs text-slate-600",
-            isListLayout ? "grid-cols-2" : "sm:grid-cols-2"
-          )}
-        >
-          {!flashSaleActive && product?.minimumOrderQuantity ? (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <BuildingStorefrontIcon className="h-4 w-4 text-slate-400" />
-              <div>
-                <dt className="font-medium text-slate-700">MOQ</dt>
-                <dd className="text-slate-500">
-                  {product.minimumOrderQuantity}
-                  {product?.uom ? ` ${product.uom}` : " units"}
-                </dd>
+        {!isMinimal && (
+          <dl
+            className={mergeClasses(
+              "grid gap-3 text-xs text-slate-600",
+              isListLayout ? "grid-cols-2" : "sm:grid-cols-2"
+            )}
+          >
+            {!flashSaleActive && product?.minimumOrderQuantity ? (
+              <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                <BuildingStorefrontIcon className="h-4 w-4 text-slate-400" />
+                <div>
+                  <dt className="font-medium text-slate-700">MOQ</dt>
+                  <dd className="text-slate-500">
+                    {product.minimumOrderQuantity}
+                    {product?.uom ? ` ${product.uom}` : " units"}
+                  </dd>
+                </div>
               </div>
-            </div>
-          ) : null}
-          {!flashSaleActive &&
-          typeof product?.stock === "number" &&
-          product.stock >= 0 ? (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <TagIcon className="h-4 w-4 text-slate-400" />
-              <div>
-                <dt className="font-medium text-slate-700">Available</dt>
-                <dd className="text-slate-500">{product.stock} in stock</dd>
+            ) : null}
+            {!flashSaleActive &&
+            typeof product?.stock === "number" &&
+            product.stock >= 0 ? (
+              <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                <TagIcon className="h-4 w-4 text-slate-400" />
+                <div>
+                  <dt className="font-medium text-slate-700">Available</dt>
+                  <dd className="text-slate-500">{product.stock} in stock</dd>
+                </div>
               </div>
-            </div>
-          ) : null}
-          {!flashSaleActive && dimensionText && (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <CubeIcon className="h-4 w-4 text-slate-400" />
-              <div>
-                <dt className="font-medium text-slate-700">Dimensions</dt>
-                <dd className="text-slate-500">{dimensionText}</dd>
+            ) : null}
+            {!flashSaleActive && dimensionText && (
+              <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                <CubeIcon className="h-4 w-4 text-slate-400" />
+                <div>
+                  <dt className="font-medium text-slate-700">Dimensions</dt>
+                  <dd className="text-slate-500">{dimensionText}</dd>
+                </div>
               </div>
-            </div>
-          )}
-          {!flashSaleActive && weightText && (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <CubeIcon className="h-4 w-4 text-slate-400" />
-              <div>
-                <dt className="font-medium text-slate-700">Weight</dt>
-                <dd className="text-slate-500">{weightText}</dd>
+            )}
+            {!flashSaleActive && weightText && (
+              <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                <CubeIcon className="h-4 w-4 text-slate-400" />
+                <div>
+                  <dt className="font-medium text-slate-700">Weight</dt>
+                  <dd className="text-slate-500">{weightText}</dd>
+                </div>
               </div>
-            </div>
-          )}
-        </dl>
+            )}
+          </dl>
+        )}
 
-        {tags.length > 0 && (
+        {!isMinimal && tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <span
@@ -487,7 +493,7 @@ export default function ProductCard({
                 <Price amount={strikePrice} />
               </p>
             )}
-            {hasDiscount && discountPercentage > 0 && (
+            {!isMinimal && hasDiscount && discountPercentage > 0 && (
               <p
                 className={mergeClasses(
                   "text-xs font-medium",

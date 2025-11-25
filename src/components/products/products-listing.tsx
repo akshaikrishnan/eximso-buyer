@@ -47,14 +47,14 @@ export default async function ProductsListing({ params, searchParams }: any) {
   const pageData: any = await queryClient.getQueryData(["products", {}, ""]);
   const title = res.data?.result?.title ?? "Products";
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ProductLayout
-        params={params.params}
-        searchParams={searchParams}
-        title={title}
-      >
-        <ProductsGrid params={params.params} />
-      </ProductLayout>
-    </HydrationBoundary>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <ProductLayout
+          params={params.params}
+          searchParams={searchParams}
+          title={title}
+        >
+          <ProductsGrid params={params.params} isMinimal={false} />
+        </ProductLayout>
+      </HydrationBoundary>
   );
 }
