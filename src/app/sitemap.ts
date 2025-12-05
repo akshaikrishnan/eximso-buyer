@@ -2,7 +2,7 @@
 import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://eximso.com";
-export const revalidate = 60 * 60 * 24; // 24 hours
+const revalidate = 60 * 60 * 24; // 24 hours
 
 type ProductApiResponse = {
   result?: {
