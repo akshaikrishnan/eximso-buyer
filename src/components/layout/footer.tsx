@@ -4,7 +4,12 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import IncentivesFooter from "./incentives-footer";
 import EmailSubscription from "./home/email-subscription";
-import { FaFacebookF, FaYoutube, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import {
+  FaFacebookF,
+  FaYoutube,
+  FaInstagram,
+  FaLinkedinIn,
+} from "react-icons/fa";
 import Link from "next/link";
 import { BuildingStorefrontIcon } from "@heroicons/react/24/outline";
 
@@ -30,15 +35,36 @@ const footerNavigation = {
     { name: "Shipping Policy", href: "/policy/shipping-policy" },
   ],
   social: [
-    { name: "Facebook", href: "https://www.facebook.com/profile.php?id=61579842334275", icon: FaFacebookF },
-    { name: "YouTube", href: "https://www.youtube.com/@eximso", icon: FaYoutube },
-    { name: "Instagram", href: "https://www.instagram.com/eximso_com/", icon: FaInstagram },
-    { name: "LinkedIn", href: "https://www.linkedin.com/company/eximso/?viewAsMember=true", icon: FaLinkedinIn },
+    {
+      name: "Facebook",
+      href: "https://www.facebook.com/profile.php?id=61579842334275",
+      icon: FaFacebookF,
+    },
+    {
+      name: "YouTube",
+      href: "https://www.youtube.com/@eximso",
+      icon: FaYoutube,
+    },
+    {
+      name: "Instagram",
+      href: "https://www.instagram.com/eximso_com/",
+      icon: FaInstagram,
+    },
+    {
+      name: "LinkedIn",
+      href: "https://www.linkedin.com/company/eximso/?viewAsMember=true",
+      icon: FaLinkedinIn,
+    },
   ],
   bottomLinks: [
-    { name: "Accessibility", href: "#" },
-    { name: "Privacy", href: "#" },
-    { name: "Terms", href: "#" },
+    {
+      name: "Sitemap",
+      href: "/sitemap.xml",
+    },
+    {
+      name: "Become a Seller",
+      href: process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login",
+    },
   ],
 };
 
@@ -51,22 +77,29 @@ export default function Footer() {
       {pathname === "/" && <EmailSubscription />}
 
       <footer aria-labelledby="footer-heading" className="bg-white">
-        <h2 id="footer-heading" className="sr-only">Footer</h2>
+        <h2 id="footer-heading" className="sr-only">
+          Footer
+        </h2>
 
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="border-t border-gray-200">
-
             {/* Grid Columns */}
             <div className="mt-16 flex justify-center">
               <div className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 px-4">
-
                 {/* Customer Service */}
                 <div className="flex flex-col items-start text-left">
-                  <h3 className="text-sm font-medium text-gray-900">Customer Service</h3>
+                  <h3 className="text-sm font-medium text-gray-900">
+                    Customer Service
+                  </h3>
                   <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.customerService.map((item) => (
                       <li key={item.name} className="text-sm">
-                        <a href={item.href} className="text-gray-500 hover:text-gray-600">{item.name}</a>
+                        <a
+                          href={item.href}
+                          className="text-gray-500 hover:text-gray-600"
+                        >
+                          {item.name}
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -78,7 +111,12 @@ export default function Footer() {
                   <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.company.map((item) => (
                       <li key={item.name} className="text-sm">
-                        <a href={item.href} className="text-gray-500 hover:text-gray-600">{item.name}</a>
+                        <a
+                          href={item.href}
+                          className="text-gray-500 hover:text-gray-600"
+                        >
+                          {item.name}
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -90,7 +128,12 @@ export default function Footer() {
                   <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.legal.map((item) => (
                       <li key={item.name} className="text-sm">
-                        <a href={item.href} className="text-gray-500 hover:text-gray-600">{item.name}</a>
+                        <a
+                          href={item.href}
+                          className="text-gray-500 hover:text-gray-600"
+                        >
+                          {item.name}
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -98,7 +141,9 @@ export default function Footer() {
 
                 {/* Social */}
                 <div className="flex flex-col items-start text-left">
-                  <h3 className="text-sm font-medium text-gray-900">Follow Us</h3>
+                  <h3 className="text-sm font-medium text-gray-900">
+                    Follow Us
+                  </h3>
                   <ul role="list" className="mt-2 space-y-3">
                     {footerNavigation.social.map((item) => (
                       <li key={item.name} className="text-sm">
@@ -118,19 +163,18 @@ export default function Footer() {
 
                 {/* ⭐ IMAGE COLUMN ⭐ */}
                 <div className="hidden lg:flex justify-start lg:justify-center items-start">
-                 <Link 
-                  href={process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login"}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  <Link
+                    href={process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login"}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                  <img
-                    src="/images/common/footerImg.jpg"
-                    alt="Footer Image"
-                    className="w-full  h-auto object-contain rounded-md"
-                  />
+                    <img
+                      src="/images/common/footerImg.jpg"
+                      alt="Footer Image"
+                      className="w-full  h-auto object-contain rounded-md"
+                    />
                   </Link>
                 </div>
-
               </div>
             </div>
 
@@ -150,20 +194,24 @@ export default function Footer() {
             {/* Bottom Section */}
             <div className="mt-10 md:flex md:items-center md:justify-between">
               <p className="text-sm text-gray-500 text-center md:text-left">
-                &copy; 2025 All Rights Reserved
+                &copy; {new Date().getFullYear()} All Rights Reserved |
+                Eximso.com
               </p>
 
               <div className="mt-4 flex items-center justify-center md:mt-0">
                 <div className="flex space-x-8">
                   {footerNavigation.bottomLinks.map((item) => (
-                    <a key={item.name} href={item.href} className="text-sm text-gray-500 hover:text-gray-600">
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      className="text-sm text-gray-500 hover:text-gray-600"
+                    >
                       {item.name}
                     </a>
                   ))}
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </footer>
