@@ -47,7 +47,7 @@ export const sample = {
       description: "Shipping Globally",
       price: 40,
       icon: "/images/common/dhl.png",
-      isActive: true,
+      isActive: false,
     },
     {
       _id: "67c00428d4450ae7557fd892",
@@ -61,7 +61,7 @@ export const sample = {
       title: "India Post",
       description: "Currenty Not Available",
       icon: "/images/common/india-post.jpg",
-      isActive: false,
+      isActive: true,
     },
   ],
 };

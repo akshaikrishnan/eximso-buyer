@@ -30,14 +30,6 @@ export default function CheckoutPage() {
     queryKey: ["payment-providers"],
     queryFn: () =>
       api.get(endpoints.paymentProviders).then((res) => {
-        const defaultProvider = res.data.find(
-          (item: any) => item.slug === "payu"
-        );
-        console.log({ defaultProvider });
-        setCheckOutData((prev: any) => ({
-          ...prev,
-          paymentMethod: defaultProvider || res.data[0],
-        }));
         return res.data;
       }),
     refetchOnWindowFocus: false,
@@ -48,7 +40,7 @@ export default function CheckoutPage() {
     billingAddress: null,
     isSameAddress: true,
     shippingMethod: sample.shippimngMethods.find((item) => item.isActive),
-    paymentMethod: paymentProviders?.find((item: any) => item.isActive),
+    paymentMethod: null,
   });
   const { subTotal } = useCart();
 
@@ -80,6 +72,19 @@ export default function CheckoutPage() {
   const handleCheckoutData = (data: Partial<CheckoutData>) => {
     setCheckOutData({ ...checkOutData, ...data });
   };
+
+  React.useEffect(() => {
+    if (paymentProviders && !checkOutData.paymentMethod) {
+      const defaultProvider = paymentProviders.find(
+        (item: any) =>
+          item.slug === process.env.NEXT_PUBLIC_DEFAULT_PAYMENT_PROVIDER
+      );
+      setCheckOutData((prev: any) => ({
+        ...prev,
+        paymentMethod: defaultProvider || paymentProviders[0],
+      }));
+    }
+  }, [paymentProviders, checkOutData.paymentMethod]);
 
   const isValid = () => {
     if (!checkOutData.isSameAddress && !checkOutData.billingAddress) {
