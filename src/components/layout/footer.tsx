@@ -57,10 +57,10 @@ const footerNavigation = {
     },
   ],
   bottomLinks: [
-    {
-      name: "Sitemap",
-      href: "/sitemap.xml",
-    },
+    // {
+    //   name: "Sitemap",
+    //   href: "/sitemap.xml",
+    // },
     {
       name: "Become a Seller",
       href: process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login",
