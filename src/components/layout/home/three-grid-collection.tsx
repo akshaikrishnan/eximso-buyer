@@ -20,14 +20,12 @@ const callouts = [
     href: "/angana-henna-powder-40gms",
   },
   {
-    name: "Premium black pepper",
-    description: "Mulakupetti Premium Black Pepper Powder 100 gm.",
-    imageSrc:
-      // "https://tailwindui.com/img/ecommerce-images/home-page-02-edition-03.jpg",
-      "/images/products/Kurumulak.webp",
-    imageAlt: "Premium black pepper.",
-    href: "/premium-black-pepper-1",
-  },
+    name: "Handcrafted Home Decor Showpiece",
+    description: "Beautiful handmade decor crafted by local artisans perfect for elevating your living room aesthetics.",
+    imageSrc: "/images/products/HomeDecorShowpiece.webp",
+    imageAlt: "Handcrafted home decor showpiece.",
+    href: "",
+  }
 ];
 
 export default function ThreeGridCollection() {
