@@ -80,7 +80,7 @@ export default function CheckoutPage() {
   // Function to get checkout info based on shipping address
   const getCheckoutInfo = React.useCallback(async (addressId: string) => {
     if (!addressId) return;
-    
+
     try {
       const response = await api.get(endpoints.getCheckoutInfo, {
         params: { addressId },
@@ -95,11 +95,14 @@ export default function CheckoutPage() {
   }, []);
 
   // Call getCheckoutInfo when shipping address changes or on initial load
-  React.useEffect(() => {
-    if (checkOutData.shippingAddress?._id) {
-      getCheckoutInfo(checkOutData.shippingAddress._id);
-    }
-  }, [checkOutData.shippingAddress?._id, getCheckoutInfo]);
+  const {
+    data: checkOutInfo,
+    isLoading: checkoutInfoLoading,
+    error,
+  } = useQuery({
+    queryKey: ["checkout-info", checkOutData.shippingAddress?._id, subTotal],
+    queryFn: () => getCheckoutInfo(checkOutData.shippingAddress?._id),
+  });
 
   const handleCheckoutData = (data: Partial<CheckoutData>) => {
     setCheckOutData({ ...checkOutData, ...data });
@@ -117,10 +120,11 @@ export default function CheckoutPage() {
 
   const initiatePayment = () => {
     // Ensure shippingMethod is always set (use default if not available)
-    const defaultShippingMethod = checkOutData.shippingMethod || 
-      sample.shippimngMethods.find((item) => item.isActive) || 
+    const defaultShippingMethod =
+      checkOutData.shippingMethod ||
+      sample.shippimngMethods.find((item) => item.isActive) ||
       sample.shippimngMethods[0];
-    
+
     paymentMutation.mutate({
       shippingAddress: checkOutData.shippingAddress._id,
       billingAddress: checkOutData.isSameAddress
@@ -138,7 +142,10 @@ export default function CheckoutPage() {
 
           <div className="mx-auto grid max-w-lg grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
             <div className="mx-auto w-full max-w-lg order-1 xl:order-2 xl:sticky top-2">
-              <OrderSummary>
+              <OrderSummary
+                checkoutInfo={checkOutInfo}
+                isCheckoutInfoLoading={checkoutInfoLoading}
+              >
                 <div className="hidden lg:block">
                   <PlaceOrderButton
                     action={initiatePayment}

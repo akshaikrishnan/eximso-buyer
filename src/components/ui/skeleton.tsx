@@ -12,7 +12,7 @@ export function Skeleton({
   return (
     <span
       className={cn(
-        "animate-pulse bg-gray-200",
+        "animate-pulse bg-gray-200 block",
         variant === "circle" ? "rounded-full" : "rounded-md",
         className
       )}

@@ -57,24 +57,29 @@ export function OrderSummary({
   isAnyOfItemsOutOfStock = false,
   itemCount = 0,
   cart,
+  checkoutInfo,
+  isCheckoutInfoLoading = false,
 }: {
   subTotal: number;
   isAnyOfItemsOutOfStock?: boolean;
   children?: ReactNode;
   itemCount?: number;
   cart?: any;
+  checkoutInfo?: any;
+  isCheckoutInfoLoading?: boolean;
 }) {
   // Calculate total regular price (sum of all product prices)
-  const totalPrice = cart?.items?.reduce((acc: number, item: any) => {
-    const regularPrice = item.product?.price || 0;
-    const qty = item.quantity || 1;
-    return acc + (regularPrice * qty);
-  }, 0) || subTotal;
+  const totalPrice =
+    cart?.items?.reduce((acc: number, item: any) => {
+      const regularPrice = item.product?.price || 0;
+      const qty = item.quantity || 1;
+      return acc + regularPrice * qty + (checkoutInfo?.shippingAmount || 100);
+    }, 0) || subTotal;
 
   // Calculate total discount
   const totalDiscount = totalPrice - subTotal;
 
-  const shippingEstimate = Number(process.env.shippingesstimate) || 40;
+  const shippingEstimate = Number(checkoutInfo?.shippingAmount) || 100;
   const taxAmount = subTotal * 0.05;
   const orderTotal = Math.ceil(subTotal + taxAmount + shippingEstimate);
 
@@ -88,7 +93,7 @@ export function OrderSummary({
         <div className="flex justify-center items-center w-full space-y-4 flex-col pb-4">
           <div className="flex justify-between items-center w-full">
             <p className="text-base dark:text-white leading-5 text-gray-800">
-              Price ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+              Price ({itemCount} {itemCount === 1 ? "item" : "items"})
             </p>
             <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
               <Price amount={totalPrice} />
@@ -111,7 +116,10 @@ export function OrderSummary({
               Shipping Amount
             </p>
             <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
-              <Price amount={shippingEstimate} />
+              <Price
+                amount={shippingEstimate}
+                isLoadingExternal={isCheckoutInfoLoading}
+              />
             </p>
           </div>
 
@@ -131,7 +139,11 @@ export function OrderSummary({
               Total Amount
             </p>
             <p className="text-lg dark:text-white font-bold leading-5 text-gray-800">
-              <Price amount={orderTotal} />
+              <Price
+                amount={orderTotal}
+                isLoadingExternal={isCheckoutInfoLoading}
+                className=""
+              />
             </p>
           </div>
         </div>
@@ -145,8 +157,16 @@ export function OrderSummary({
         {totalDiscount > 0 && (
           <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <svg
+                className="w-5 h-5 text-green-600 dark:text-green-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
               </svg>
               <p className="text-sm font-medium text-green-700 dark:text-green-300">
                 You&apos;ll save <Price amount={totalDiscount} /> on this order!
