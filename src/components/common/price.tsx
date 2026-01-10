@@ -6,12 +6,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface PriceProps {
   amount: number;
   className?: string;
+  isLoadingExternal?: boolean;
 }
 
-export function Price({ amount, className }: PriceProps) {
+export function Price({ amount, className, isLoadingExternal }: PriceProps) {
   const { convertPrice, currentCurrency, isLoading, error } = useCurrency();
 
-  if (isLoading) {
+  if (isLoadingExternal || isLoading) {
     return <Skeleton className={`h-6 w-20 ${className}`} />;
   }
 

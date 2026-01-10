@@ -11,8 +11,12 @@ import clsx from "clsx";
 
 export default function OrderSummaryDetails({
   children,
+  checkoutInfo,
+  isCheckoutInfoLoading,
 }: {
   children?: ReactNode;
+  checkoutInfo?: any;
+  isCheckoutInfoLoading?: boolean;
 }) {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
   const [showCart, setShowCart] = React.useState(false);
@@ -55,7 +59,10 @@ export default function OrderSummaryDetails({
           />
         </div>
         <div
-          className={clsx("flow-root lg:block max-h-64 overflow-y-auto", showCart ? "block" : "hidden")}
+          className={clsx(
+            "flow-root lg:block max-h-64 overflow-y-auto",
+            showCart ? "block" : "hidden"
+          )}
         >
           <ul role="list" className="-my-6 divide-y divide-gray-200">
             {cart?.items.map((item: CartItem) => (
@@ -72,7 +79,14 @@ export default function OrderSummaryDetails({
                         <a href={item.product.slug}>{item.product.name}</a>
                       </h3>
                       <p className="text-gray-900">
-                        <Price amount={item.product.offerPrice && item.product.offerPrice > 0 ? item.product.offerPrice : item.product.price} />
+                        <Price
+                          amount={
+                            item.product.offerPrice &&
+                            item.product.offerPrice > 0
+                              ? item.product.offerPrice
+                              : item.product.price
+                          }
+                        />
                       </p>
 
                       <div className=" text-gray-500 ">
@@ -106,6 +120,8 @@ export default function OrderSummaryDetails({
           isAnyOfItemsOutOfStock={isAnyOfItemsOutOfStock}
           itemCount={cart?.items?.length || 0}
           cart={cart}
+          checkoutInfo={checkoutInfo}
+          isCheckoutInfoLoading={isCheckoutInfoLoading}
         >
           {children}
         </OrderSummary>

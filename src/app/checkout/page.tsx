@@ -30,6 +30,14 @@ export default function CheckoutPage() {
     queryKey: ["payment-providers"],
     queryFn: () =>
       api.get(endpoints.paymentProviders).then((res) => {
+        const defaultProvider = res.data.find(
+          (item: any) => item.slug === "payu"
+        );
+        console.log({ defaultProvider });
+        setCheckOutData((prev: any) => ({
+          ...prev,
+          paymentMethod: defaultProvider || res.data[0],
+        }));
         return res.data;
       }),
     refetchOnWindowFocus: false,
@@ -40,7 +48,7 @@ export default function CheckoutPage() {
     billingAddress: null,
     isSameAddress: true,
     shippingMethod: sample.shippimngMethods.find((item) => item.isActive),
-    paymentMethod: null,
+    paymentMethod: paymentProviders?.find((item: any) => item.isActive),
   });
   const { subTotal } = useCart();
 
@@ -69,22 +77,36 @@ export default function CheckoutPage() {
       });
     },
   });
+  // Function to get checkout info based on shipping address
+  const getCheckoutInfo = React.useCallback(async (addressId: string) => {
+    if (!addressId) return;
+
+    try {
+      const response = await api.get(endpoints.getCheckoutInfo, {
+        params: { addressId },
+      });
+      console.log("Checkout info:", response.data);
+      // You can use this data to update UI, calculate totals, etc.
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching checkout info:", error);
+      // Don't show error toast as this is a background call
+    }
+  }, []);
+
+  // Call getCheckoutInfo when shipping address changes or on initial load
+  const {
+    data: checkOutInfo,
+    isLoading: checkoutInfoLoading,
+    error,
+  } = useQuery({
+    queryKey: ["checkout-info", checkOutData.shippingAddress?._id, subTotal],
+    queryFn: () => getCheckoutInfo(checkOutData.shippingAddress?._id),
+  });
+
   const handleCheckoutData = (data: Partial<CheckoutData>) => {
     setCheckOutData({ ...checkOutData, ...data });
   };
-
-  React.useEffect(() => {
-    if (paymentProviders && !checkOutData.paymentMethod) {
-      const defaultProvider = paymentProviders.find(
-        (item: any) =>
-          item.slug === process.env.NEXT_PUBLIC_DEFAULT_PAYMENT_PROVIDER
-      );
-      setCheckOutData((prev: any) => ({
-        ...prev,
-        paymentMethod: defaultProvider || paymentProviders[0],
-      }));
-    }
-  }, [paymentProviders, checkOutData.paymentMethod]);
 
   const isValid = () => {
     if (!checkOutData.isSameAddress && !checkOutData.billingAddress) {
@@ -97,12 +119,18 @@ export default function CheckoutPage() {
   };
 
   const initiatePayment = () => {
+    // Ensure shippingMethod is always set (use default if not available)
+    const defaultShippingMethod =
+      checkOutData.shippingMethod ||
+      sample.shippimngMethods.find((item) => item.isActive) ||
+      sample.shippimngMethods[0];
+
     paymentMutation.mutate({
       shippingAddress: checkOutData.shippingAddress._id,
       billingAddress: checkOutData.isSameAddress
         ? checkOutData.shippingAddress._id
         : checkOutData.billingAddress._id,
-      shippingMethod: checkOutData.shippingMethod._id,
+      shippingMethod: defaultShippingMethod?._id || null, // Backend will handle null/missing
       paymentMethod: checkOutData.paymentMethod.slug,
     });
   };
@@ -114,7 +142,10 @@ export default function CheckoutPage() {
 
           <div className="mx-auto grid max-w-lg grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
             <div className="mx-auto w-full max-w-lg order-1 xl:order-2 xl:sticky top-2">
-              <OrderSummary>
+              <OrderSummary
+                checkoutInfo={checkOutInfo}
+                isCheckoutInfoLoading={checkoutInfoLoading}
+              >
                 <div className="hidden lg:block">
                   <PlaceOrderButton
                     action={initiatePayment}
@@ -144,7 +175,8 @@ export default function CheckoutPage() {
                 </CheckoutBlock>
               )}
 
-              <CheckoutBlock>
+              {/* Shipping Methods UI Hidden - Backend will use default active shipping provider */}
+              {/* <CheckoutBlock>
                 <RadioSelector
                   items={sample.shippimngMethods}
                   selectedItem={checkOutData.shippingMethod}
@@ -154,7 +186,7 @@ export default function CheckoutPage() {
                   label="Shipping Methods"
                   isGrid
                 />
-              </CheckoutBlock>
+              </CheckoutBlock> */}
 
               <CheckoutBlock>
                 <RadioSelector

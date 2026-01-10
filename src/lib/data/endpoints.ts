@@ -7,6 +7,7 @@ export const endpoints = {
   wishlist: "wishlist",
   address: "address",
   checkout: "checkout",
+  getCheckoutInfo: "checkout/info",
   order: "order",
   reviews: "reviews",
   banner: "banner",
