@@ -14,7 +14,8 @@ const DynamicAddressForm = dynamic(() => import("../profile/address-form"), {
 const DynamicModal = dynamic(() => import("../ui/modal"));
 
 type AddressType = "shipping" | "billing";
-type Address = {
+
+export type Address = {
   _id: string;
   name: string;
   phone: string;
@@ -48,7 +49,6 @@ const getFormattedAddress = (address: Address) => {
     address.country,
     address.altPhone && `Alt. Phone: ${address.altPhone}`,
   ];
-
   return parts.filter(Boolean).join(", ");
 };
 
@@ -69,38 +69,35 @@ export default function AddressBlock({
     queryFn: async () => {
       const res = await api.get(endpoints.address);
       const defaultAddress = res.data.result.find(
-        (address: Address) => address.isDefault
+        (a: Address) => a.isDefault
       );
 
-      if (defaultAddress) {
-        if (type === "shipping")
-          handleCheckoutData({ [addressKey]: defaultAddress });
+      if (defaultAddress && type === "shipping") {
+        handleCheckoutData({ [addressKey]: defaultAddress });
       }
       return res.data.result;
     },
   });
 
-  const handleAddressSelect = (selectedAddress: Address) => {
-    handleCheckoutData({ [addressKey]: selectedAddress });
-  };
-
   const selectedAddress = checkoutData?.[addressKey];
 
+  const handleSelect = (address: Address) => {
+    handleCheckoutData({ [addressKey]: address });
+  };
+
   return (
-    <div className="">
-      <div className="flex items-center justify-between mb-3">
+    <div>
+      <div className="flex justify-between mb-3">
         <h4 className="text-lg font-medium text-gray-500">
           {type === "shipping" ? "Delivering To" : "Billing Address"}
         </h4>
-        {!isLoading && selectedAddress && addresses && addresses.length > 0 && (
-          <div>
-            {isEdit && <AddAddress />}
+
+        {selectedAddress && (
+          <div className="flex items-center gap-3">
+            <AddAddress onSaved={refetch} />
             <button
-              className={clsx(
-                "text-sm font-medium text-indigo-600 hover:text-indigo-500 pl-2",
-                isEdit && "border-slate-300  border-l "
-              )}
               onClick={() => setIsEdit(!isEdit)}
+              className="text-indigo-600 text-sm"
             >
               {isEdit ? "Cancel" : "Change"}
             </button>
@@ -110,44 +107,39 @@ export default function AddressBlock({
 
       {isLoading ? (
         <Loader />
-      ) : addresses && addresses.length === 0 ? (
-        <DynamicAddressForm onSave={refetch} />
       ) : isEdit || !selectedAddress ? (
         <div className="flex flex-col gap-4">
           {addresses?.map((address) => (
             <AddressCard
               key={address._id}
               address={address}
-              selected={address._id === selectedAddress?._id}
-              onSelect={handleAddressSelect}
+              selected={selectedAddress?._id === address._id}
+              onSelect={handleSelect}
               name={`address-${type}`}
+              onUpdated={refetch}
             />
           ))}
         </div>
       ) : (
         <SelectedAddress address={selectedAddress} />
       )}
+
       {type === "shipping" && (
         <div className="mt-4 text-sm">
           <input
             type="checkbox"
-            id="isSameAddress"
-            name="isSameAddress"
-            className="cursor-pointer"
             checked={checkoutData.isSameAddress}
             onChange={(e) => {
-              const addressValue = e.target.checked
-                ? checkoutData.shippingAddress
-                : null;
               handleCheckoutData({
-                billingAddress: addressValue,
-                isSameAddress: !checkoutData.isSameAddress,
+                billingAddress: e.target.checked
+                  ? checkoutData.shippingAddress
+                  : null,
+                isSameAddress: e.target.checked,
               });
-              console.log(checkoutData);
             }}
           />
-          <label htmlFor="isSameAddress" className="cursor-pointer ml-2">
-            Billing address is same as shipping address
+          <label className="ml-2">
+            Billing address is same as shipping
           </label>
         </div>
       )}
@@ -155,87 +147,114 @@ export default function AddressBlock({
   );
 }
 
+/* ================= Selected Address ================= */
+
 function SelectedAddress({ address }: { address: Address }) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex flex-col gap-1">
-        <h4 className="text-md font-medium text-gray-900">
-          {address.name}
-          <span className="text-sm font-normal text-gray-900 ml-3">
-            {address.phone}
-          </span>
-        </h4>
-        <p className="text-sm font-normal text-gray-900">
-          {getFormattedAddress(address)}
-        </p>
+    <div className="border p-4 rounded-lg">
+      <div className="font-medium">
+        {address.name} — {address.phone}
+      </div>
+      <div className="text-sm text-gray-600 mt-1">
+        {getFormattedAddress(address)}
       </div>
     </div>
   );
 }
+
+/* ================= Address Card with Edit ================= */
 
 function AddressCard({
   address,
   selected,
   onSelect,
   name,
+  onUpdated,
 }: {
   address: Address;
   selected: boolean;
-  onSelect: (address: Address) => void;
+  onSelect: (a: Address) => void;
   name: string;
+  onUpdated: () => void;
 }) {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   return (
-    <div className="flex items-center gap-4">
-      <input
-        type="radio"
-        name={name}
-        id={`${name}-${address._id}`}
-        checked={selected}
-        onChange={() => onSelect(address)}
-        className="cursor-pointer"
-      />
-      <label
-        htmlFor={`${name}-${address._id}`}
-        className="cursor-pointer flex-1"
-      >
-        <div className="text-sm font-medium">
-          {address.name}, {address.phone}
-          <span className="ml-2 italic capitalize font-semibold text-slate-600 text-xs px-2 border border-slate-300 rounded-full">
-            {address.addressType}
-          </span>
+    <>
+      <div className="border p-4 rounded-lg flex gap-4">
+        <input
+          type="radio"
+          checked={selected}
+          name={name}
+          onChange={() => onSelect(address)}
+        />
+
+        <div className="flex-1">
+          <div className="flex justify-between">
+            <div className="font-medium">
+              {address.name} — {address.phone}
+            </div>
+
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="text-indigo-600 text-sm"
+            >
+              Edit
+            </button>
+          </div>
+
+          <p className="text-sm text-gray-600 mt-1">
+            {getFormattedAddress(address)}
+          </p>
         </div>
-        <p className="text-sm font-normal text-gray-500">
-          {getFormattedAddress(address)}
-        </p>
-      </label>
-    </div>
+      </div>
+
+      <DynamicModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        title="Edit Address"
+        hideButton
+      >
+        <DynamicAddressForm
+          address={address}
+          onCancel={() => setIsEditOpen(false)}
+          onSave={() => {
+            setIsEditOpen(false);
+            onUpdated();
+          }}
+        />
+
+      </DynamicModal>
+    </>
   );
 }
 
-function AddAddress() {
-  const [isOpen, setIsOpen] = useState(false);
+/* ================= Add Address ================= */
+
+function AddAddress({ onSaved }: { onSaved: () => void }) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
       <button
-        className="text-sm font-medium text-slate-600 hover:text-indigo-500 pr-2"
-        onClick={() => setIsOpen(true)}
+        onClick={() => setOpen(true)}
+        className="text-slate-600 text-sm"
       >
         Add Address
       </button>
 
       <DynamicModal
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-        }}
+        isOpen={open}
+        onClose={() => setOpen(false)}
         title="Add Address"
-        modalClassName="max-w-7xl!"
         hideButton
       >
         <DynamicAddressForm
-          onCancel={() => setIsOpen(false)}
-          onSave={() => setIsOpen(false)}
+          onCancel={() => setOpen(false)}
+          onSave={() => {
+            setOpen(false);
+            onSaved();
+          }}
         />
       </DynamicModal>
     </>

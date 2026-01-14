@@ -69,19 +69,28 @@ export function OrderSummary({
   isCheckoutInfoLoading?: boolean;
 }) {
   // Calculate total regular price (sum of all product prices)
-  const totalPrice =
+  // 1️⃣ Pure product total
+  const itemsTotal =
     cart?.items?.reduce((acc: number, item: any) => {
-      const regularPrice = item.product?.price || 0;
-      const qty = item.quantity || 1;
-      return acc + regularPrice * qty + (checkoutInfo?.shippingAmount || 100);
-    }, 0) || subTotal;
+      const price = Number(item.product?.price || 0);
+      const qty = Number(item.quantity || 1);
+      return acc + price * qty;
+    }, 0) || 0;
 
-  // Calculate total discount
-  const totalDiscount = totalPrice - subTotal;
-
+  // 2️⃣ Shipping ONLY ONCE
   const shippingEstimate = Number(checkoutInfo?.shippingAmount) || 100;
-  const taxAmount = subTotal * 0.05;
-  const orderTotal = Math.ceil(subTotal + taxAmount + shippingEstimate);
+  console.log("shippingEstimatedss", shippingEstimate);
+  
+
+  // 3️⃣ Discount = MRP - selling price
+  const totalDiscount = itemsTotal - subTotal;
+
+  // 4️⃣ Tax
+  // const taxAmount = subTotal * 0.05;
+
+  // 5️⃣ Final payable
+  const orderTotal = Math.ceil(subTotal  + shippingEstimate);
+
 
   return (
     <section className="mt-16 lg:col-span-5 lg:mt-0 lg:sticky top-5">
@@ -96,7 +105,7 @@ export function OrderSummary({
               Price ({itemCount} {itemCount === 1 ? "item" : "items"})
             </p>
             <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
-              <Price amount={totalPrice} />
+              <Price amount={itemsTotal} />
             </p>
           </div>
 
@@ -123,14 +132,14 @@ export function OrderSummary({
             </p>
           </div>
 
-          <div className="flex justify-between items-center w-full">
+          {/* <div className="flex justify-between items-center w-full">
             <p className="text-base dark:text-white leading-5 text-gray-800">
               Tax Amount
             </p>
             <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
               <Price amount={taxAmount} />
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className="border-t-2 border-gray-200 dark:border-gray-600 pt-4">
