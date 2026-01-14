@@ -31,13 +31,24 @@ const Modal: React.FC<ModalProps> = ({
   hideButton,
   modalClassName,
 }) => {
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-10">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      <div className="fixed inset-0 bg-black/30 z-40" aria-hidden="true" />
+      <div className="fixed inset-0 flex items-center justify-center p-4 z-50 overflow-y-auto">
         <DialogPanel
           className={clsx(
-            "w-full max-w-md rounded-xl bg-white p-6",
+            "w-full max-w-2xl rounded-xl bg-white p-6 my-8",
             modalClassName
           )}
         >
