@@ -7,11 +7,15 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { Price } from "@/components/common/price";
 import clsx from "clsx";
+import { useQuery } from "@tanstack/react-query";
+import { useShippingCost } from "@/hooks/use-shipping-cost";
 
 export default function Cart() {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
+  const { data: shippingInfo, isLoading: shippingInfoLoading } =
+    useShippingCost({ subTotal });
   const isAnyOfItemsOutOfStock = cart?.items?.some(
-    (item: any) => item.product.stock <= 0
+    (item: any) => item.product.stock <= 0,
   );
 
   if (isLoading) return <Loader fullScreen />;
@@ -44,6 +48,7 @@ export default function Cart() {
             isAnyOfItemsOutOfStock={isAnyOfItemsOutOfStock}
             itemCount={cart.items.length}
             cart={cart}
+            checkoutInfo={shippingInfo}
           />
         </form>
       </div>
@@ -80,7 +85,6 @@ export function OrderSummary({
   // 2️⃣ Shipping ONLY ONCE
   const shippingEstimate = Number(checkoutInfo?.shippingAmount) || 100;
   console.log("shippingEstimatedss", shippingEstimate);
-  
 
   // 3️⃣ Discount = MRP - selling price
   const totalDiscount = itemsTotal - subTotal;
@@ -89,8 +93,7 @@ export function OrderSummary({
   // const taxAmount = subTotal * 0.05;
 
   // 5️⃣ Final payable
-  const orderTotal = Math.ceil(subTotal  + shippingEstimate);
-
+  const orderTotal = Math.ceil(subTotal + shippingEstimate);
 
   return (
     <section className="mt-16 lg:col-span-5 lg:mt-0 lg:sticky top-5">
@@ -201,7 +204,7 @@ function CheckoutButton({ disabled = false }: { disabled: boolean }) {
           disabled
             ? "cursor-not-allowed bg-gray-400 text-white"
             : "w-full rounded-md border inline-block text-center border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50",
-          disabled && "cursor-not-allowed bg-gray-400 hover:bg-gray-400"
+          disabled && "cursor-not-allowed bg-gray-400 hover:bg-gray-400",
         )}
       >
         Checkout

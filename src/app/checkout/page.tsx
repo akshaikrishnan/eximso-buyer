@@ -5,6 +5,7 @@ import OrderSummary from "@/components/checkout/order-summary";
 import RadioSelector from "@/components/checkout/radio-button";
 import { Price } from "@/components/common/price";
 import { useCart } from "@/hooks/use-cart";
+import { useShippingCost } from "@/hooks/use-shipping-cost";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api/axios.interceptor";
 import { sample } from "@/lib/data/checkoutdata";
@@ -31,7 +32,7 @@ export default function CheckoutPage() {
     queryFn: () =>
       api.get(endpoints.paymentProviders).then((res) => {
         const defaultProvider = res.data.find(
-          (item: any) => item.slug === "payu"
+          (item: any) => item.slug === "payu",
         );
         console.log({ defaultProvider });
         setCheckOutData((prev: any) => ({
@@ -77,31 +78,15 @@ export default function CheckoutPage() {
       });
     },
   });
-  // Function to get checkout info based on shipping address
-  const getCheckoutInfo = React.useCallback(async (addressId: string) => {
-    if (!addressId) return;
-
-    try {
-      const response = await api.get(endpoints.getCheckoutInfo, {
-        params: { addressId },
-      });
-      console.log("Checkout info:", response.data);
-      // You can use this data to update UI, calculate totals, etc.
-      return response.data;
-    } catch (error: any) {
-      console.error("Error fetching checkout info:", error);
-      // Don't show error toast as this is a background call
-    }
-  }, []);
 
   // Call getCheckoutInfo when shipping address changes or on initial load
   const {
     data: checkOutInfo,
     isLoading: checkoutInfoLoading,
     error,
-  } = useQuery({
-    queryKey: ["checkout-info", checkOutData.shippingAddress?._id, subTotal],
-    queryFn: () => getCheckoutInfo(checkOutData.shippingAddress?._id),
+  } = useShippingCost({
+    subTotal,
+    addressId: checkOutData.shippingAddress?._id,
   });
 
   const handleCheckoutData = (data: Partial<CheckoutData>) => {
@@ -218,7 +203,7 @@ export default function CheckoutPage() {
                 amount={Math.ceil(
                   subTotal +
                     subTotal * 0.05 +
-                    (Number(process.env.shippingesstimate) || 40)
+                    (Number(process.env.shippingesstimate) || 40),
                 )}
               />
               <InformationCircleIcon
@@ -257,7 +242,7 @@ const PlaceOrderButton = ({
       onClick={action}
       className={clsx(
         "w-full flex items-center cursor-pointer font-bold justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base  text-white shadow-xs hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60",
-        className
+        className,
       )}
     >
       {isLoading ? (
