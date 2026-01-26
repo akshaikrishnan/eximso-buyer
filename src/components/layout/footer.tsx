@@ -47,7 +47,7 @@ const footerNavigation = {
     },
     {
       name: "Instagram",
-      href: "https://www.instagram.com/eximso_com/",
+      href: "https://www.instagram.com/eximso_official/",
       icon: FaInstagram,
     },
     {

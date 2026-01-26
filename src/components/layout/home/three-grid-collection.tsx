@@ -7,7 +7,7 @@ const callouts = [
       "/images/products/angana.jpg",
     imageAlt:
       "A premium herbal skincare and haircare",
-    href: "/products?collection=herbal-oil-1",
+    href: "/products/beauty-products",
   },
   {
     name: "ANGANA HERBAL POWDER",
@@ -17,14 +17,14 @@ const callouts = [
       "/images/products/power.jpg",
     imageAlt:
       "Angana herbal powders for natural coloring, cleansing, and dandruff control.",
-    href: "/angana-henna-powder-40gms",
+    href: "/products/beauty-products",
   },
   {
     name: "Handcrafted Home Decor Showpiece",
     description: "Beautiful handmade decor crafted by local artisans perfect for elevating your living room aesthetics.",
     imageSrc: "/images/products/HomeDecorShowpiece.webp",
     imageAlt: "Handcrafted home decor showpiece.",
-    href: "",
+    href: "/products/home-decor",
   }
 ];
 
@@ -54,7 +54,7 @@ export default function ThreeGridCollection() {
             </p>
           </div>
         ))}
-      </div>
+      </div>̥
     </div>
   );
 }

@@ -130,7 +130,7 @@ const Navbar = (props: any) => {
               className="Eximso-logo cursor-pointer mt-1 w-10 h-10"
             >
               <img
-                className="h-full w-full object-contain"
+                className="h-full w-full text-xs object-contain"
                 src={"/images/common/logo.png"}
                 alt="Eximso.com"
               />
@@ -179,7 +179,7 @@ const Navbar = (props: any) => {
               <Searchbar categories={categories} />
             </Suspense>
           </li>
-          <li className="nav-item location cursor-pointer lg:flex items-end gap-2 md:order-2 hidden ">
+          <li className="nav-item location cursor-default lg:flex items-end gap-2 md:order-2 hidden ">
             <div className="text-xl">
               <i className="fa-solid fa-location-dot"></i>
             </div>
@@ -196,7 +196,7 @@ const Navbar = (props: any) => {
               </div>
             )}
           </li>
-          <li className="nav-item country cursor-pointer lg:flex hidden items-center gap-2 md:order-4">
+          <li className="nav-item country cursor-default lg:flex hidden items-center gap-2 md:order-4">
             {/* <div className="w-5">
               <img
                 className="w-full h-full"

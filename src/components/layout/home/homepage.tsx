@@ -13,7 +13,7 @@ import { Suspense } from "react";
 type Banner = {
   image: string;
   title: string;
-  linkUrl: string;
+  link: string;
   type: string;
   createdAt?: string;
   updatedAt?: string;
@@ -61,7 +61,7 @@ export default async function HomePage() {
   const SLIDES = filteredBanners.map((banner: Banner) => ({
     image: banner.image || "/placeholder-image.jpg",
     title: banner.title || "Banner",
-    href: banner.linkUrl || "#",
+    href: banner.link || "#",
   }));
 
   let collectionData: CollectionGroupProps[] = [];
