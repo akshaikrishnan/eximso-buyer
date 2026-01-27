@@ -27,6 +27,7 @@ interface ProductsGridProps {
   gridLayout?: GridLayoutConfig;
   activeColumns?: number;
   isMobileViewport?: boolean;
+  isMinimal?: boolean;
 }
 
 const ProductCardSkeleton = ({
@@ -80,6 +81,7 @@ export default function ProductsGrid({
   gridLayout,
   activeColumns,
   isMobileViewport,
+  isMinimal,
 }: ProductsGridProps) {
   const searchParams = useSearchParams();
   const name = searchParams.get("q") || "";
@@ -185,6 +187,9 @@ export default function ProductsGrid({
   const effectiveIsMobile =
     typeof isMobileViewport === "boolean" ? isMobileViewport : localIsMobile;
 
+  const effectiveIsMinimal =
+    typeof isMinimal === "boolean" ? isMinimal : effectiveIsMobile;
+
   const activeColumnCount = activeColumns
     ? Math.max(activeColumns, 1)
     : Math.max(
@@ -274,11 +279,12 @@ export default function ProductsGrid({
                 cardVariant === "grid" ? "hover:scale-105" : ""
               )}
             >
-              <ProductCard
-                product={product}
-                layoutVariant={cardVariant}
-                isMobileViewport={effectiveIsMobile}
-              />
+          <ProductCard
+            product={product}
+            layoutVariant={cardVariant}
+            isMobileViewport={effectiveIsMobile}
+            isMinimal={effectiveIsMinimal}
+          />
             </div>
           ))}
           {isFetchingNextPage &&
