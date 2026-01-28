@@ -32,7 +32,16 @@ interface EditAddressModalProps {
   address: Address;
   onClose: () => void;
 }
+const sanitizers: Record<string, (v: string) => string> = {
+  name: (v) => v.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ").trimStart(),
+  city: (v) => v.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ").trimStart(),
+  state: (v) => v.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ").trimStart(),
 
+  phone: (v) => v.replace(/\D/g, "").slice(0, 10),
+  altPhone: (v) => v.replace(/\D/g, "").slice(0, 10),
+
+  pincode: (v) => v.replace(/\D/g, "").slice(0, 6),
+};
 const EditAddressModal: React.FC<EditAddressModalProps> = ({
   address,
   onClose,
@@ -71,28 +80,33 @@ const EditAddressModal: React.FC<EditAddressModalProps> = ({
       toast({
         title: "Error",
         description: "Failed to edit address!",
-        variant: "default",
+        variant: "destructive",
       });
-    },
-  });
+    },  });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target as HTMLInputElement;
-    if (type === "checkbox") {
-      const checkbox = e.target as HTMLInputElement;
-      setFormData((prev) => ({
-        ...prev,
-        [name]: checkbox.checked,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
+const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+) => {
+  const target = e.target;
+
+  if (target instanceof HTMLInputElement && target.type === "checkbox") {
+    setFormData((prev) => ({
+      ...prev,
+      [target.name]: target.checked,
+    }));
+    return;
+  }
+
+  const sanitize = sanitizers[target.name];
+
+  setFormData((prev) => ({
+    ...prev,
+    [target.name]: sanitize
+      ? sanitize(target.value)
+      : target.value.trimStart(),
+  }));
+};
+
 
   const handleCountrySelect = (countryName: string) => {
     setFormData((prev) => ({
@@ -102,11 +116,33 @@ const EditAddressModal: React.FC<EditAddressModalProps> = ({
     setIsCountryDropdownOpen(false);
     setCountrySearch("");
   };
+const validateForm = () => {
+  if (!formData.name.trim()) return "Name is required";
+  if (!/^\d{10}$/.test(formData.phone)) return "Phone must be 10 digits";
+  if (formData.altPhone && !/^\d{10}$/.test(formData.altPhone))
+    return "Alternate phone must be 10 digits";
+  if (!/^\d{6}$/.test(formData.pincode)) return "Invalid pincode";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+    return "Invalid email address";
+  if (!formData.addressLine1.trim()) return "Address Line 1 is required";
+  if (!formData.city.trim()) return "City is required";
+  if (!formData.state.trim()) return "State is required";
+  if (!formData.country) return "Country is required";
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateAddressMutation.mutate(formData);
-  };
+  return null;
+};
+
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const error = validateForm();
+  if (error) {
+    toast({ title: "Validation Error", description: error, variant: "destructive" });
+    return;
+  }
+
+  updateAddressMutation.mutate(formData);
+};
 
   return (
     <div className="fixed inset-0 bg-white/5 backdrop-blur-sm flex items-center justify-center z-50">
@@ -255,8 +291,8 @@ const EditAddressModal: React.FC<EditAddressModalProps> = ({
                   <input
                     type="radio"
                     name="addressType"
-                    value="Home"
-                    checked={formData.addressType === "Home"}
+                    value="home"
+                    checked={formData.addressType === "home"}
                     onChange={handleChange}
                     className="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                     required
@@ -267,20 +303,20 @@ const EditAddressModal: React.FC<EditAddressModalProps> = ({
                   <input
                     type="radio"
                     name="addressType"
-                    value="Work"
-                    checked={formData.addressType === "Work"}
+                    value="office"
+                    checked={formData.addressType === "office"}
                     onChange={handleChange}
                     className="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                     required
                   />
-                  <span className="ml-2 text-gray-700">Work</span>
+                  <span className="ml-2 text-gray-700">Office</span>
                 </label>
                 <label className="inline-flex items-center ml-4">
                   <input
                     type="radio"
                     name="addressType"
-                    value="Other"
-                    checked={formData.addressType === "Other"}
+                    value="other"
+                    checked={formData.addressType === "other"}
                     onChange={handleChange}
                     className="form-radio h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                     required

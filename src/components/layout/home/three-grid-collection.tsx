@@ -54,7 +54,7 @@ export default function ThreeGridCollection() {
             </p>
           </div>
         ))}
-      </div>̥
+      </div>
     </div>
   );
 }
