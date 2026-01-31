@@ -162,10 +162,34 @@ export default function UserProfile() {
     },
   });
 
+  const sanitizers: Record<string, (value: string) => string> = {
+    name: (v) =>
+      v
+        .replace(/[^a-zA-Z\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trimStart(),
+
+    phone: (v) =>
+      v
+        .replace(/\D/g, "")   // digits only
+        .slice(0, 10),        // max 10 digits
+  };
+
+
   // ---- Handlers ----
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+  ) => {
+    const { name, value } = e.target;
+
+    const sanitize = sanitizers[name];
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: sanitize ? sanitize(value) : value,
+    }));
+  };
+
 
   const handleCountryChange = (opt: CountryOption | null) => {
     setFormData((p) => ({ ...p, country: opt?.value ?? "" }));

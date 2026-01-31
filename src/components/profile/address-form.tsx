@@ -60,8 +60,9 @@ const FormInput = ({
       type={type}
       placeholder={placeholder}
       {...register(id, rules)}
-      className={`mt-2 w-full rounded-md px-4 py-3 ring-1 ${errors?.[id] ? "ring-red-500" : "ring-gray-300"
-        }`}
+      className={`mt-2 w-full rounded-md px-4 py-3 ring-1 ${
+        errors?.[id] ? "ring-red-500" : "ring-gray-300"
+      }`}
     />
     {errors?.[id] && (
       <p className="text-sm text-red-600">{errors[id].message}</p>
@@ -80,7 +81,7 @@ const AddressTypeRadio = ({ register }: any) => (
           <input
             type="radio"
             value={type}
-            {...register("addressType")}
+            {...register("addressType", { required: true })}
             className="text-indigo-600"
           />
           {type}
@@ -115,12 +116,11 @@ export default function AddressForm({
   /* ================= MUTATION ================= */
 
   const mutation = useMutation({
-    mutationFn: (data: Address) => {
-      if (data._id) {
-        return api.put(`${endpoints.address}/${data._id}`, data);
-      }
-      return api.post(endpoints.address, data);
-    },
+    mutationFn: (data: Address) =>
+      data._id
+        ? api.put(`${endpoints.address}/${data._id}`, data)
+        : api.post(endpoints.address, data),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["addresses"] });
       toast({
@@ -141,32 +141,15 @@ export default function AddressForm({
     },
   });
 
-  /* ================= SUBMIT ================= */
-
   const onSubmit = (data: Address) => {
     mutation.mutate({ ...data, _id: address?._id });
   };
 
-  /* ================= PREFILL (THIS FIXES EMPTY EDIT FORM) ================= */
+  /* ================= PREFILL ================= */
 
   useEffect(() => {
     if (address) {
-      reset({
-        _id: address._id,
-        name: address.name,
-        phone: address.phone,
-        email: address.email,
-        addressLine1: address.addressLine1,
-        addressLine2: address.addressLine2,
-        city: address.city,
-        state: address.state,
-        pincode: address.pincode,
-        country: address.country,
-        addressType: address.addressType,
-        altPhone: address.altPhone,
-        isDefault: address.isDefault,
-        isDelete: address.isDelete,
-      });
+      reset(address);
     }
   }, [address, reset]);
 
@@ -174,13 +157,75 @@ export default function AddressForm({
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 p-6">
 
-        <FormInput id="name" label="Full Name" register={register} errors={errors} rules={{ required: "Required" }} />
-        <FormInput id="phone" label="Phone" register={register} errors={errors} rules={{ required: "Required" }} />
-        <FormInput id="email" label="Email" register={register} errors={errors} />
+        {/* NAME (NO NUMBERS / SYMBOLS) */}
+        <FormInput
+          id="name"
+          label="Full Name"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "Name is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value
+                .replace(/[^A-Za-z\s]/g, "")
+                .replace(/\s+/g, " ")
+                .replace(/^\s+/, "");
+            },
+            validate: (v: string) =>
+              /^[A-Za-z\s]+$/.test(v) || "Only letters and spaces allowed",
+          }}
+        />
 
-        <FormInput id="addressLine1" label="Address Line 1" gridClass="col-span-full" register={register} errors={errors} />
-        <FormInput id="addressLine2" label="Address Line 2" gridClass="col-span-full" register={register} errors={errors} />
+        {/* PHONE */}
+        <FormInput
+          id="phone"
+          label="Phone"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "Phone is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+            },
+            validate: (v: string) =>
+              /^\d{10}$/.test(v) || "Phone must be 10 digits",
+          }}
+        />
 
+        {/* EMAIL */}
+        <FormInput
+          id="email"
+          label="Email"
+          type="email"
+          register={register}
+          errors={errors}
+          rules={{
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Invalid email address",
+            },
+          }}
+        />
+
+        {/* ADDRESS */}
+        <FormInput
+          id="addressLine1"
+          label="Address Line 1"
+          gridClass="col-span-full"
+          register={register}
+          errors={errors}
+          rules={{ required: "Address is required" }}
+        />
+
+        <FormInput
+          id="addressLine2"
+          label="Address Line 2"
+          gridClass="col-span-full"
+          register={register}
+          errors={errors}
+        />
+
+        {/* COUNTRY */}
         <SelectInput
           control={control}
           name="country"
@@ -189,13 +234,66 @@ export default function AddressForm({
           required
         />
 
-        <FormInput id="city" label="City" register={register} errors={errors} />
-        <FormInput id="state" label="State" register={register} errors={errors} />
-        <FormInput id="pincode" label="Pincode" register={register} errors={errors} />
+        {/* CITY */}
+        <FormInput
+          id="city"
+          label="City"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "City is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+            },
+          }}
+        />
+
+        {/* STATE */}
+        <FormInput
+          id="state"
+          label="State"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "State is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+            },
+          }}
+        />
+
+        {/* PINCODE */}
+        <FormInput
+          id="pincode"
+          label="Pincode"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "Pincode is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+            },
+            validate: (v: string) =>
+              /^\d{6}$/.test(v) || "Pincode must be 6 digits",
+          }}
+        />
 
         <AddressTypeRadio register={register} />
 
-        <FormInput id="altPhone" label="Alt Phone" register={register} errors={errors} />
+        {/* ALT PHONE */}
+        <FormInput
+          id="altPhone"
+          label="Alt Phone"
+          register={register}
+          errors={errors}
+          rules={{
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+            },
+            validate: (v: string) =>
+              !v || /^\d{10}$/.test(v) || "Alt phone must be 10 digits",
+          }}
+        />
 
       </div>
 
