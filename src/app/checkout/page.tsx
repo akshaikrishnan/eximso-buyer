@@ -29,18 +29,7 @@ interface CheckoutData {
 export default function CheckoutPage() {
   const { data: paymentProviders, isLoading } = useQuery({
     queryKey: ["payment-providers"],
-    queryFn: () =>
-      api.get(endpoints.paymentProviders).then((res) => {
-        const defaultProvider = res.data.find(
-          (item: any) => item.slug === "payu",
-        );
-        console.log({ defaultProvider });
-        setCheckOutData((prev: any) => ({
-          ...prev,
-          paymentMethod: defaultProvider || res.data[0],
-        }));
-        return res.data;
-      }),
+    queryFn: () => api.get(endpoints.paymentProviders).then((res) => res.data),
     refetchOnWindowFocus: false,
   });
 
@@ -49,8 +38,24 @@ export default function CheckoutPage() {
     billingAddress: null,
     isSameAddress: true,
     shippingMethod: sample.shippimngMethods.find((item) => item.isActive),
-    paymentMethod: paymentProviders?.find((item: any) => item.isActive),
+    paymentMethod: null,
   });
+
+  // Set default payment method when providers are loaded
+  React.useEffect(() => {
+    if (paymentProviders && !checkOutData.paymentMethod) {
+      const activeProviders = paymentProviders.filter((item: any) => item.isActive);
+      const defaultProvider =
+        activeProviders.find((item: any) => item.slug === "razorpay") ||
+        activeProviders[0];
+      if (defaultProvider) {
+        setCheckOutData((prev: any) => ({
+          ...prev,
+          paymentMethod: defaultProvider,
+        }));
+      }
+    }
+  }, [paymentProviders, checkOutData.paymentMethod]);
   const { subTotal } = useCart();
 
   const paymentMutation = useMutation({
@@ -100,10 +105,21 @@ export default function CheckoutPage() {
     if (!checkOutData.shippingAddress) {
       return false;
     }
+    if (!checkOutData.paymentMethod) {
+      return false;
+    }
     return true;
   };
 
   const initiatePayment = () => {
+    if (!checkOutData.paymentMethod) {
+      toast({
+        title: "Payment Method Missing",
+        description: "Please select a payment method to proceed.",
+        variant: "destructive",
+      });
+      return;
+    }
     // Ensure shippingMethod is always set (use default if not available)
     const defaultShippingMethod =
       checkOutData.shippingMethod ||
@@ -176,7 +192,7 @@ export default function CheckoutPage() {
               <CheckoutBlock>
                 <RadioSelector
                   key={checkOutData.paymentMethod?._id}
-                  items={paymentProviders || []}
+                  items={paymentProviders?.filter((item: any) => item.isActive) || []}
                   selectedItem={checkOutData.paymentMethod}
                   onChange={(item) => {
                     handleCheckoutData({ paymentMethod: item });
@@ -201,11 +217,9 @@ export default function CheckoutPage() {
             >
               <Price
                 amount={Math.ceil(
-                  subTotal +
-                    subTotal * 0.05 +
-                    (Number(process.env.shippingesstimate) || 40),
+                  subTotal + Number(checkOutInfo?.shippingAmount ?? 100)
                 )}
-              />
+              />              
               <InformationCircleIcon
                 className="h-5 w-5 text-eximso-500"
                 aria-hidden="true"

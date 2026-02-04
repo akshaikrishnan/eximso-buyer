@@ -49,7 +49,8 @@ export default function RadioSelector<T extends RadioItem>({
         )}
       >
         {items
-          .sort((item) => (item.isActive ? -1 : 1))
+          .slice()
+          .sort((a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0))
           .map((item) => (
             <Radio
               key={item._id}
@@ -82,7 +83,7 @@ export default function RadioSelector<T extends RadioItem>({
                         as="span"
                         className="block text-sm font-medium text-gray-900 mt-3"
                       >
-                        {item.title}
+                        {item.title || item.name}
                       </Label>
                       {item.description && (
                         <Description

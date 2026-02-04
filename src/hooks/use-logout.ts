@@ -16,7 +16,7 @@ export const useLogout = () => {
     });
     const data = await res.json();
     if (res.ok) {
-      window.location.href = "/?from=logout";
+      window.location.replace("/?from=logout");
       return data;
     } else {
       toast({
