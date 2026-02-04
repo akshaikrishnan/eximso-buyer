@@ -249,7 +249,7 @@ export default function ProductCard({
   const dimensionText = formatDimensionText(product?.dimensions);
   const weightText =
     typeof product?.dimensions?.weight === "number"
-      ? `${product.dimensions.weight} kg`
+      ? `${Number(product.dimensions.weight.toFixed(2))} kg`
       : undefined;
 
   const tags: string[] = Array.isArray(product?.tags)
