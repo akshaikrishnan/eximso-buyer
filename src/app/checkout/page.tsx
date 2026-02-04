@@ -105,10 +105,21 @@ export default function CheckoutPage() {
     if (!checkOutData.shippingAddress) {
       return false;
     }
+    if (!checkOutData.paymentMethod) {
+      return false;
+    }
     return true;
   };
 
   const initiatePayment = () => {
+    if (!checkOutData.paymentMethod) {
+      toast({
+        title: "Payment Method Missing",
+        description: "Please select a payment method to proceed.",
+        variant: "destructive",
+      });
+      return;
+    }
     // Ensure shippingMethod is always set (use default if not available)
     const defaultShippingMethod =
       checkOutData.shippingMethod ||
@@ -206,9 +217,9 @@ export default function CheckoutPage() {
             >
               <Price
                 amount={Math.ceil(
-                  subTotal + (Number(checkOutInfo?.shippingAmount) || 100)
+                  subTotal + Number(checkOutInfo?.shippingAmount ?? 100)
                 )}
-              />
+              />              
               <InformationCircleIcon
                 className="h-5 w-5 text-eximso-500"
                 aria-hidden="true"

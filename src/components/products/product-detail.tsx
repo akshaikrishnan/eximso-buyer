@@ -603,7 +603,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   const rawValue = product.dimensions?.[key];
                   const formattedValue =
                     typeof rawValue === "number" && Number.isFinite(rawValue)
-                      ? `${key === 'weight' ? Number(rawValue.toFixed(2)) : rawValue} ${unit ?? ""}`.trim()
+                      ? `${key === "weight" ? rawValue.toFixed(2) : rawValue} ${unit ?? ""}`.trim()
+
                       : "—";
 
                   return (
