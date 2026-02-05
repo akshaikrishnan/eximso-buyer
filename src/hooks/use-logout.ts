@@ -1,7 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "./use-toast";
 
 //logout hook
 export const useLogout = () => {
+  const queryClient = useQueryClient();
+
   const logout = async () => {
     toast({
       title: " Logging out",
@@ -16,6 +19,7 @@ export const useLogout = () => {
     });
     const data = await res.json();
     if (res.ok) {
+      queryClient.clear();
       window.location.replace("/?from=logout");
       return data;
     } else {

@@ -12,6 +12,7 @@ import { HistoryIcon, LogOutIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useLogout } from "@/hooks/use-logout";
+import { useEffect } from "react";
 
 const tabs = [
   { name: "My Account", href: "/profile", icon: UserIcon, current: false },
@@ -53,6 +54,16 @@ function classNames(...classes: any) {
 
 export default function ProfileNavbar() {
   const pathName = usePathname();
+
+  useEffect(() => {
+    const token = document.cookie.replace(
+      /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+    if (!token) {
+      window.location.replace("/");
+    }
+  }, [pathName]);
 
   const isActive = (href: string) => {
     return pathName === href;

@@ -58,6 +58,16 @@ export default function UserProfile() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    const token = document.cookie.replace(
+      /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    );
+    if (!token) {
+      window.location.replace("/");
+    }
+  }, []);
+
   // ---- Fetch user ----
   const {
     data: user,
