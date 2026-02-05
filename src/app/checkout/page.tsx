@@ -27,15 +27,7 @@ interface CheckoutData {
 }
 
 export default function CheckoutPage() {
-  React.useEffect(() => {
-    const token = document.cookie.replace(
-      /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    );
-    if (!token) {
-      window.location.replace("/");
-    }
-  }, []);
+ 
 
   const { data: paymentProviders, isLoading } = useQuery({
     queryKey: ["payment-providers"],
