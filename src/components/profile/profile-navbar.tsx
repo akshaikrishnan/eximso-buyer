@@ -55,16 +55,6 @@ function classNames(...classes: any) {
 export default function ProfileNavbar() {
   const pathName = usePathname();
 
-  useEffect(() => {
-    const token = document.cookie.replace(
-      /(?:(?:^|.*;\s*)access_token\s*=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    );
-    if (!token) {
-      window.location.replace("/");
-    }
-  }, [pathName]);
-
   const isActive = (href: string) => {
     return pathName === href;
   };
