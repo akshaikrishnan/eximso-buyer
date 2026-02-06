@@ -167,18 +167,18 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
               {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
             </p>
             <p className="text-sm text-gray-700">
-              <span className="font-bold">GSTIN:</span> 32AAOPC2609R1ZW
+              <span className="font-bold">GSTIN:</span> 32AAICE8620P1ZA                                                                                                                                                                  
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-700">
-              <span className="font-bold">IE Code:</span> AAOPC2609R
+              <span className="font-bold">IE Code:</span> AAICE8620P
             </p>
             <p className="text-sm text-gray-700">
-              <span className="font-bold">Bank AD Code:</span> 63610859701431
+              <span className="font-bold">Bank AD Code:</span> 6380011
             </p>
             <p className="text-sm text-gray-700">
-              <span className="font-bold">LUT Code:</span> 63610859701431
+              <span className="font-bold">LUT Code:</span> AD320925003410N
             </p>
           </div>
         </div>
@@ -193,8 +193,8 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
                 <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">HSN Code</th>
                 <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">UOM</th>
                 <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Quantity</th>
-                <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Unit Rate (USD)</th>
-                <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Amount (USD)</th>
+                <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Unit Rate </th>
+                <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Amount </th>
               </tr>
             </thead>
             <tbody>
