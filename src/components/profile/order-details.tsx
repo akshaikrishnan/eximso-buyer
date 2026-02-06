@@ -161,26 +161,35 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
       return acc;
     }, 0);
 
-    // Sum up all offer prices from connected orders (only actual offer prices)
-    const connectedOrdersOfferPrice = connectedOrdersQueries.reduce((acc, query) => {
-      if (query.data?.items) {
-        const orderOfferPrice = query.data.items.reduce((itemAcc, item) => {
-          const offerPrice = item.product?.offerPrice || 0;
-          const qty = item.quantity || 1;
-          return itemAcc + (offerPrice * qty);
-        }, 0);
-        return acc + orderOfferPrice;
-      }
-      return acc;
+       const connectedOrdersOfferPrice = connectedOrdersQueries.reduce((acc, query) => {
+  if (query.data?.items) {
+    const orderOfferPrice = query.data.items.reduce((itemAcc, item) => {
+      const regularPrice = item.product?.price || 0;
+
+      // ✅ only use offerPrice if it actually exists and is lower
+      const offerPrice =
+        item.product?.offerPrice &&
+        item.product.offerPrice < regularPrice
+          ? item.product.offerPrice
+          : regularPrice;
+
+      const qty = item.quantity || 1;
+      return itemAcc + offerPrice * qty;
     }, 0);
 
-    displayPrice = connectedOrdersTotalPrice;
-    totalDiscount = connectedOrdersTotalPrice - connectedOrdersOfferPrice;
+    return acc + orderOfferPrice;
   }
+  return acc;
+}, 0);
+
+displayPrice = connectedOrdersTotalPrice;
+totalDiscount = connectedOrdersTotalPrice - connectedOrdersOfferPrice;
+  }
+
 
   const shipping = orderRes.shippingAmount ?? orderRes.shippingPrice ?? 0;
   const tax = orderRes.taxAmount ?? 0;
-  const total = orderRes.totalAmount ?? orderRes.orderTotal ?? subtotal + shipping + tax;
+  const total = orderRes.totalAmount ?? orderRes.orderTotal ?? subtotal + shipping;
 
   return (
     <div className="py-14 px-4 md:px-6 2xl:px-6 2xl:container 2xl:mx-auto">
@@ -378,16 +387,6 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
               </p>
             </div>
 
-            {tax > 0 && (
-              <div className="flex justify-between items-center w-full">
-                <p className="text-base dark:text-white leading-5 text-gray-800">
-                  Tax Amount
-                </p>
-                <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
-                  <Price amount={tax} />
-                </p>
-              </div>
-            )}
           </div>
 
           <div className="border-t-2 border-gray-200 dark:border-gray-600 pt-4">
