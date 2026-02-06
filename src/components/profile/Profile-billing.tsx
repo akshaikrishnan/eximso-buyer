@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { Price } from "@/components/common/price";
@@ -67,10 +67,40 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
     },
   });
 
-  // Use items directly from the order
-  const allItems = order?.items || [];
+  // Fetch connected orders data
+  const connectedOrdersQueries = useQueries({
+    queries: (order?.connectedOrders || []).map((connectedOrder) => ({
+      queryKey: ["connectedOrder", connectedOrder.orderNumber || connectedOrder._id],
+      queryFn: async () => {
+        const res = await api.get(`${endpoints.order}/${connectedOrder.orderNumber || connectedOrder._id}`);
+        const data = res?.data?.result ?? res?.data;
+        return data as Order;
+      },
+      enabled: !!(order?.connectedOrders && order.connectedOrders.length > 0),
+    })),
+  });
 
-  const totalAmount =
+  // Check if there are connected orders
+  const hasConnectedOrders = order?.connectedOrders && order.connectedOrders.length > 0;
+
+  // Use items from connected orders if they exist, otherwise use order items
+  let allItems: OrderItem[] = [];
+  
+  if (hasConnectedOrders) {
+    // Collect all items from connected orders
+    allItems = connectedOrdersQueries.reduce<OrderItem[]>((acc, query) => {
+      if (query.data?.items) {
+        return [...acc, ...query.data.items];
+      }
+      return acc;
+    }, []);
+  } else {
+    // Use items from the single order
+    allItems = order?.items || [];
+  }
+
+  // Calculate subtotal (items total)
+  const subtotalAmount =
     allItems?.reduce((sum, item) => {
       const unit =
         item.product?.offerPrice && item.product.offerPrice > 0
@@ -78,6 +108,12 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
           : item.product?.price ?? 0;
       return sum + unit * (item.quantity ?? 0);
     }, 0) ?? 0;
+
+  // Get shipping amount from order
+  const shippingAmount = order?.shippingAmount ?? 0;
+
+  // Calculate total amount (subtotal + shipping)
+  const totalAmount = order?.totalAmount ?? (subtotalAmount + shippingAmount);
 
   if (isLoading) {
     return (
@@ -222,6 +258,28 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
                 );
               })}
               <tr>
+                <td
+                  colSpan={6}
+                  className="border border-gray-300 px-4 py-2 text-right font-bold text-gray-800"
+                >
+                  Subtotal
+                </td>
+                <td className="border border-gray-300 px-4 py-2 text-gray-800 font-bold">
+                  <Price amount={subtotalAmount} />
+                </td>
+              </tr>
+              <tr>
+                <td
+                  colSpan={6}
+                  className="border border-gray-300 px-4 py-2 text-right font-semibold text-gray-800"
+                >
+                  Shipping Amount
+                </td>
+                <td className="border border-gray-300 px-4 py-2 text-gray-800 font-semibold">
+                  {shippingAmount > 0 ? <Price amount={shippingAmount} /> : 'Free'}
+                </td>
+              </tr>
+              <tr className="bg-blue-50">
                 <td
                   colSpan={6}
                   className="border border-gray-300 px-4 py-2 text-right font-bold text-gray-800"
