@@ -193,8 +193,8 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
                 <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">HSN Code</th>
                 <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">UOM</th>
                 <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Quantity</th>
-                <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Unit Rate (USD)</th>
-                <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Amount (USD)</th>
+                <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Unit Rate </th>
+                <th className="border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800">Amount </th>
               </tr>
             </thead>
             <tbody>

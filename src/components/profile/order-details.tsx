@@ -161,31 +161,26 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
       return acc;
     }, 0);
 
-       const connectedOrdersOfferPrice = connectedOrdersQueries.reduce((acc, query) => {
-  if (query.data?.items) {
-    const orderOfferPrice = query.data.items.reduce((itemAcc, item) => {
-      const regularPrice = item.product?.price || 0;
-
-      // ✅ only use offerPrice if it actually exists and is lower
-      const offerPrice =
-        item.product?.offerPrice &&
-        item.product.offerPrice < regularPrice
-          ? item.product.offerPrice
-          : regularPrice;
-
-      const qty = item.quantity || 1;
-      return itemAcc + offerPrice * qty;
+    // Sum up all offer prices from connected orders (only actual offer prices)
+    const connectedOrdersOfferPrice = connectedOrdersQueries.reduce((acc, query) => {
+      if (query.data?.items) {
+        const orderOfferPrice = query.data.items.reduce((itemAcc, item) => {
+          const regularPrice = item.product?.price || 0;
+          const offerPrice =
+            item.product?.offerPrice && item.product.offerPrice < regularPrice
+              ? item.product.offerPrice
+              : regularPrice;
+          const qty = item.quantity || 1;
+          return itemAcc + offerPrice * qty;
+        }, 0);
+        return acc + orderOfferPrice;
+      }
+      return acc;
     }, 0);
 
-    return acc + orderOfferPrice;
+    displayPrice = connectedOrdersTotalPrice;
+    totalDiscount = connectedOrdersTotalPrice - connectedOrdersOfferPrice;
   }
-  return acc;
-}, 0);
-
-displayPrice = connectedOrdersTotalPrice;
-totalDiscount = connectedOrdersTotalPrice - connectedOrdersOfferPrice;
-  }
-
 
   const shipping = orderRes.shippingAmount ?? orderRes.shippingPrice ?? 0;
   const tax = orderRes.taxAmount ?? 0;
