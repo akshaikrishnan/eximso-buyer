@@ -84,19 +84,27 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
   const hasConnectedOrders = order?.connectedOrders && order.connectedOrders.length > 0;
 
   // Use items from connected orders if they exist, otherwise use order items
-  let allItems: OrderItem[] = [];
+  // Also track the order number for each item
+  let allItems: (OrderItem & { orderNumber?: string })[] = [];
   
   if (hasConnectedOrders) {
-    // Collect all items from connected orders
-    allItems = connectedOrdersQueries.reduce<OrderItem[]>((acc, query) => {
+    // Collect all items from connected orders with their order numbers
+    allItems = connectedOrdersQueries.reduce<(OrderItem & { orderNumber?: string })[]>((acc, query) => {
       if (query.data?.items) {
-        return [...acc, ...query.data.items];
+        const itemsWithOrderNumber = query.data.items.map(item => ({
+          ...item,
+          orderNumber: query.data.orderNumber || query.data._id
+        }));
+        return [...acc, ...itemsWithOrderNumber];
       }
       return acc;
     }, []);
   } else {
-    // Use items from the single order
-    allItems = order?.items || [];
+    // Use items from the single order with its order number
+    allItems = order?.items.map(item => ({
+      ...item,
+      orderNumber: order.orderNumber
+    })) || [];
   }
 
   // Calculate subtotal (items total)
@@ -241,10 +249,14 @@ export default function ExportInvoice({ orderId: propOrderId }: ExportInvoicePro
                     : item.product?.price ?? 0;
                 const amount = unit * (item.quantity ?? 0);
                 const description = item.product?.name;
+                const itemOrderNumber = item.orderNumber;
                 return (
                   <tr key={`${item.product?.name}-${index}`}>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{index + 1}</td>
-                    <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{description}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                      <div>{description}</div>
+                      <div className="font-bold mt-1">Order: {itemOrderNumber}</div>
+                    </td>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{item.product?.hsnCode || "N/A"}</td>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{item.product?.uom || "N/A"}</td>
                     <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{item.quantity}</td>
