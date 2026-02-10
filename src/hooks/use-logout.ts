@@ -16,7 +16,13 @@ export const useLogout = () => {
     });
     const data = await res.json();
     if (res.ok) {
-      window.location.replace("/?from=logout");
+      if (data.sellerLogoutUrl) {
+        // Redirect through seller logout to clear seller-domain cookies,
+        // then the seller logout will redirect back to buyer
+        window.location.replace(data.sellerLogoutUrl);
+      } else {
+        window.location.replace("/?from=logout");
+      }
       return data;
     } else {
       toast({
