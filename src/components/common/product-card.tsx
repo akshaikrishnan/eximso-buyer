@@ -143,8 +143,8 @@ export default function ProductCard({
 
   const flashSaleVisible = Boolean(
     flashSale &&
-      !product?.flashSaleHidden &&
-      !flashSale.product?.flashSaleHidden
+    !product?.flashSaleHidden &&
+    !flashSale.product?.flashSaleHidden
   );
 
   const flashSaleCountdown = useCountdown(
@@ -171,9 +171,9 @@ export default function ProductCard({
     : getLabel(product) ?? undefined;
   const labelTheme = flashSaleActive
     ? {
-        backgroundClass: "bg-gradient-to-r from-rose-600 to-orange-500",
-        textClass: "text-white",
-      }
+      backgroundClass: "bg-gradient-to-r from-rose-600 to-orange-500",
+      textClass: "text-white",
+    }
     : resolveLabelTheme(labelText);
 
   const brandName =
@@ -189,22 +189,22 @@ export default function ProductCard({
       : basePrice;
   const flashPrice = flashSaleActive
     ? flashSale?.flashPrice ??
-      flashSale?.product?.flashPrice ??
-      product?.flashPrice ??
-      defaultOfferPrice
+    flashSale?.product?.flashPrice ??
+    product?.flashPrice ??
+    defaultOfferPrice
     : undefined;
 
   const flashPriceValue =
     typeof flashPrice === "number"
       ? flashPrice
       : Number.isFinite(Number(flashPrice))
-      ? Number(flashPrice)
-      : undefined;
+        ? Number(flashPrice)
+        : undefined;
 
   const hasDiscount = flashSaleActive
     ? typeof flashPriceValue === "number" &&
-      basePrice > 0 &&
-      flashPriceValue < basePrice
+    basePrice > 0 &&
+    flashPriceValue < basePrice
     : Boolean(product?.offerPrice) && product.offerPrice < product.price;
 
   const effectivePrice =
@@ -212,8 +212,8 @@ export default function ProductCard({
   const strikePrice = flashSaleActive
     ? basePrice
     : hasDiscount
-    ? product.price
-    : undefined;
+      ? product.price
+      : undefined;
 
   const discountPercentage = useMemo(() => {
     if (flashSaleActive && flashPriceValue && basePrice > 0) {
@@ -328,18 +328,18 @@ export default function ProductCard({
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1">
               {brandName && (
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                <p className="line-clamp-1 text-xs font-semibold uppercase tracking-wide text-primary">
                   {brandName}
                 </p>
               )}
-              <h3 className="text-base font-semibold leading-tight text-slate-900 line-clamp-2">
+              <h3 className="line-clamp-1 text-base font-semibold leading-tight text-slate-900">
                 {product.name}
               </h3>
             </div>
             {discountPercentage > 0 && (
               <span
                 className={mergeClasses(
-                  "rounded-full px-2.5 py-1 text-xs font-semibold",
+                  "rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap", // Added whitespace-nowrap
                   flashSaleActive
                     ? "bg-rose-100 text-rose-600"
                     : "bg-emerald-50 text-emerald-600"
@@ -374,15 +374,17 @@ export default function ProductCard({
         </header>
 
         {shortDescription && (
-          <p
-            className={mergeClasses(
-              "text-sm text-slate-600",
-              isListLayout || isMobileViewport ? "line-clamp-3" : "line-clamp-2"
-            )}
-          >
-            {shortDescription}
-          </p>
-        )}
+  <div className="flex flex-col justify-center h-10 overflow-hidden"> 
+    <p
+      className={mergeClasses(
+        "text-sm leading-5 text-slate-600 text-center line-clamp-2",
+        
+      )}
+    >
+      {shortDescription}
+    </p>
+  </div>
+)}
 
         <dl
           className={mergeClasses(
@@ -403,8 +405,8 @@ export default function ProductCard({
             </div>
           ) : null}
           {!flashSaleActive &&
-          typeof product?.stock === "number" &&
-          product.stock >= 0 ? (
+            typeof product?.stock === "number" &&
+            product.stock >= 0 ? (
             <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
               <TagIcon className="h-4 w-4 text-slate-400" />
               <div>
@@ -506,7 +508,7 @@ export default function ProductCard({
               {product?.uom ? ` ${product.uom}` : " units"}
             </div>
           ) : null} */}
-          
+
         </footer>
       </div>
     </article>
