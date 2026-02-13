@@ -278,6 +278,7 @@ export default function ProductsGrid({
                 product={product}
                 layoutVariant={cardVariant}
                 isMobileViewport={effectiveIsMobile}
+                activeColumns={columnCount}
               />
             </div>
           ))}
