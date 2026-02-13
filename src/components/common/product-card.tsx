@@ -109,6 +109,7 @@ type ProductCardProps = {
   product: any;
   layoutVariant?: ProductCardVariant;
   isMobileViewport?: boolean;
+  activeColumns?: number;
 };
 
 const formatDimensionText = (dimensions?: any) => {
@@ -130,6 +131,7 @@ export default function ProductCard({
   product,
   layoutVariant = "grid",
   isMobileViewport = false,
+  activeColumns,
 }: ProductCardProps) {
   const isOutOfStock =
     product?.stock < product?.minimumOrderQuantity ||
@@ -257,6 +259,7 @@ export default function ProductCard({
     : [];
 
   const isListLayout = layoutVariant === "list";
+  const showIconsOnly = activeColumns !== undefined && activeColumns >= 6;
 
   return (
     <article
@@ -320,13 +323,13 @@ export default function ProductCard({
 
       <div
         className={mergeClasses(
-          "flex flex-1 flex-col gap-4",
+          "flex min-w-0 flex-1 flex-col gap-4",
           isListLayout ? "" : "px-5 pb-5 pt-4"
         )}
       >
-        <header className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
+        <header className="flex min-w-0 flex-col gap-2">
+          <div className="flex min-w-0 items-start justify-between gap-3">
+            <div className="min-w-0 space-y-1">
               {brandName && (
                 <p className="line-clamp-1 text-xs font-semibold uppercase tracking-wide text-primary">
                   {brandName}
@@ -339,7 +342,7 @@ export default function ProductCard({
             {discountPercentage > 0 && (
               <span
                 className={mergeClasses(
-                  "rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap", // Added whitespace-nowrap
+                  "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap",
                   flashSaleActive
                     ? "bg-rose-100 text-rose-600"
                     : "bg-emerald-50 text-emerald-600"
@@ -350,10 +353,10 @@ export default function ProductCard({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+          <div className="flex min-w-0 flex-wrap items-center gap-3 text-sm text-slate-600">
             {ratingValue > 0 ? (
               <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-600">
-                <StarIcon className="h-4 w-4" />
+                <StarIcon className="h-4 w-4 shrink-0" />
                 {ratingValue.toFixed(1)}
                 {reviewsCount ? (
                   <span className="text-[11px] text-slate-500">
@@ -365,8 +368,8 @@ export default function ProductCard({
               <span className="text-xs text-slate-500">No ratings yet</span>
             )}
             {product?.countryOfOrigin && (
-              <span className="flex items-center gap-1 text-xs text-slate-500">
-                <GlobeAsiaAustraliaIcon className="h-4 w-4" />
+              <span className="flex min-w-0 items-center gap-1 text-xs text-slate-500">
+                <GlobeAsiaAustraliaIcon className="h-4 w-4 shrink-0" />
                 {product.countryOfOrigin}
               </span>
             )}
@@ -388,49 +391,81 @@ export default function ProductCard({
 
         <dl
           className={mergeClasses(
-            "grid gap-3 text-xs text-slate-600",
-            isListLayout ? "grid-cols-2" : "sm:grid-cols-2"
+            "grid min-w-0 gap-3 text-xs text-slate-600",
+            isListLayout ? "grid-cols-2" : showIconsOnly ? "grid-cols-4" : "sm:grid-cols-2"
           )}
         >
           {!flashSaleActive && product?.minimumOrderQuantity ? (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <BuildingStorefrontIcon className="h-4 w-4 text-slate-400" />
-              <div>
-                <dt className="font-medium text-slate-700">MOQ</dt>
-                <dd className="text-slate-500">
-                  {product.minimumOrderQuantity}
-                  {product?.uom ? ` ${product.uom}` : " units"}
-                </dd>
-              </div>
+            <div 
+              className={mergeClasses(
+                "flex min-w-0 items-center rounded-lg border border-slate-100 bg-slate-50",
+                showIconsOnly ? "justify-center p-2" : "gap-2 px-3 py-2"
+              )}
+              title={showIconsOnly ? `MOQ: ${product.minimumOrderQuantity}${product?.uom ? ` ${product.uom}` : " units"}` : undefined}
+            >
+              <BuildingStorefrontIcon className="h-4 w-4 shrink-0 text-slate-400" />
+              {!showIconsOnly && (
+                <div className="min-w-0">
+                  <dt className="truncate font-medium text-slate-700">MOQ</dt>
+                  <dd className="truncate text-slate-500">
+                    {product.minimumOrderQuantity}
+                    {product?.uom ? ` ${product.uom}` : " units"}
+                  </dd>
+                </div>
+              )}
             </div>
           ) : null}
           {!flashSaleActive &&
             typeof product?.stock === "number" &&
             product.stock >= 0 ? (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <TagIcon className="h-4 w-4 text-slate-400" />
-              <div>
-                <dt className="font-medium text-slate-700">Available</dt>
-                <dd className="text-slate-500">{product.stock} in stock</dd>
-              </div>
+            <div 
+              className={mergeClasses(
+                "flex min-w-0 items-center rounded-lg border border-slate-100 bg-slate-50",
+                showIconsOnly ? "justify-center p-2" : "gap-2 px-3 py-2"
+              )}
+              title={showIconsOnly ? `Available: ${product.stock} in stock` : undefined}
+            >
+              <TagIcon className="h-4 w-4 shrink-0 text-slate-400" />
+              {!showIconsOnly && (
+                <div className="min-w-0">
+                  <dt className="truncate font-medium text-slate-700">Available</dt>
+                  <dd className="truncate text-slate-500">{product.stock} in stock</dd>
+                </div>
+              )}
             </div>
           ) : null}
           {!flashSaleActive && dimensionText && (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <CubeIcon className="h-4 w-4 text-slate-400" />
-              <div>
-                <dt className="font-medium text-slate-700">Dimensions</dt>
-                <dd className="text-slate-500">{dimensionText}</dd>
-              </div>
+            <div 
+              className={mergeClasses(
+                "flex min-w-0 items-center rounded-lg border border-slate-100 bg-slate-50",
+                showIconsOnly ? "justify-center p-2" : "gap-2 px-3 py-2"
+              )}
+              title={showIconsOnly ? `Dimensions: ${dimensionText}` : undefined}
+            >
+              <CubeIcon className="h-4 w-4 shrink-0 text-slate-400" />
+              {!showIconsOnly && (
+                <div className="min-w-0">
+                  <dt className="truncate font-medium text-slate-700">Dimensions</dt>
+                  <dd className="truncate text-slate-500">{dimensionText}</dd>
+                </div>
+              )}
             </div>
           )}
           {!flashSaleActive && weightText && (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <CubeIcon className="h-4 w-4 text-slate-400" />
-              <div>
-                <dt className="font-medium text-slate-700">Weight</dt>
-                <dd className="text-slate-500">{weightText}</dd>
-              </div>
+            <div 
+              className={mergeClasses(
+                "flex min-w-0 items-center rounded-lg border border-slate-100 bg-slate-50",
+                showIconsOnly ? "justify-center p-2" : "gap-2 px-3 py-2"
+              )}
+              title={showIconsOnly ? `Weight: ${weightText}` : undefined}
+            >
+              <CubeIcon className="h-4 w-4 shrink-0 text-slate-400" />
+              {!showIconsOnly && (
+                <div className="min-w-0">
+                  <dt className="truncate font-medium text-slate-700">Weight</dt>
+                  <dd className="truncate text-slate-500">{weightText}</dd>
+                </div>
+              )}
             </div>
           )}
         </dl>
@@ -450,9 +485,9 @@ export default function ProductCard({
 
         {flashSaleActive && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-3 text-xs text-slate-600 shadow-inner">
-            <div className="flex items-center justify-between gap-2 text-rose-600">
-              <span className="inline-flex items-center gap-1 font-semibold uppercase tracking-wide">
-                <SparklesIcon className="h-4 w-4" aria-hidden />
+            <div className="flex min-w-0 items-center justify-between gap-2 text-rose-600">
+              <span className="inline-flex min-w-0 items-center gap-1 font-semibold uppercase tracking-wide">
+                <SparklesIcon className="h-4 w-4 shrink-0" aria-hidden />
                 Flash sale
               </span>
               <span className="font-semibold">{flashSaleCountdown.label}</span>
@@ -479,8 +514,8 @@ export default function ProductCard({
           </div>
         )}
 
-        <footer className="mt-auto flex items-end justify-between gap-3">
-          <div className="space-y-1">
+        <footer className="mt-auto flex min-w-0 items-end justify-between gap-3">
+          <div className="min-w-0 space-y-1">
             <p className="text-lg font-semibold text-slate-900">
               <Price amount={effectivePrice} />
             </p>
