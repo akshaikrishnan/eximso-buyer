@@ -4,6 +4,7 @@ import {
   BuildingStorefrontIcon,
   CubeIcon,
   GlobeAsiaAustraliaIcon,
+  ScaleIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon, TagIcon } from "@heroicons/react/24/solid";
@@ -459,7 +460,7 @@ export default function ProductCard({
               )}
               title={showIconsOnly ? `Weight: ${weightText}` : undefined}
             >
-              <CubeIcon className="h-4 w-4 shrink-0 text-slate-400" />
+              <ScaleIcon className="h-4 w-4 shrink-0 text-slate-400" />
               {!showIconsOnly && (
                 <div className="min-w-0">
                   <dt className="truncate font-medium text-slate-700">Weight</dt>
