@@ -37,7 +37,7 @@ export interface NewsListParams {
   tag?: string;
 }
 
-const NEWS_ENDPOINT = "web/news";
+const NEWS_ENDPOINT = "/backend/news";
 
 export const newsQueryKeys = {
   list: (params: NewsListParams) => ["news", "list", params] as const,
