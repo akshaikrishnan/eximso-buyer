@@ -369,7 +369,7 @@ export default function ProductCard({
                     : "bg-emerald-50 text-emerald-600"
                 )}
               >
-                {flashSaleActive ? "Flash" : "Save"} {discountPercentage}%
+                {flashSaleActive ? "Flash Deal" : "Save"} {discountPercentage}%
               </span>
             )}
           </div>
