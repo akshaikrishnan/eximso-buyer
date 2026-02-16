@@ -267,6 +267,14 @@ export default function ProductCard({
   // Show icons only for very dense layouts (7+ columns)
   const showIconsOnly = activeColumns !== undefined && activeColumns >= 7;
 
+  // Determine grid columns for metadata based on priority
+  const getMetadataGridClass = () => {
+    if (isListLayout) return "grid-cols-2";
+    if (showIconsOnly) return "grid-cols-4";
+    if (isCompactGrid) return "grid-cols-2";
+    return "sm:grid-cols-2";
+  };
+
   return (
     <article
       key={product._id}
@@ -398,8 +406,8 @@ export default function ProductCard({
         </header>
 
         {shortDescription && !isCompactGrid && (
-          <div className="flex flex-col justify-center h-10 overflow-hidden"> 
-            <p className="text-sm leading-5 text-slate-600 text-center line-clamp-2">
+          <div className="flex flex-col justify-center overflow-hidden"> 
+            <p className="text-sm leading-5 text-slate-600 text-left line-clamp-2">
               {shortDescription}
             </p>
           </div>
@@ -408,7 +416,7 @@ export default function ProductCard({
         <dl
           className={mergeClasses(
             "grid min-w-0 gap-2 text-slate-600",
-            isListLayout ? "grid-cols-2" : isCompactGrid ? "grid-cols-2" : showIconsOnly ? "grid-cols-4" : "sm:grid-cols-2"
+            getMetadataGridClass()
           )}
         >
           {!flashSaleActive && product?.minimumOrderQuantity ? (
