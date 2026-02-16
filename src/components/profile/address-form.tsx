@@ -3,9 +3,13 @@ import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { SelectInput } from "./select-input";
 import countries from "@/lib/data/db/countries.json";
+import PhoneNumberInput, {
+  validatePhoneByCountry,
+} from "@/components/ui/phone-number-input";
+import type { CountryCode } from "libphonenumber-js";
 
 /* ===================== TYPES ===================== */
 
@@ -41,6 +45,11 @@ const countryOptions: CountryOption[] = (countries as Country[]).map((c) => ({
   value: c.name,
   label: c.name,
 }));
+
+const getCountryCodeByName = (countryName?: string): CountryCode => {
+  const matched = (countries as Country[]).find((country) => country.name === countryName);
+  return (matched?.code || "IN") as CountryCode;
+};
 
 /* ===================== INPUT COMPONENT ===================== */
 
@@ -106,12 +115,15 @@ export default function AddressForm({
     formState: { errors },
     control,
     reset,
+    watch,
   } = useForm<Address>({
     defaultValues: {
       addressType: "home",
       country: "India",
     },
   });
+
+  const selectedCountryCode = getCountryCodeByName(watch("country"));
 
   /* ================= MUTATION ================= */
 
@@ -177,20 +189,35 @@ export default function AddressForm({
         />
 
         {/* PHONE */}
-        <FormInput
-          id="phone"
-          label="Phone"
-          register={register}
-          errors={errors}
-          rules={{
-            required: "Phone is required",
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-              e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
-            },
-            validate: (v: string) =>
-              /^\d{10}$/.test(v) || "Phone must be 10 digits",
-          }}
-        />
+        <div className="sm:col-span-4">
+          <label className="block text-sm font-medium">Phone</label>
+          <Controller
+            name="phone"
+            control={control}
+            rules={{
+              required: "Phone is required",
+              validate: (value) =>
+                validatePhoneByCountry(value || "", selectedCountryCode) ||
+                "Enter a valid phone number",
+            }}
+            render={({ field }) => (
+              <PhoneNumberInput
+                value={field.value}
+                onChange={(phone) => field.onChange(phone)}
+                onBlur={field.onBlur}
+                defaultCountry={selectedCountryCode}
+                placeholder="Enter phone number"
+                error={!!errors.phone}
+                inputClassName={`w-full rounded-md px-4 py-3 ring-1 ${
+                  errors.phone ? "ring-red-500" : "ring-gray-300"
+                }`}
+              />
+            )}
+          />
+          {errors.phone && (
+            <p className="text-sm text-red-600">{errors.phone.message}</p>
+          )}
+        </div>
 
         {/* EMAIL */}
         <FormInput
@@ -281,19 +308,33 @@ export default function AddressForm({
         <AddressTypeRadio register={register} />
 
         {/* ALT PHONE */}
-        <FormInput
-          id="altPhone"
-          label="Alt Phone"
-          register={register}
-          errors={errors}
-          rules={{
-            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-              e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
-            },
-            validate: (v: string) =>
-              !v || /^\d{10}$/.test(v) || "Alt phone must be 10 digits",
-          }}
-        />
+        <div className="sm:col-span-4">
+          <label className="block text-sm font-medium">Alt Phone</label>
+          <Controller
+            name="altPhone"
+            control={control}
+            rules={{
+              validate: (value) =>
+                !value || validatePhoneByCountry(value, selectedCountryCode) || "Enter a valid alternate phone number",
+            }}
+            render={({ field }) => (
+              <PhoneNumberInput
+                value={field.value || ""}
+                onChange={(phone) => field.onChange(phone)}
+                onBlur={field.onBlur}
+                defaultCountry={selectedCountryCode}
+                placeholder="Enter alternate phone number"
+                error={!!errors.altPhone}
+                inputClassName={`w-full rounded-md px-4 py-3 ring-1 ${
+                  errors.altPhone ? "ring-red-500" : "ring-gray-300"
+                }`}
+              />
+            )}
+          />
+          {errors.altPhone && (
+            <p className="text-sm text-red-600">{errors.altPhone.message}</p>
+          )}
+        </div>
 
       </div>
 
