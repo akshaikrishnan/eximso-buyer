@@ -260,8 +260,12 @@ export default function ProductCard({
     : [];
 
   const isListLayout = layoutVariant === "list";
-  const showIconsOnly = activeColumns !== undefined && activeColumns >= 6;
-  const isSixColumns = activeColumns === 6;
+  
+  // Safely handle undefined activeColumns
+  // Use a threshold of 5 or more columns to trigger compact mode
+  const isCompactGrid = activeColumns !== undefined && activeColumns >= 5;
+  // Show icons only for very dense layouts (7+ columns)
+  const showIconsOnly = activeColumns !== undefined && activeColumns >= 7;
 
   return (
     <article
@@ -317,7 +321,7 @@ export default function ProductCard({
           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className={mergeClasses(
             "object-contain",
-            isListLayout ? "p-2 sm:p-3" : isSixColumns ? "p-3" : "p-4"
+            isListLayout ? "p-2 sm:p-3" : isCompactGrid ? "p-3" : "p-4"
           )}
           priority={false}
         />
@@ -326,7 +330,7 @@ export default function ProductCard({
       <div
         className={mergeClasses(
           "flex min-w-0 flex-1 flex-col",
-          isListLayout ? "gap-4" : isSixColumns ? "px-3 pb-3 pt-2 gap-2" : "px-5 pb-5 pt-4 gap-4"
+          isListLayout ? "gap-4" : isCompactGrid ? "px-3 pb-3 pt-2 gap-2" : "px-5 pb-5 pt-4 gap-4"
         )}
       >
         <header className="flex min-w-0 flex-col gap-2">
@@ -335,14 +339,14 @@ export default function ProductCard({
               {brandName && (
                 <p className={mergeClasses(
                   "font-semibold uppercase tracking-wide text-primary",
-                  isSixColumns ? "text-[10px] leading-tight" : "text-xs"
+                  isCompactGrid ? "text-[10px] leading-tight" : "text-xs"
                 )}>
                   {brandName}
                 </p>
               )}
               <h3 className={mergeClasses(
                 "font-semibold leading-tight text-slate-900 break-words",
-                isSixColumns ? "text-sm line-clamp-2" : "text-base line-clamp-1"
+                isCompactGrid ? "text-sm line-clamp-2" : "text-base line-clamp-1"
               )}>
                 {product.name}
               </h3>
@@ -351,7 +355,7 @@ export default function ProductCard({
               <span
                 className={mergeClasses(
                   "shrink-0 rounded-full px-2 py-1 font-semibold whitespace-nowrap",
-                  isSixColumns ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2.5 py-1",
+                  isCompactGrid ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2.5 py-1",
                   flashSaleActive
                     ? "bg-rose-100 text-rose-600"
                     : "bg-emerald-50 text-emerald-600"
@@ -366,9 +370,9 @@ export default function ProductCard({
             {ratingValue > 0 ? (
               <span className={mergeClasses(
                 "flex items-center gap-1 rounded-full bg-amber-50 font-medium text-amber-600",
-                isSixColumns ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-xs"
+                isCompactGrid ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-1 text-xs"
               )}>
-                <StarIcon className={mergeClasses("shrink-0", isSixColumns ? "h-3 w-3" : "h-4 w-4")} />
+                <StarIcon className={mergeClasses("shrink-0", isCompactGrid ? "h-3 w-3" : "h-4 w-4")} />
                 {ratingValue.toFixed(1)}
                 {reviewsCount ? (
                   <span className="text-[9px] text-slate-500">
@@ -377,23 +381,23 @@ export default function ProductCard({
                 ) : null}
               </span>
             ) : (
-              <span className={mergeClasses("text-slate-500", isSixColumns ? "text-[10px]" : "text-xs")}>
+              <span className={mergeClasses("text-slate-500", isCompactGrid ? "text-[10px]" : "text-xs")}>
                 No ratings
               </span>
             )}
             {product?.countryOfOrigin && (
               <span className={mergeClasses(
                 "flex min-w-0 items-center gap-1 text-slate-500",
-                isSixColumns ? "text-[10px]" : "text-xs"
+                isCompactGrid ? "text-[10px]" : "text-xs"
               )}>
-                <GlobeAsiaAustraliaIcon className={mergeClasses("shrink-0", isSixColumns ? "h-3 w-3" : "h-4 w-4")} />
+                <GlobeAsiaAustraliaIcon className={mergeClasses("shrink-0", isCompactGrid ? "h-3 w-3" : "h-4 w-4")} />
                 <span className="truncate">{product.countryOfOrigin}</span>
               </span>
             )}
           </div>
         </header>
 
-        {shortDescription && !isSixColumns && (
+        {shortDescription && !isCompactGrid && (
           <div className="flex flex-col justify-center h-10 overflow-hidden"> 
             <p className="text-sm leading-5 text-slate-600 text-center line-clamp-2">
               {shortDescription}
@@ -404,7 +408,7 @@ export default function ProductCard({
         <dl
           className={mergeClasses(
             "grid min-w-0 gap-2 text-slate-600",
-            isListLayout ? "grid-cols-2" : showIconsOnly ? "grid-cols-4" : isSixColumns ? "grid-cols-2" : "sm:grid-cols-2"
+            isListLayout ? "grid-cols-2" : isCompactGrid ? "grid-cols-2" : showIconsOnly ? "grid-cols-4" : "sm:grid-cols-2"
           )}
         >
           {!flashSaleActive && product?.minimumOrderQuantity ? (
@@ -412,11 +416,11 @@ export default function ProductCard({
               className={mergeClasses(
                 "flex min-w-0 items-center rounded-lg border border-slate-100 bg-slate-50",
                 showIconsOnly ? "justify-center p-1.5" : "gap-1.5 px-2 py-1.5",
-                isSixColumns ? "text-[10px]" : "text-xs"
+                isCompactGrid ? "text-[10px]" : "text-xs"
               )}
               title={showIconsOnly ? `MOQ: ${product.minimumOrderQuantity}${product?.uom ? ` ${product.uom}` : " units"}` : undefined}
             >
-              <BuildingStorefrontIcon className={mergeClasses("shrink-0 text-slate-400", isSixColumns ? "h-3 w-3" : "h-4 w-4")} />
+              <BuildingStorefrontIcon className={mergeClasses("shrink-0 text-slate-400", isCompactGrid ? "h-3 w-3" : "h-4 w-4")} />
               {!showIconsOnly && (
                 <div className="min-w-0">
                   <dt className="truncate font-medium text-slate-700">MOQ</dt>
@@ -435,11 +439,11 @@ export default function ProductCard({
               className={mergeClasses(
                 "flex min-w-0 items-center rounded-lg border border-slate-100 bg-slate-50",
                 showIconsOnly ? "justify-center p-1.5" : "gap-1.5 px-2 py-1.5",
-                isSixColumns ? "text-[10px]" : "text-xs"
+                isCompactGrid ? "text-[10px]" : "text-xs"
               )}
               title={showIconsOnly ? `Available: ${product.stock} in stock` : undefined}
             >
-              <TagIcon className={mergeClasses("shrink-0 text-slate-400", isSixColumns ? "h-3 w-3" : "h-4 w-4")} />
+              <TagIcon className={mergeClasses("shrink-0 text-slate-400", isCompactGrid ? "h-3 w-3" : "h-4 w-4")} />
               {!showIconsOnly && (
                 <div className="min-w-0">
                   <dt className="truncate font-medium text-slate-700">Available</dt>
@@ -453,12 +457,12 @@ export default function ProductCard({
               className={mergeClasses(
                 "flex min-w-0 items-center rounded-lg border border-slate-100 bg-slate-50",
                 showIconsOnly ? "justify-center p-1.5" : "gap-1.5 px-2 py-1.5",
-                isSixColumns ? "text-[10px]" : "text-xs"
+                isCompactGrid ? "text-[10px]" : "text-xs"
               )}
               title={showIconsOnly ? `Dimensions: ${dimensionText}` : undefined}
               aria-label={showIconsOnly ? `Dimensions: ${dimensionText}` : undefined}
             >
-              <CubeIcon className={mergeClasses("shrink-0 text-slate-400", isSixColumns ? "h-3 w-3" : "h-4 w-4")} />
+              <CubeIcon className={mergeClasses("shrink-0 text-slate-400", isCompactGrid ? "h-3 w-3" : "h-4 w-4")} />
               {!showIconsOnly && (
                 <div className="min-w-0">
                   <dt className="truncate font-medium text-slate-700">Dimensions</dt>
@@ -472,12 +476,12 @@ export default function ProductCard({
               className={mergeClasses(
                 "flex min-w-0 items-center rounded-lg border border-slate-100 bg-slate-50",
                 showIconsOnly ? "justify-center p-1.5" : "gap-1.5 px-2 py-1.5",
-                isSixColumns ? "text-[10px]" : "text-xs"
+                isCompactGrid ? "text-[10px]" : "text-xs"
               )}
               title={showIconsOnly ? `Weight: ${weightText}` : undefined}
               aria-label={showIconsOnly ? `Weight: ${weightText}` : undefined}
             >
-              <ScaleIcon className={mergeClasses("shrink-0 text-slate-400", isSixColumns ? "h-3 w-3" : "h-4 w-4")} />
+              <ScaleIcon className={mergeClasses("shrink-0 text-slate-400", isCompactGrid ? "h-3 w-3" : "h-4 w-4")} />
               {!showIconsOnly && (
                 <div className="min-w-0">
                   <dt className="truncate font-medium text-slate-700">Weight</dt>
@@ -488,7 +492,7 @@ export default function ProductCard({
           )}
         </dl>
 
-        {tags.length > 0 && !isSixColumns && (
+        {tags.length > 0 && !isCompactGrid && (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <span
@@ -504,11 +508,11 @@ export default function ProductCard({
         {flashSaleActive && (
           <div className={mergeClasses(
             "rounded-2xl border border-rose-200 bg-rose-50/70 p-2 text-slate-600 shadow-inner",
-            isSixColumns ? "text-[9px]" : "p-3 text-xs"
+            isCompactGrid ? "text-[9px]" : "p-3 text-xs"
           )}>
             <div className="flex min-w-0 items-center justify-between gap-1 text-rose-600">
               <span className="inline-flex min-w-0 items-center gap-1 font-semibold uppercase tracking-wide">
-                <SparklesIcon className={mergeClasses("shrink-0", isSixColumns ? "h-3 w-3" : "h-4 w-4")} aria-hidden />
+                <SparklesIcon className={mergeClasses("shrink-0", isCompactGrid ? "h-3 w-3" : "h-4 w-4")} aria-hidden />
                 Flash sale
               </span>
               <span className="font-semibold">{flashSaleCountdown.label}</span>
@@ -537,11 +541,11 @@ export default function ProductCard({
 
         <footer className="mt-auto flex min-w-0 items-end justify-between gap-2">
           <div className="min-w-0 space-y-0.5">
-            <p className={mergeClasses("font-semibold text-slate-900", isSixColumns ? "text-base" : "text-lg")}>
+            <p className={mergeClasses("font-semibold text-slate-900", isCompactGrid ? "text-base" : "text-lg")}>
               <Price amount={effectivePrice} />
             </p>
             {typeof strikePrice === "number" && strikePrice > 0 && (
-              <p className={mergeClasses("text-slate-400 line-through", isSixColumns ? "text-[10px]" : "text-xs")}>
+              <p className={mergeClasses("text-slate-400 line-through", isCompactGrid ? "text-[10px]" : "text-xs")}>
                 <Price amount={strikePrice} />
               </p>
             )}
@@ -549,7 +553,7 @@ export default function ProductCard({
               <p
                 className={mergeClasses(
                   "font-medium",
-                  isSixColumns ? "text-[9px]" : "text-xs",
+                  isCompactGrid ? "text-[9px]" : "text-xs",
                   flashSaleActive ? "text-rose-600" : "text-emerald-600"
                 )}
               >
