@@ -156,8 +156,8 @@ function Contact() {
                       onChange={(phone) => field.onChange(phone)}
                       onBlur={field.onBlur}
                       placeholder="Enter your phone number"
-                      containerClassName="items-center"
-                      inputClassName="w-full rounded-xl border border-gray-200 bg-white p-4 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
+                      
+                      inputClassName="px-4 text-sm"
                       error={!!errors.phone}
                     />
                   )}

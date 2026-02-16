@@ -389,7 +389,7 @@ const handleSubmit = (e: React.FormEvent) => {
                   value={formData.phone}
                   onChange={(value) => handlePhoneChange("phone", value)}
                   defaultCountry={getCountryCodeByName(formData.country)}
-                  inputClassName="block w-full rounded-md border-gray-300 px-3 py-2 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  inputClassName="px-3 sm:text-sm"
                 />
               </div>
             </div>
@@ -407,7 +407,7 @@ const handleSubmit = (e: React.FormEvent) => {
                   value={formData.altPhone || ""}
                   onChange={(value) => handlePhoneChange("altPhone", value)}
                   defaultCountry={getCountryCodeByName(formData.country)}
-                  inputClassName="block w-full rounded-md border-gray-300 px-3 py-2 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  inputClassName="px-3 sm:text-sm"
                 />
               </div>
             </div>

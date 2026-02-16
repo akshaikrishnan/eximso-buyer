@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Select, { SingleValue } from "react-select";
 import {
   CountryCode,
@@ -45,11 +45,7 @@ const detectCountryFromCookies = (): CountryCode | undefined => {
       return acc;
     }, {});
 
-  const possible = [
-    cookieMap.loc_country,
-    cookieMap.country,
-    cookieMap.countryCode,
-  ]
+  const possible = [cookieMap.loc_country, cookieMap.country, cookieMap.countryCode]
     .filter(Boolean)
     .map((value) => value!.toUpperCase());
 
@@ -60,9 +56,7 @@ const detectCountryFromCookies = (): CountryCode | undefined => {
   return matched as CountryCode | undefined;
 };
 
-export const getInitialPhoneCountry = (
-  explicitCountry?: string
-): CountryCode => {
+export const getInitialPhoneCountry = (explicitCountry?: string): CountryCode => {
   const explicit = explicitCountry?.toUpperCase();
   if (explicit && COUNTRY_OPTIONS.some((option) => option.value === explicit)) {
     return explicit as CountryCode;
@@ -114,6 +108,8 @@ export default function PhoneNumberInput({
     getInitialPhoneCountry(defaultCountry)
   );
   const [nationalNumber, setNationalNumber] = useState("");
+  const [menuWidth, setMenuWidth] = useState<number>();
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const cookieCountry = detectCountryFromCookies();
@@ -121,6 +117,11 @@ export default function PhoneNumberInput({
       setCountry(cookieCountry);
     }
   }, []);
+
+  useEffect(() => {
+    const fallbackCountry = getInitialPhoneCountry(defaultCountry);
+    setCountry((prev) => (prev === fallbackCountry ? prev : fallbackCountry));
+  }, [defaultCountry]);
 
   useEffect(() => {
     if (!value) {
@@ -135,31 +136,30 @@ export default function PhoneNumberInput({
       return;
     }
 
-    const digits = value.replace(/\D/g, "");
-    setNationalNumber(digits);
+    setNationalNumber(value.replace(/\D/g, ""));
   }, [value, country]);
 
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+
+    const updateWidth = () => {
+      if (!wrapperRef.current) return;
+      setMenuWidth(wrapperRef.current.getBoundingClientRect().width);
+    };
+
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(wrapperRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
   const selectedOption = useMemo(
-    () => COUNTRY_OPTIONS.find((option) => option.value === country) ?? COUNTRY_OPTIONS[0],
+    () =>
+      COUNTRY_OPTIONS.find((option) => option.value === country) ??
+      COUNTRY_OPTIONS[0],
     [country]
   );
-
-  const selectStyles = {
-    control: (base: any) => ({
-      ...base,
-      minHeight: "44px",
-      borderRadius: "0.75rem",
-      borderColor: error ? "#ef4444" : "#d1d5db",
-      boxShadow: "none",
-      ":hover": { borderColor: error ? "#ef4444" : "#9ca3af" },
-    }),
-    menuPortal: (base: any) => ({ ...base, zIndex: 100 }),
-    option: (base: any, state: any) => ({
-      ...base,
-      backgroundColor: state.isFocused ? "#eef2ff" : "white",
-      color: "#111827",
-    }),
-  };
 
   const handleCountryChange = (option: SingleValue<CountryOption>) => {
     if (!option) return;
@@ -178,9 +178,19 @@ export default function PhoneNumberInput({
     onChange(formatted, country);
   };
 
+  const baseInputClasses =
+    "h-11 w-full border-0 bg-transparent px-3 text-sm text-gray-900 outline-hidden placeholder:text-gray-400 disabled:cursor-not-allowed disabled:text-gray-400";
+
   return (
-    <div className={`flex gap-2 ${containerClassName}`}>
-      <div className="min-w-[180px]">
+    <div
+      ref={wrapperRef}
+      className={`flex w-full overflow-hidden rounded-xl border ${
+        error ? "border-red-500" : "border-gray-300"
+      } bg-white shadow-xs focus-within:ring-2 focus-within:ring-indigo-200 ${
+        containerClassName || ""
+      }`}
+    >
+      <div className="min-w-[110px] border-r border-gray-200">
         <Select
           options={COUNTRY_OPTIONS}
           isSearchable
@@ -188,15 +198,80 @@ export default function PhoneNumberInput({
           value={selectedOption}
           classNamePrefix="phone-country"
           menuPortalTarget={typeof window !== "undefined" ? document.body : undefined}
-          styles={selectStyles}
+          menuPosition="fixed"
+          placeholder="+91"
           onChange={handleCountryChange}
-          formatOptionLabel={(option) => (
-            <div className="flex items-center gap-2">
-              <span>{option.flag}</span>
-              <span>{option.label}</span>
-              <span className="text-gray-500">{option.dialCode}</span>
-            </div>
-          )}
+          styles={{
+            control: (base) => ({
+              ...base,
+              minHeight: "44px",
+              height: "44px",
+              border: 0,
+              borderRadius: 0,
+              boxShadow: "none",
+              backgroundColor: "transparent",
+            }),
+            valueContainer: (base) => ({
+              ...base,
+              padding: "0 8px",
+            }),
+            indicatorsContainer: (base) => ({
+              ...base,
+              height: "44px",
+            }),
+            indicatorSeparator: () => ({ display: "none" }),
+            singleValue: (base) => ({
+              ...base,
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              margin: 0,
+              color: "#111827",
+              fontSize: "14px",
+              maxWidth: "none",
+            }),
+            input: (base) => ({
+              ...base,
+              margin: 0,
+              padding: 0,
+            }),
+            menuPortal: (base) => ({ ...base, zIndex: 100 }),
+            menu: (base) => ({
+              ...base,
+              width: menuWidth ?? base.width,
+              minWidth: menuWidth ?? base.minWidth,
+              marginTop: 4,
+            }),
+            menuList: (base) => ({
+              ...base,
+              maxHeight: 280,
+              overflowX: "hidden",
+            }),
+            option: (base, state) => ({
+              ...base,
+              backgroundColor: state.isFocused ? "#eef2ff" : "white",
+              color: "#111827",
+              padding: "10px 12px",
+            }),
+          }}
+          formatOptionLabel={(option, meta) => {
+            if (meta.context === "value") {
+              return (
+                <div className="flex items-center gap-1 whitespace-nowrap">
+                  <span>{option.flag}</span>
+                  <span>{option.dialCode}</span>
+                </div>
+              );
+            }
+
+            return (
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="shrink-0">{option.flag}</span>
+                <span className="truncate">{option.label}</span>
+                <span className="ml-auto shrink-0 text-gray-500">{option.dialCode}</span>
+              </div>
+            );
+          }}
           getOptionLabel={(option) => `${option.label} ${option.dialCode}`}
         />
       </div>
@@ -211,7 +286,7 @@ export default function PhoneNumberInput({
         onBlur={onBlur}
         onChange={(event) => handleNumberChange(event.target.value)}
         placeholder={placeholder}
-        className={inputClassName}
+        className={`${baseInputClasses} ${inputClassName || ""}`}
       />
     </div>
   );

@@ -208,9 +208,7 @@ export default function AddressForm({
                 defaultCountry={selectedCountryCode}
                 placeholder="Enter phone number"
                 error={!!errors.phone}
-                inputClassName={`w-full rounded-md px-4 py-3 ring-1 ${
-                  errors.phone ? "ring-red-500" : "ring-gray-300"
-                }`}
+                inputClassName="px-4 text-sm"
               />
             )}
           />
@@ -325,9 +323,7 @@ export default function AddressForm({
                 defaultCountry={selectedCountryCode}
                 placeholder="Enter alternate phone number"
                 error={!!errors.altPhone}
-                inputClassName={`w-full rounded-md px-4 py-3 ring-1 ${
-                  errors.altPhone ? "ring-red-500" : "ring-gray-300"
-                }`}
+                inputClassName="px-4 text-sm"
               />
             )}
           />

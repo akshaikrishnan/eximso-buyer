@@ -384,7 +384,7 @@ export default function UserProfile() {
                     }
                     defaultCountry={formData.country || "IN"}
                     placeholder="+91 98765 43210"
-                    inputClassName="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    inputClassName="px-4 sm:text-sm"
                   />
                 </div>
 
