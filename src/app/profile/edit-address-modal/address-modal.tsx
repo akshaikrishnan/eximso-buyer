@@ -8,6 +8,8 @@ import { toast } from "@/hooks/use-toast";
 import { XIcon, ChevronDown } from "lucide-react";
 import { endpoints } from "@/lib/data/endpoints";
 import countries from "@/lib/data/db/countries.json";
+import PhoneNumberInput, { validatePhoneByCountry } from "@/components/ui/phone-number-input";
+import type { CountryCode } from "libphonenumber-js";
 
 
 // Define the Address type with additional fields
@@ -37,11 +39,15 @@ const sanitizers: Record<string, (v: string) => string> = {
   city: (v) => v.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ").trimStart(),
   state: (v) => v.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ").trimStart(),
 
-  phone: (v) => v.replace(/\D/g, "").slice(0, 10),
-  altPhone: (v) => v.replace(/\D/g, "").slice(0, 10),
-
   pincode: (v) => v.replace(/\D/g, "").slice(0, 6),
 };
+
+
+const getCountryCodeByName = (countryName?: string): CountryCode => {
+  const matched = countries.find((country) => country.name === countryName);
+  return (matched?.code || "IN") as CountryCode;
+};
+
 const EditAddressModal: React.FC<EditAddressModalProps> = ({
   address,
   onClose,
@@ -108,7 +114,14 @@ const handleChange = (
 };
 
 
-  const handleCountrySelect = (countryName: string) => {
+  const handlePhoneChange = (name: "phone" | "altPhone", value: string) => {
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+const handleCountrySelect = (countryName: string) => {
     setFormData((prev) => ({
       ...prev,
       country: countryName,
@@ -117,10 +130,12 @@ const handleChange = (
     setCountrySearch("");
   };
 const validateForm = () => {
+  const selectedCountryCode = getCountryCodeByName(formData.country);
+
   if (!formData.name.trim()) return "Name is required";
-  if (!/^\d{10}$/.test(formData.phone)) return "Phone must be 10 digits";
-  if (formData.altPhone && !/^\d{10}$/.test(formData.altPhone))
-    return "Alternate phone must be 10 digits";
+  if (!validatePhoneByCountry(formData.phone, selectedCountryCode)) return "Enter a valid phone number";
+  if (formData.altPhone && !validatePhoneByCountry(formData.altPhone, selectedCountryCode))
+    return "Enter a valid alternate phone number";
   if (!/^\d{6}$/.test(formData.pincode)) return "Invalid pincode";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
     return "Invalid email address";
@@ -367,15 +382,16 @@ const handleSubmit = (e: React.FormEvent) => {
               >
                 Phone Number
               </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
+              <div className="mt-1">
+                <PhoneNumberInput
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={(value) => handlePhoneChange("phone", value)}
+                  defaultCountry={getCountryCodeByName(formData.country)}
+                  inputClassName="px-3 sm:text-sm"
+                />
+              </div>
             </div>
             <div>
               <label
@@ -384,14 +400,16 @@ const handleSubmit = (e: React.FormEvent) => {
               >
                 Alternate Phone (Optional)
               </label>
-              <input
-                type="tel"
-                id="altPhone"
-                name="altPhone"
-                value={formData.altPhone || ""}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              />
+              <div className="mt-1">
+                <PhoneNumberInput
+                  id="altPhone"
+                  name="altPhone"
+                  value={formData.altPhone || ""}
+                  onChange={(value) => handlePhoneChange("altPhone", value)}
+                  defaultCountry={getCountryCodeByName(formData.country)}
+                  inputClassName="px-3 sm:text-sm"
+                />
+              </div>
             </div>
             <div className="sm:col-span-2">
               <label
