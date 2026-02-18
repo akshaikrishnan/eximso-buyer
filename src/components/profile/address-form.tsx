@@ -69,9 +69,8 @@ const FormInput = ({
       type={type}
       placeholder={placeholder}
       {...register(id, rules)}
-      className={`mt-2 w-full rounded-md px-4 py-3 ring-1 ${
-        errors?.[id] ? "ring-red-500" : "ring-gray-300"
-      }`}
+      className={`mt-2 w-full rounded-md px-4 py-3 ring-1 ${errors?.[id] ? "ring-red-500" : "ring-gray-300"
+        }`}
     />
     {errors?.[id] && (
       <p className="text-sm text-red-600">{errors[id].message}</p>
@@ -296,10 +295,12 @@ export default function AddressForm({
           rules={{
             required: "Pincode is required",
             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-              e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+              e.target.value = e.target.value.replace(/[^a-zA-Z0-9\s\-]/g, "").slice(0, 12);
             },
             validate: (v: string) =>
-              /^\d{6}$/.test(v) || "Pincode must be 6 digits",
+              /^[a-zA-Z0-9\s\-]+$/.test(v) ||
+              "Pincode must contain only letters, numbers, spaces, or hyphens",
+
           }}
         />
 
