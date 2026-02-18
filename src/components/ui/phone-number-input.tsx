@@ -46,12 +46,10 @@ const detectCountryFromCookies = (): CountryCode | undefined => {
       const idx = pair.indexOf("=");
       if (idx === -1) return acc;
       const key = pair.slice(0, idx).trim();
-      try {
-        acc[key] = decodeURIComponent(pair.slice(idx + 1));
-      } catch {
-        acc[key] = pair.slice(idx + 1);
-      }
-      return acc;    }, {});
+      const val = decodeURIComponent(pair.slice(idx + 1));
+      acc[key] = val;
+      return acc;
+    }, {});
 
   const possible = [cookieMap.loc_country, cookieMap.country, cookieMap.countryCode]
     .filter(Boolean)
@@ -121,6 +119,12 @@ export default function PhoneNumberInput({
   // so we can skip the useEffect sync and avoid the 91-injection loop
   const isInternalChange = useRef(false);
 
+  // Use a ref to access current country in effects without adding to dependency array
+  const countryRef = useRef(country);
+  useEffect(() => {
+    countryRef.current = country;
+  }, [country]);
+
   // Prevent SSR/hydration mismatch for menuPortalTarget
   useEffect(() => {
     setMounted(true);
@@ -134,10 +138,19 @@ export default function PhoneNumberInput({
     }
   }, []);
 
-  // Sync defaultCountry prop changes
+  // Sync defaultCountry prop changes (only when explicitly provided and changes)
+  const hasMountedRef = useRef(false);
   useEffect(() => {
-    const next = getInitialPhoneCountry(defaultCountry);
-    setCountry(next);
+    // Skip on initial mount to avoid clobbering cookie-detected country
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    // Only update if defaultCountry is explicitly provided
+    if (defaultCountry) {
+      const next = getInitialPhoneCountry(defaultCountry);
+      setCountry(next);
+    }
   }, [defaultCountry]);
 
   // Sync external value prop changes (e.g. form reset, pre-fill)
@@ -153,21 +166,24 @@ export default function PhoneNumberInput({
       return;
     }
 
-    const parsed = parsePhoneNumberFromString(value, country);
+    // Use countryRef to avoid dependency on country state
+    const currentCountry = countryRef.current;
+
+    const parsed = parsePhoneNumberFromString(value, currentCountry);
     if (parsed) {
-      setCountry(parsed.country ?? country);
+      setCountry(parsed.country ?? currentCountry);
       setNationalNumber(parsed.nationalNumber);
       return;
     }
 
     // Safely strip dial code prefix to avoid injecting country code digits
-    const dialCode = getCountryCallingCode(country);
+    const dialCode = getCountryCallingCode(currentCountry);
     const digits = value.replace(/\D/g, "");
     const stripped = digits.startsWith(dialCode)
       ? digits.slice(dialCode.length)
       : digits;
     setNationalNumber(stripped);
-  }, [value, country]);
+  }, [value]);
 
   // Track wrapper width for dropdown menu alignment
   useEffect(() => {
