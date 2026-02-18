@@ -176,7 +176,7 @@ if (!normalizedPincode) {
 }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-    newErrors.email = "Invalid email address";
+    newErrors.email = "Email is required";
   if (!formData.addressLine1.trim()) newErrors.addressLine1 = "Address Line 1 is required";
   if (!formData.city.trim()) newErrors.city = "City is required";
   if (!formData.state.trim()) newErrors.state = "State is required";
