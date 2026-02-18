@@ -39,7 +39,7 @@ const sanitizers: Record<string, (v: string) => string> = {
   city: (v) => v.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ").trimStart(),
   state: (v) => v.replace(/[^a-zA-Z\s]/g, "").replace(/\s+/g, " ").trimStart(),
 
-  pincode: (v) => v.replace(/\D/g, "").slice(0, 6),
+  pincode: (v) => v.replace(/[^a-zA-Z0-9\s\-]/g, "").slice(0, 12),
 };
 
 
@@ -55,6 +55,7 @@ const EditAddressModal: React.FC<EditAddressModalProps> = ({
   const [formData, setFormData] = useState<Address>(address);
   const [countrySearch, setCountrySearch] = useState("");
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const queryClient = useQueryClient();
 
   const filteredCountries = useMemo(() => {
@@ -111,6 +112,15 @@ const handleChange = (
       ? sanitize(target.value)
       : target.value.trimStart(),
   }));
+
+  // Clear error for this field when user starts typing
+  if (errors[target.name]) {
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[target.name];
+      return newErrors;
+    });
+  }
 };
 
 
@@ -119,6 +129,14 @@ const handleChange = (
     ...prev,
     [name]: value,
   }));
+  // Clear error for this field when user starts typing
+  if (errors[name]) {
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[name];
+      return newErrors;
+    });
+  }
 };
 
 const handleCountrySelect = (countryName: string) => {
@@ -128,31 +146,43 @@ const handleCountrySelect = (countryName: string) => {
     }));
     setIsCountryDropdownOpen(false);
     setCountrySearch("");
+    // Clear country error when user selects a country
+    if (errors.country) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.country;
+        return newErrors;
+      });
+    }
   };
 const validateForm = () => {
   const selectedCountryCode = getCountryCodeByName(formData.country);
+  const newErrors: Record<string, string> = {};
 
-  if (!formData.name.trim()) return "Name is required";
-  if (!validatePhoneByCountry(formData.phone, selectedCountryCode)) return "Enter a valid phone number";
+  if (!formData.name.trim()) newErrors.name = "Name is required";
+  if (!validatePhoneByCountry(formData.phone, selectedCountryCode)) newErrors.phone = "Enter a valid phone number";
   if (formData.altPhone && !validatePhoneByCountry(formData.altPhone, selectedCountryCode))
-    return "Enter a valid alternate phone number";
-  if (!/^\d{6}$/.test(formData.pincode)) return "Invalid pincode";
+    newErrors.altPhone = "Enter a valid alternate phone number";
+  if (!formData.pincode.trim()) newErrors.pincode = "Pincode is required";
+  else if (!/^[a-zA-Z0-9]+$/.test(formData.pincode)) newErrors.pincode = "Pincode must contain only letters and numbers";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-    return "Invalid email address";
-  if (!formData.addressLine1.trim()) return "Address Line 1 is required";
-  if (!formData.city.trim()) return "City is required";
-  if (!formData.state.trim()) return "State is required";
-  if (!formData.country) return "Country is required";
+    newErrors.email = "Invalid email address";
+  if (!formData.addressLine1.trim()) newErrors.addressLine1 = "Address Line 1 is required";
+  if (!formData.city.trim()) newErrors.city = "City is required";
+  if (!formData.state.trim()) newErrors.state = "State is required";
+  if (!formData.country) newErrors.country = "Country is required";
 
-  return null;
+  setErrors(newErrors);
+  return Object.keys(newErrors).length > 0 ? newErrors : null;
 };
 
 const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
 
-  const error = validateForm();
-  if (error) {
-    toast({ title: "Validation Error", description: error, variant: "destructive" });
+  const validationErrors = validateForm();
+  if (validationErrors) {
+    const firstError = Object.values(validationErrors)[0];
+    toast({ title: "Validation Error", description: firstError, variant: "destructive" });
     return;
   }
 
@@ -189,8 +219,13 @@ const handleSubmit = (e: React.FormEvent) => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                  errors.name ? "border-red-500 ring-1 ring-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+              )}
             </div>
 
             {/* Country Searchable Dropdown */}
@@ -205,7 +240,9 @@ const handleSubmit = (e: React.FormEvent) => {
                 <button
                   type="button"
                   onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                  className="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-xs focus:border-indigo-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                  className={`w-full rounded-md bg-white py-2 pl-3 pr-10 text-left shadow-xs focus:border-indigo-500 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 sm:text-sm ${
+                    errors.country ? "border-red-500 ring-1 ring-red-500" : "border border-gray-300"
+                  }`}
                 >
                   <span className={formData.country ? "text-gray-900" : "text-gray-400"}>
                     {formData.country || "Select a country"}
@@ -245,6 +282,9 @@ const handleSubmit = (e: React.FormEvent) => {
                   </div>
                 )}
               </div>
+              {errors.country && (
+                <p className="mt-1 text-sm text-red-600">{errors.country}</p>
+              )}
             </div>
 
             <div className="sm:col-span-2">
@@ -261,8 +301,13 @@ const handleSubmit = (e: React.FormEvent) => {
                 value={formData.addressLine1}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                  errors.addressLine1 ? "border-red-500 ring-1 ring-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.addressLine1 && (
+                <p className="mt-1 text-sm text-red-600">{errors.addressLine1}</p>
+              )}
             </div>
             <div className="sm:col-span-2">
               <label
@@ -294,8 +339,13 @@ const handleSubmit = (e: React.FormEvent) => {
                 value={formData.city}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                  errors.city ? "border-red-500 ring-1 ring-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.city && (
+                <p className="mt-1 text-sm text-red-600">{errors.city}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -354,8 +404,13 @@ const handleSubmit = (e: React.FormEvent) => {
                 value={formData.state}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                  errors.state ? "border-red-500 ring-1 ring-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.state && (
+                <p className="mt-1 text-sm text-red-600">{errors.state}</p>
+              )}
             </div>
             <div>
               <label
@@ -371,8 +426,13 @@ const handleSubmit = (e: React.FormEvent) => {
                 value={formData.pincode}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                  errors.pincode ? "border-red-500 ring-1 ring-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.pincode && (
+                <p className="mt-1 text-sm text-red-600">{errors.pincode}</p>
+              )}
             </div>
 
             <div>
@@ -390,8 +450,12 @@ const handleSubmit = (e: React.FormEvent) => {
                   onChange={(value) => handlePhoneChange("phone", value)}
                   defaultCountry={getCountryCodeByName(formData.country)}
                   inputClassName="px-3 sm:text-sm"
+                  error={!!errors.phone}
                 />
               </div>
+              {errors.phone && (
+                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+              )}
             </div>
             <div>
               <label
@@ -408,8 +472,12 @@ const handleSubmit = (e: React.FormEvent) => {
                   onChange={(value) => handlePhoneChange("altPhone", value)}
                   defaultCountry={getCountryCodeByName(formData.country)}
                   inputClassName="px-3 sm:text-sm"
+                  error={!!errors.altPhone}
                 />
               </div>
+              {errors.altPhone && (
+                <p className="mt-1 text-sm text-red-600">{errors.altPhone}</p>
+              )}
             </div>
             <div className="sm:col-span-2">
               <label
@@ -425,8 +493,13 @@ const handleSubmit = (e: React.FormEvent) => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md shadow-xs focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm ${
+                  errors.email ? "border-red-500 ring-1 ring-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
             <div className="sm:col-span-2">
               <div className="flex items-center">

@@ -10,10 +10,12 @@ import {
   parsePhoneNumberFromString,
 } from "libphonenumber-js";
 
-const toFlagEmoji = (countryCode: string) =>
-  countryCode
+const toFlagEmoji = (code: string): string => {
+  if (!/^[A-Za-z]{2}$/.test(code)) return "🏳";
+  return code
     .toUpperCase()
-    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+    .replace(/./g, (c) => String.fromCodePoint(127397 + c.charCodeAt(0)));
+};
 
 type CountryOption = {
   value: CountryCode;
@@ -24,33 +26,39 @@ type CountryOption = {
 
 const countryName = new Intl.DisplayNames(["en"], { type: "region" });
 
-const COUNTRY_OPTIONS: CountryOption[] = getCountries().map((country) => ({
-  value: country,
-  label: countryName.of(country) || country,
-  dialCode: `+${getCountryCallingCode(country)}`,
-  flag: toFlagEmoji(country),
-}));
+const COUNTRY_OPTIONS: CountryOption[] = getCountries()
+  .map((country) => ({
+    value: country,
+    label: countryName.of(country) ?? country,
+    dialCode: `+${getCountryCallingCode(country)}`,
+    flag: toFlagEmoji(country),
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
 const detectCountryFromCookies = (): CountryCode | undefined => {
   if (typeof document === "undefined") return undefined;
 
   const cookieMap = document.cookie
     .split(";")
-    .map((value) => value.trim())
+    .map((v) => v.trim())
     .filter(Boolean)
     .reduce<Record<string, string>>((acc, pair) => {
-      const [key, ...rest] = pair.split("=");
-      if (!key) return acc;
-      acc[key] = decodeURIComponent(rest.join("="));
-      return acc;
-    }, {});
+      const idx = pair.indexOf("=");
+      if (idx === -1) return acc;
+      const key = pair.slice(0, idx).trim();
+      try {
+        acc[key] = decodeURIComponent(pair.slice(idx + 1));
+      } catch {
+        acc[key] = pair.slice(idx + 1);
+      }
+      return acc;    }, {});
 
   const possible = [cookieMap.loc_country, cookieMap.country, cookieMap.countryCode]
     .filter(Boolean)
-    .map((value) => value!.toUpperCase());
+    .map((v) => v!.toUpperCase());
 
-  const matched = possible.find((value) =>
-    COUNTRY_OPTIONS.some((option) => option.value === value)
+  const matched = possible.find((v) =>
+    COUNTRY_OPTIONS.some((opt) => opt.value === v)
   );
 
   return matched as CountryCode | undefined;
@@ -58,10 +66,9 @@ const detectCountryFromCookies = (): CountryCode | undefined => {
 
 export const getInitialPhoneCountry = (explicitCountry?: string): CountryCode => {
   const explicit = explicitCountry?.toUpperCase();
-  if (explicit && COUNTRY_OPTIONS.some((option) => option.value === explicit)) {
+  if (explicit && COUNTRY_OPTIONS.some((opt) => opt.value === explicit)) {
     return explicit as CountryCode;
   }
-
   return "IN";
 };
 
@@ -70,10 +77,8 @@ export const validatePhoneByCountry = (
   country: CountryCode
 ): boolean => {
   if (!value?.trim()) return false;
-
   const parsed = parsePhoneNumberFromString(value, country);
   if (!parsed) return false;
-
   return isValidPhoneNumber(parsed.number);
 };
 
@@ -109,8 +114,19 @@ export default function PhoneNumberInput({
   );
   const [nationalNumber, setNationalNumber] = useState("");
   const [menuWidth, setMenuWidth] = useState<number>();
+  const [mounted, setMounted] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
+  // Track whether the current value change was triggered by the user typing
+  // so we can skip the useEffect sync and avoid the 91-injection loop
+  const isInternalChange = useRef(false);
+
+  // Prevent SSR/hydration mismatch for menuPortalTarget
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Auto-detect country from cookies on mount (client only)
   useEffect(() => {
     const cookieCountry = detectCountryFromCookies();
     if (cookieCountry) {
@@ -118,12 +134,20 @@ export default function PhoneNumberInput({
     }
   }, []);
 
+  // Sync defaultCountry prop changes
   useEffect(() => {
-    const fallbackCountry = getInitialPhoneCountry(defaultCountry);
-    setCountry((prev) => (prev === fallbackCountry ? prev : fallbackCountry));
+    const next = getInitialPhoneCountry(defaultCountry);
+    setCountry(next);
   }, [defaultCountry]);
 
+  // Sync external value prop changes (e.g. form reset, pre-fill)
+  // Skipped when the change was triggered by the user typing
   useEffect(() => {
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+
     if (!value) {
       setNationalNumber("");
       return;
@@ -131,14 +155,21 @@ export default function PhoneNumberInput({
 
     const parsed = parsePhoneNumberFromString(value, country);
     if (parsed) {
-      setCountry(parsed.country || country);
+      setCountry(parsed.country ?? country);
       setNationalNumber(parsed.nationalNumber);
       return;
     }
 
-    setNationalNumber(value.replace(/\D/g, ""));
+    // Safely strip dial code prefix to avoid injecting country code digits
+    const dialCode = getCountryCallingCode(country);
+    const digits = value.replace(/\D/g, "");
+    const stripped = digits.startsWith(dialCode)
+      ? digits.slice(dialCode.length)
+      : digits;
+    setNationalNumber(stripped);
   }, [value, country]);
 
+  // Track wrapper width for dropdown menu alignment
   useEffect(() => {
     if (!wrapperRef.current) return;
 
@@ -150,14 +181,11 @@ export default function PhoneNumberInput({
     updateWidth();
     const observer = new ResizeObserver(updateWidth);
     observer.observe(wrapperRef.current);
-
     return () => observer.disconnect();
   }, []);
 
   const selectedOption = useMemo(
-    () =>
-      COUNTRY_OPTIONS.find((option) => option.value === country) ??
-      COUNTRY_OPTIONS[0],
+    () => COUNTRY_OPTIONS.find((opt) => opt.value === country) ?? COUNTRY_OPTIONS[0],
     [country]
   );
 
@@ -165,16 +193,20 @@ export default function PhoneNumberInput({
     if (!option) return;
     setCountry(option.value);
 
+    isInternalChange.current = true;
     const parsed = parsePhoneNumberFromString(nationalNumber, option.value);
-    onChange(parsed?.number || `${option.dialCode}${nationalNumber}`, option.value);
+    onChange(parsed?.number ?? `${option.dialCode}${nationalNumber}`, option.value);
   };
 
   const handleNumberChange = (nextValue: string) => {
     const digits = nextValue.replace(/\D/g, "");
     setNationalNumber(digits);
 
+    // Flag as internal so the value sync useEffect doesn't re-process it
+    isInternalChange.current = true;
+
     const parsed = parsePhoneNumberFromString(digits, country);
-    const formatted = parsed?.number || `${selectedOption.dialCode}${digits}`;
+    const formatted = parsed?.number ?? `${selectedOption.dialCode}${digits}`;
     onChange(formatted, country);
   };
 
@@ -186,9 +218,7 @@ export default function PhoneNumberInput({
       ref={wrapperRef}
       className={`flex w-full overflow-hidden rounded-xl border ${
         error ? "border-red-500" : "border-gray-300"
-      } bg-white shadow-xs focus-within:ring-2 focus-within:ring-indigo-200 ${
-        containerClassName || ""
-      }`}
+      } bg-white shadow-xs focus-within:ring-2 focus-within:ring-indigo-200 ${containerClassName}`}
     >
       <div className="min-w-[110px] border-r border-gray-200">
         <Select
@@ -197,7 +227,7 @@ export default function PhoneNumberInput({
           isDisabled={disabled}
           value={selectedOption}
           classNamePrefix="phone-country"
-          menuPortalTarget={typeof window !== "undefined" ? document.body : undefined}
+          menuPortalTarget={mounted ? document.body : undefined}
           menuPosition="fixed"
           placeholder="+91"
           onChange={handleCountryChange}
@@ -211,14 +241,8 @@ export default function PhoneNumberInput({
               boxShadow: "none",
               backgroundColor: "transparent",
             }),
-            valueContainer: (base) => ({
-              ...base,
-              padding: "0 8px",
-            }),
-            indicatorsContainer: (base) => ({
-              ...base,
-              height: "44px",
-            }),
+            valueContainer: (base) => ({ ...base, padding: "0 8px" }),
+            indicatorsContainer: (base) => ({ ...base, height: "44px" }),
             indicatorSeparator: () => ({ display: "none" }),
             singleValue: (base) => ({
               ...base,
@@ -230,11 +254,7 @@ export default function PhoneNumberInput({
               fontSize: "14px",
               maxWidth: "none",
             }),
-            input: (base) => ({
-              ...base,
-              margin: 0,
-              padding: 0,
-            }),
+            input: (base) => ({ ...base, margin: 0, padding: 0 }),
             menuPortal: (base) => ({ ...base, zIndex: 100 }),
             menu: (base) => ({
               ...base,
@@ -263,7 +283,6 @@ export default function PhoneNumberInput({
                 </div>
               );
             }
-
             return (
               <div className="flex min-w-0 items-center gap-2">
                 <span className="shrink-0">{option.flag}</span>
@@ -284,9 +303,9 @@ export default function PhoneNumberInput({
         disabled={disabled}
         value={nationalNumber}
         onBlur={onBlur}
-        onChange={(event) => handleNumberChange(event.target.value)}
+        onChange={(e) => handleNumberChange(e.target.value)}
         placeholder={placeholder}
-        className={`${baseInputClasses} ${inputClassName || ""}`}
+        className={`${baseInputClasses} ${inputClassName}`}
       />
     </div>
   );

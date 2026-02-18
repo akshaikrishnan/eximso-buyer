@@ -437,7 +437,7 @@ export default function UserProfile() {
                 </div>
 
                 {/* Address */}
-                <div className="col-span-full">
+                {/* <div className="col-span-full">
                   <label className="block text-sm font-medium leading-6 text-gray-900">
                     Address
                   </label>
@@ -449,7 +449,7 @@ export default function UserProfile() {
                     placeholder="Enter your address here…"
                     className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 

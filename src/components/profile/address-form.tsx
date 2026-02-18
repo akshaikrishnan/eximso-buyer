@@ -296,10 +296,10 @@ export default function AddressForm({
           rules={{
             required: "Pincode is required",
             onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-              e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+              e.target.value = e.target.value.replace(/[^a-zA-Z0-9\s\-]/g, "").slice(0, 12);
             },
             validate: (v: string) =>
-              /^\d{6}$/.test(v) || "Pincode must be 6 digits",
+              /^[a-zA-Z0-9\s\-]+$/.test(v) || "Pincode must contain only letters, numbers, spaces, or hyphens",
           }}
         />
 
