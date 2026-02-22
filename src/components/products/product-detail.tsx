@@ -141,49 +141,134 @@ export default function ProductDetail({ product }: any) {
     product?.stock <= 0;
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <main className="mx-auto  px-4 sm:px-6 py-10 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:max-w-none">
-          {/* Product */}
-          <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12">
-            {/* 💡 IMAGE GALLERY: Dynamically Imported Component */}
-            <ProductGallery
-              images={images?.length ? images : [product?.thumbnail]}
-              productName={product?.name}
-            />
+    <div className="bg-gradient-to-b from-slate-50 via-white to-white">
+      <main className="mx-auto w-full max-w-none px-4 py-12 sm:px-6 lg:px-10 2xl:px-16">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] xl:items-start">
+          <div className="space-y-8">
+            <article className="rounded-3xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur">
+              <ProductGallery
+                images={images.length ? images : [product.thumbnail ?? ""]}
+                productName={product.name}
+              />
+            </article>
 
-            {/* Product Info */}
-            <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-              <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-2">
-                {product?.name}
-              </h1>
-
-              {/* Price Section */}
-              <div className="mt-4 flex items-center space-x-3">
-                <h2 className="sr-only">Product information</h2>
-                <p className="text-4xl font-semibold tracking-tight text-gray-900">
-                  <span className="text-indigo-600">
-                    <Price
-                      amount={
-                        product?.discountPercentage > 0
-                          ? product?.offerPrice
-                          : product?.price
-                      }
-                    />
-                  </span>
-                </p>
-                {/* Original Price and Discount Tag */}
-                {product?.discountPercentage > 0 && (
-                  <>
-                    <p className="text-xl text-gray-500 line-through">
-                      <Price amount={product?.price} />
-                    </p>
-                    <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-0.5 text-sm font-medium text-red-800">
-                      {product?.discountPercentage}% OFF
-                    </span>
-                  </>
-                )}
+            <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-xl font-semibold text-slate-900">Dimensions at a Glance</h2>
+                <SparklesIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
               </div>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                {dimensionHighlights.map(({ key, label, unit, icon: Icon }) => {
+                  const rawValue = product.dimensions?.[key];
+                  const formattedValue =
+                    typeof rawValue === "number" && Number.isFinite(rawValue)
+                      ? `${key === "weight" ? rawValue.toFixed(2) : rawValue} ${unit ?? ""}`.trim()
+
+                      : "—";
+
+                  return (
+                    <div
+                      key={key}
+                      className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3"
+                    >
+                      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+                        <Icon className="h-6 w-6" aria-hidden="true" />
+                      </span>
+                      <div>
+                        <p className="text-sm font-medium text-slate-600">{label}</p>
+                        <p className="text-lg font-semibold text-slate-900">{formattedValue}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
+
+          <aside className="space-y-8">
+            <article className="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm backdrop-blur">
+              <header className="flex flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                  {categoryName && (
+                    categoryPath ? (
+                      <Link
+                        href={categoryPath}
+                        className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                      >
+                        <CubeIcon className="h-4 w-4" aria-hidden="true" />
+                        {categoryName}
+                      </Link>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-3 py-1">
+                        <CubeIcon className="h-4 w-4" aria-hidden="true" />
+                        {categoryName}
+                      </span>
+                    )
+                  )}
+                  {subcategoryName && (
+                    subcategoryPath ? (
+                      <Link
+                        href={subcategoryPath}
+                        className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"
+                      >
+                        <Squares2X2Icon className="h-4 w-4" aria-hidden="true" />
+                        {subcategoryName}
+                      </Link>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-indigo-700">
+                        <Squares2X2Icon className="h-4 w-4" aria-hidden="true" />
+                        {subcategoryName}
+                      </span>
+                    )
+                  )}
+                </div>
+
+                <div>
+                  <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl">{product.name}</h1>
+                  <div
+                    className="prose prose-sm mt-3 max-w-none text-base leading-relaxed text-slate-600"
+                    dangerouslySetInnerHTML={{
+                      __html: product.shortDescription ?? "No short description provided.",
+                    }}
+                  />
+                </div>
+              </header>
+
+              <div className="mt-6 flex flex-col gap-4">
+                <div className="flex flex-wrap items-end gap-4">
+                  <div>
+                    <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+                      {priceInfo.isFlashSale ? "Flash Price" : "Price"}
+                    </p>
+                    <p className="text-4xl font-semibold text-slate-900">
+                      <span
+                        className={classNames(
+                          priceInfo.isFlashSale ? "text-rose-600" : "text-indigo-600",
+                        )}
+                      >
+                        <Price amount={priceInfo.displayPrice} />
+                      </span>
+                    </p>
+                  </div>
+
+                  {priceInfo.discountPercent > 0 && (
+                    <div className="flex flex-col items-start gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:gap-3">
+                      <span className="text-lg text-slate-400 line-through">
+                        <Price amount={priceInfo.originalPrice} />
+                      </span>
+                      <span
+                        className={classNames(
+                          "inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold",
+                          priceInfo.isFlashSale
+                            ? "bg-rose-100 text-rose-600"
+                            : "bg-red-50 text-red-600",
+                        )}
+                      >
+                        {priceInfo.isFlashSale ? "Flash Deal" : "Save"} {priceInfo.discountPercent}% OFF
+                      </span>
+                    </div>
+                  )}
+                </div>
 
               {/* Reviews & Stock Status */}
               <div className="mt-4 flex items-center justify-between border-b pb-4">
@@ -220,13 +305,73 @@ export default function ProductDetail({ product }: any) {
                 </p>
               </div>
 
-              {/* Short Description */}
-              <div className="mt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  About This Product
-                </h3>
-                <div
-                  className="space-y-6 text-base text-gray-700 leading-relaxed"
+              {tagKeywords.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Tags</h3>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {tagKeywords.map((tag) => (
+                      <Link
+                        key={tag}
+                        href={`/search?q=${encodeURIComponent(tag)}`}
+                        className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-indigo-600 transition hover:border-indigo-200 hover:bg-indigo-100 hover:text-indigo-700"
+                      >
+                        <TagIcon className="h-4 w-4" aria-hidden="true" />
+                        {tag}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </article>
+
+            {quickFacts.length > 0 && (
+              <section className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <ShieldCheckIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
+                  <h2 className="text-lg font-semibold text-slate-900">Quick Facts</h2>
+                </div>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  {quickFacts.map(({ label, value, icon: Icon }) => (
+                    <div
+                      key={label}
+                      className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3"
+                    >
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+                        <p className="text-sm font-medium text-slate-800">{value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* {emiEligibleAmount > 0 && <PayuEmiCard amount={emiEligibleAmount} />} */}
+          </aside>
+        </div>
+
+        <section aria-labelledby="details-heading" className="mt-12 rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+          <div className="flex items-center gap-3">
+            <SparklesIcon className="h-6 w-6 text-indigo-500" aria-hidden="true" />
+            <h2 id="details-heading" className="text-2xl font-semibold text-slate-900">
+              Product Story & Specifications
+            </h2>
+          </div>
+
+          <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+            <div className="flex flex-col">
+              <div className="relative">
+                <article
+                  ref={descriptionRef}
+                  className={classNames(
+                    "prose prose-slate max-w-none text-base text-slate-700 transition-[max-height] duration-300 ease-in-out",
+                    shouldClampDescription && !isDescriptionExpanded
+                      ? "max-h-[32rem] overflow-hidden"
+                      : ""
+                  )}
                   dangerouslySetInnerHTML={{
                     __html:
                       product?.shortDescription ??

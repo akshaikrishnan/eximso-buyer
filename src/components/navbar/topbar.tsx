@@ -7,18 +7,18 @@ export default function TopBar({ className }: { className: string }) {
   return (
     <>
       <div
-        className={`w-full bg-white h-10 border-b border-gray-200 ${
-          className || ""
-        }`}
+        className={`w-full bg-white h-10 border-b border-gray-200 ${className || ""
+          }`}
       >
         <div className="container-x mx-auto h-full">
           <div className="flex justify-between items-center h-full ">
             <div className="topbar-nav ">
               <ul className="flex space-x-6">
                 <li>
-                  <Link href="/profile">
+                  <Link href={process.env.NEXT_PUBLIC_SELLER_URL + "/auth/login"}
+                  >
                     <span className="text-xs leading-6 text-qblack font-500">
-                      Account
+                      Become a Seller
                     </span>
                   </Link>
                 </li>

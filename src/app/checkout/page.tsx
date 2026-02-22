@@ -5,6 +5,7 @@ import OrderSummary from "@/components/checkout/order-summary";
 import RadioSelector from "@/components/checkout/radio-button";
 import { Price } from "@/components/common/price";
 import { useCart } from "@/hooks/use-cart";
+import { useShippingCost } from "@/hooks/use-shipping-cost";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api/axios.interceptor";
 import { sample } from "@/lib/data/checkoutdata";
@@ -28,18 +29,7 @@ interface CheckoutData {
 export default function CheckoutPage() {
   const { data: paymentProviders, isLoading } = useQuery({
     queryKey: ["payment-providers"],
-    queryFn: () =>
-      api.get(endpoints.paymentProviders).then((res) => {
-        const defaultProvider = res.data.find(
-          (item: any) => item.slug === "payu"
-        );
-        console.log({ defaultProvider });
-        setCheckOutData((prev: any) => ({
-          ...prev,
-          paymentMethod: defaultProvider || res.data[0],
-        }));
-        return res.data;
-      }),
+    queryFn: () => api.get(endpoints.paymentProviders).then((res) => res.data),
     refetchOnWindowFocus: false,
   });
 
@@ -48,8 +38,26 @@ export default function CheckoutPage() {
     billingAddress: null,
     isSameAddress: true,
     shippingMethod: sample.shippimngMethods.find((item) => item.isActive),
-    paymentMethod: paymentProviders?.find((item: any) => item.isActive),
+    paymentMethod: null,
   });
+
+  // Set default payment method when providers are loaded
+  React.useEffect(() => {
+    if (paymentProviders && !checkOutData.paymentMethod) {
+      const activeProviders = paymentProviders.filter(
+        (item: any) => item.isActive,
+      );
+      const defaultProvider =
+        activeProviders.find((item: any) => item.slug === "razorpay") ||
+        activeProviders[0];
+      if (defaultProvider) {
+        setCheckOutData((prev: any) => ({
+          ...prev,
+          paymentMethod: defaultProvider,
+        }));
+      }
+    }
+  }, [paymentProviders, checkOutData.paymentMethod]);
   const { subTotal } = useCart();
 
   const paymentMutation = useMutation({
@@ -77,6 +85,17 @@ export default function CheckoutPage() {
       });
     },
   });
+
+  // Call getCheckoutInfo when shipping address changes or on initial load
+  const {
+    data: checkOutInfo,
+    isLoading: checkoutInfoLoading,
+    error,
+  } = useShippingCost({
+    subTotal,
+    addressId: checkOutData.shippingAddress?._id,
+  });
+
   const handleCheckoutData = (data: Partial<CheckoutData>) => {
     setCheckOutData({ ...checkOutData, ...data });
   };
@@ -88,16 +107,46 @@ export default function CheckoutPage() {
     if (!checkOutData.shippingAddress) {
       return false;
     }
+    if (!checkOutData.paymentMethod) {
+      return false;
+    }
     return true;
   };
 
+  const getValidationMessage = () => {
+    if (!checkOutData.shippingAddress) {
+      return "Please select a shipping address";
+    }
+    if (!checkOutData.isSameAddress && !checkOutData.billingAddress) {
+      return "Please select a billing address";
+    }
+    if (!checkOutData.paymentMethod) {
+      return "Please select a payment method";
+    }
+    return "";
+  };
+
   const initiatePayment = () => {
+    if (!checkOutData.paymentMethod) {
+      toast({
+        title: "Payment Method Missing",
+        description: "Please select a payment method to proceed.",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Ensure shippingMethod is always set (use default if not available)
+    const defaultShippingMethod =
+      checkOutData.shippingMethod ||
+      sample.shippimngMethods.find((item) => item.isActive) ||
+      sample.shippimngMethods[0];
+
     paymentMutation.mutate({
       shippingAddress: checkOutData.shippingAddress._id,
       billingAddress: checkOutData.isSameAddress
         ? checkOutData.shippingAddress._id
         : checkOutData.billingAddress._id,
-      shippingMethod: checkOutData.shippingMethod._id,
+      shippingMethod: defaultShippingMethod?._id || null, // Backend will handle null/missing
       paymentMethod: checkOutData.paymentMethod.slug,
     });
   };
@@ -109,11 +158,15 @@ export default function CheckoutPage() {
 
           <div className="mx-auto grid max-w-lg grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
             <div className="mx-auto w-full max-w-lg order-1 xl:order-2 xl:sticky top-2">
-              <OrderSummary>
+              <OrderSummary
+                checkoutInfo={checkOutInfo}
+                isCheckoutInfoLoading={checkoutInfoLoading}
+              >
                 <div className="hidden lg:block">
                   <PlaceOrderButton
                     action={initiatePayment}
                     isValid={isValid()}
+                    validationMessage={getValidationMessage()}
                     className="mt-4"
                     isLoading={paymentMutation.isPending}
                   />
@@ -139,7 +192,8 @@ export default function CheckoutPage() {
                 </CheckoutBlock>
               )}
 
-              <CheckoutBlock>
+              {/* Shipping Methods UI Hidden - Backend will use default active shipping provider */}
+              {/* <CheckoutBlock>
                 <RadioSelector
                   items={sample.shippimngMethods}
                   selectedItem={checkOutData.shippingMethod}
@@ -149,12 +203,14 @@ export default function CheckoutPage() {
                   label="Shipping Methods"
                   isGrid
                 />
-              </CheckoutBlock>
+              </CheckoutBlock> */}
 
               <CheckoutBlock>
                 <RadioSelector
                   key={checkOutData.paymentMethod?._id}
-                  items={paymentProviders || []}
+                  items={
+                    paymentProviders?.filter((item: any) => item.isActive) || []
+                  }
                   selectedItem={checkOutData.paymentMethod}
                   onChange={(item) => {
                     handleCheckoutData({ paymentMethod: item });
@@ -167,21 +223,34 @@ export default function CheckoutPage() {
                 <PlaceOrderButton
                   action={initiatePayment}
                   isValid={isValid()}
+                  validationMessage={getValidationMessage()}
                   isLoading={paymentMutation.isPending}
                 />
               </div>
             </div>
           </div>
-          <div className="lg:hidden sticky bottom-14 left-0 right-0 bg-white p-4 flex justify-center items-center gap-2 border-t border-gray-200">
+          {/* mobile only */}
+          <div className="lg:hidden sticky bottom-18 left-0 right-0 bg-white p-4 flex justify-center items-center gap-2 border-t border-gray-200">
+            {!isValid() && getValidationMessage() && (
+              <div className="absolute bottom-full left-0 right-0 p-4 bg-red-50 border-t border-red-200 animate-in slide-in-from-bottom-2 fade-in">
+                <div className="flex items-center justify-center gap-2">
+                  <InformationCircleIcon
+                    className="h-5 w-5 text-red-400"
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm font-medium text-red-800 text-center">
+                    {getValidationMessage()}
+                  </p>
+                </div>
+              </div>
+            )}
             <div
               onClick={() => scrollTo({ top: 0, behavior: "smooth" })}
               className="flex-1 flex items-center justify-center cursor-pointer gap-2"
             >
               <Price
                 amount={Math.ceil(
-                  subTotal +
-                    subTotal * 0.05 +
-                    (Number(process.env.shippingesstimate) || 40)
+                  subTotal + Number(checkOutInfo?.shippingAmount ?? 100),
                 )}
               />
               <InformationCircleIcon
@@ -206,29 +275,50 @@ const PlaceOrderButton = ({
   className,
   action,
   isLoading,
+  validationMessage,
 }: {
   isValid: boolean;
   action: () => void;
   className?: string;
   isLoading: boolean;
+  validationMessage?: string;
 }) => {
   return (
-    <button
-      disabled={!isValid || isLoading}
-      title="Secured Checkout"
-      type="submit"
-      onClick={action}
-      className={clsx(
-        "w-full flex items-center cursor-pointer font-bold justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base  text-white shadow-xs hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60",
-        className
+    <div className="w-full">
+      <button
+        disabled={!isValid || isLoading}
+        title="Secured Checkout"
+        type="submit"
+        onClick={action}
+        className={clsx(
+          "w-full flex items-center cursor-pointer font-bold justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base  text-white shadow-xs hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60",
+          className,
+        )}
+      >
+        {isLoading ? (
+          <Loader2Icon className="animate-spin" />
+        ) : (
+          <LockClosedIcon className="h-6 w-6 text-white" aria-hidden="true" />
+        )}
+        <span className="ml-1">Place Order</span>
+      </button>
+      {!isValid && validationMessage && (
+        <div className="mt-3 rounded-md bg-red-50 p-3 border border-red-200 animate-in fade-in slide-in-from-top-1">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <InformationCircleIcon
+                className="h-5 w-5 text-red-400"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-red-800">
+                {validationMessage}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
-    >
-      {isLoading ? (
-        <Loader2Icon className="animate-spin" />
-      ) : (
-        <LockClosedIcon className="h-6 w-6 text-white" aria-hidden="true" />
-      )}
-      <span className="ml-1">Place Order</span>
-    </button>
+    </div>
   );
 };

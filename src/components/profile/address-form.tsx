@@ -3,12 +3,18 @@ import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { SelectInput } from "./select-input";
 import countries from "@/lib/data/db/countries.json";
+import PhoneNumberInput, {
+  validatePhoneByCountry,
+} from "@/components/ui/phone-number-input";
+import type { CountryCode } from "libphonenumber-js";
+
+/* ===================== TYPES ===================== */
 
 type Address = {
-  id?: string;
+  _id?: string;
   name: string;
   phone: string;
   email?: string;
@@ -30,31 +36,22 @@ type AddressFormProps = {
   onSave?: () => void;
 };
 
-type Country = {
-  code: string;
-  name: string;
-};
-type CountryOption = {
-  value: string;
-  label: string;
-};
-const countryOptions: CountryOption[] = (countries as Country[]).map(
-  (country) => ({
-    value: country.name,
-    label: country.name,
-  })
-);
+/* ===================== COUNTRY OPTIONS ===================== */
 
-type FormInputProps = {
-  id: string;
-  label: string;
-  type?: string;
-  placeholder?: string;
-  register: any;
-  errors: any;
-  rules?: any;
-  gridClass?: string;
+type Country = { code: string; name: string };
+type CountryOption = { value: string; label: string };
+
+const countryOptions: CountryOption[] = (countries as Country[]).map((c) => ({
+  value: c.name,
+  label: c.name,
+}));
+
+const getCountryCodeByName = (countryName?: string): CountryCode => {
+  const matched = (countries as Country[]).find((country) => country.name === countryName);
+  return (matched?.code || "IN") as CountryCode;
 };
+
+/* ===================== INPUT COMPONENT ===================== */
 
 const FormInput = ({
   id,
@@ -65,57 +62,44 @@ const FormInput = ({
   errors,
   rules,
   gridClass = "sm:col-span-4",
-}: FormInputProps) => (
+}: any) => (
   <div className={gridClass}>
-    <label
-      htmlFor={id}
-      className="block text-sm font-medium leading-6 text-gray-900"
-    >
-      {label}
-    </label>
-    <div className="mt-2">
-      <input
-        type={type}
-        id={id}
-        placeholder={placeholder}
-        className={`block w-full rounded-md border-0 py-3 text-gray-900 shadow-xs ring-1 ring-inset px-4 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
-          errors?.[id] ? "ring-red-500" : "ring-gray-300"
+    <label className="block text-sm font-medium">{label}</label>
+    <input
+      type={type}
+      placeholder={placeholder}
+      {...register(id, rules)}
+      className={`mt-2 w-full rounded-md px-4 py-3 ring-1 ${errors?.[id] ? "ring-red-500" : "ring-gray-300"
         }`}
-        {...register(id, rules)}
-      />
-      {errors?.[id] && (
-        <p className="mt-1 text-sm text-red-600">{errors[id].message}</p>
-      )}
-    </div>
+    />
+    {errors?.[id] && (
+      <p className="text-sm text-red-600">{errors[id].message}</p>
+    )}
   </div>
 );
 
+/* ===================== ADDRESS TYPE ===================== */
+
 const AddressTypeRadio = ({ register }: any) => (
   <div className="col-span-full">
-    <label className="block text-sm font-medium leading-6 text-gray-900">
-      Type of Address
-    </label>
-    <div className="mt-2 flex space-x-4">
+    <label className="block text-sm font-medium">Type of Address</label>
+    <div className="mt-2 flex gap-4">
       {["home", "office", "other"].map((type) => (
-        <div className="flex items-center" key={type}>
+        <label key={type} className="flex items-center gap-2 capitalize">
           <input
             type="radio"
-            id={type}
             value={type}
-            {...register("addressType")}
-            className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+            {...register("addressType", { required: true })}
+            className="text-indigo-600"
           />
-          <label
-            htmlFor={type}
-            className="ml-2 block text-sm text-gray-900 capitalize"
-          >
-            {type}
-          </label>
-        </div>
+          {type}
+        </label>
       ))}
     </div>
   </div>
 );
+
+/* ===================== MAIN FORM ===================== */
 
 export default function AddressForm({
   address,
@@ -123,31 +107,6 @@ export default function AddressForm({
   onSave,
 }: AddressFormProps) {
   const queryClient = useQueryClient();
-  const addressMutation = useMutation({
-    mutationFn: ({ data, id }: { data: Omit<Address, "id">; id?: string }) => {
-      if (id) {
-        return api.put(`${endpoints.address}/${id}`, data);
-      }
-      return api.post(endpoints.address, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["addresses"] }).then(() => {
-        toast({
-          title: "Success",
-          description: address?.id ? "Address updated!" : "Address added!",
-        });
-        reset();
-        onSave?.();
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: address?.id ? "Update failed" : "Add failed",
-        variant: "destructive",
-      });
-    },
-  });
 
   const {
     register,
@@ -155,157 +114,237 @@ export default function AddressForm({
     formState: { errors },
     control,
     reset,
+    watch,
   } = useForm<Address>({
-    defaultValues: address || { addressType: "home", country: "India" },
+    defaultValues: {
+      addressType: "home",
+      country: "India",
+    },
   });
 
-  const onSubmit = (formData: Address) => {
-    const { id, ...data } = formData;
-    addressMutation.mutate({ data, id: address?.id });
+  const selectedCountryCode = getCountryCodeByName(watch("country"));
+
+  /* ================= MUTATION ================= */
+
+  const mutation = useMutation({
+    mutationFn: (data: Address) =>
+      data._id
+        ? api.put(`${endpoints.address}/${data._id}`, data)
+        : api.post(endpoints.address, data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      toast({
+        title: "Success",
+        description: address?._id
+          ? "Address updated successfully"
+          : "Address added successfully",
+      });
+      reset();
+      onSave?.();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (data: Address) => {
+    mutation.mutate({ ...data, _id: address?._id });
   };
 
+  /* ================= PREFILL ================= */
+
   useEffect(() => {
-    reset(
-      address || {
-        addressType: "home",
-        country: "India",
-      }
-    );
+    if (address) {
+      reset(address);
+    }
   }, [address, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="">
-      <div className="px-4 py-6 sm:p-8">
-        <div className="grid  grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
-          <FormInput
-            id="name"
-            label="Full Name"
-            placeholder="Name of recipient"
-            register={register}
-            errors={errors}
-            rules={{ required: "Name is required", minLength: 2 }}
-          />
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid grid-cols-1 sm:grid-cols-6 gap-6 p-6">
 
-          <FormInput
-            id="phone"
-            label="Mobile Number"
-            type="tel"
-            placeholder="Contact number"
-            register={register}
-            errors={errors}
+        {/* NAME (NO NUMBERS / SYMBOLS) */}
+        <FormInput
+          id="name"
+          label="Full Name"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "Name is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value
+                .replace(/[^A-Za-z\s]/g, "")
+                .replace(/\s+/g, " ")
+                .replace(/^\s+/, "");
+            },
+            validate: (v: string) =>
+              /^[A-Za-z\s]+$/.test(v) || "Only letters and spaces allowed",
+          }}
+        />
+
+        {/* PHONE */}
+        <div className="sm:col-span-4">
+          <label className="block text-sm font-medium">Phone</label>
+          <Controller
+            name="phone"
+            control={control}
             rules={{
               required: "Phone is required",
-              pattern: { value: /^\d{10}$/, message: "Invalid phone" },
+              validate: (value) =>
+                validatePhoneByCountry(value || "", selectedCountryCode) ||
+                "Enter a valid phone number",
             }}
+            render={({ field }) => (
+              <PhoneNumberInput
+                value={field.value}
+                onChange={(phone) => field.onChange(phone)}
+                onBlur={field.onBlur}
+                defaultCountry={selectedCountryCode}
+                placeholder="Enter phone number"
+                error={!!errors.phone}
+                inputClassName="px-4 text-sm"
+              />
+            )}
           />
-
-          <FormInput
-            id="email"
-            label="Email"
-            type="email"
-            placeholder="Email address"
-            register={register}
-            errors={errors}
-            rules={{
-              pattern: { value: /^\S+@\S+\.\S+$/, message: "Invalid email" },
-            }}
-          />
-
-          <FormInput
-            id="addressLine1"
-            label="Address Line 1"
-            gridClass="col-span-full"
-            placeholder="Street address"
-            register={register}
-            errors={errors}
-            rules={{ required: "Address required", minLength: 5 }}
-          />
-
-          <FormInput
-            id="addressLine2"
-            label="Address Line 2"
-            gridClass="col-span-full"
-            placeholder="Apartment/suite"
-            register={register}
-            errors={errors}
-            rules={{ minLength: 5 }}
-          />
-          <div className="grid gap-x-6 gap-y-8 col-span-full xl:grid-cols-5 grid-cols-1">
-            <SelectInput
-              control={control}
-              name="country"
-              label="Country"
-              options={countryOptions}
-              placeholder="Select a country"
-              className="col-span-3"
-              required
-              errors={errors}
-            />
-            <FormInput
-              id="city"
-              label="City"
-              placeholder="City name"
-              register={register}
-              errors={errors}
-              gridClass="col-span-2"
-              rules={{ required: "City required", minLength: 2 }}
-            />
-          </div>
-          <div className="grid xl:grid-cols-3 grid-cols-1 col-span-full gap-x-6 gap-y-6">
-            <FormInput
-              id="pincode"
-              label="ZIP/Postal Code"
-              placeholder="Postal code"
-              gridClass="col-span-1"
-              register={register}
-              errors={errors}
-              rules={{
-                required: "Postal code required",
-                pattern: { value: /^\d{5,6}$/, message: "Invalid code" },
-              }}
-            />
-            <FormInput
-              id="state"
-              label="State/Province"
-              placeholder="State name"
-              register={register}
-              errors={errors}
-              gridClass="col-span-2"
-              rules={{ required: "State required", minLength: 2 }}
-            />
-          </div>
-
-          <AddressTypeRadio register={register} />
-
-          <FormInput
-            id="altPhone"
-            label="Alternative Mobile"
-            type="tel"
-            placeholder="Optional contact"
-            register={register}
-            errors={errors}
-            rules={{ pattern: { value: /^\d{10}$/, message: "Invalid phone" } }}
-          />
+          {errors.phone && (
+            <p className="text-sm text-red-600">{errors.phone.message}</p>
+          )}
         </div>
+
+        {/* EMAIL */}
+        <FormInput
+          id="email"
+          label="Email"
+          type="email"
+          register={register}
+          errors={errors}
+          rules={{
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Invalid email address",
+            },
+          }}
+        />
+
+        {/* ADDRESS */}
+        <FormInput
+          id="addressLine1"
+          label="Address Line 1"
+          gridClass="col-span-full"
+          register={register}
+          errors={errors}
+          rules={{ required: "Address is required" }}
+        />
+
+        <FormInput
+          id="addressLine2"
+          label="Address Line 2"
+          gridClass="col-span-full"
+          register={register}
+          errors={errors}
+        />
+
+        {/* COUNTRY */}
+        <SelectInput
+          control={control}
+          name="country"
+          label="Country"
+          options={countryOptions}
+          required
+        />
+
+        {/* CITY */}
+        <FormInput
+          id="city"
+          label="City"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "City is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+            },
+          }}
+        />
+
+        {/* STATE */}
+        <FormInput
+          id="state"
+          label="State"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "State is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+            },
+          }}
+        />
+
+        {/* PINCODE */}
+        <FormInput
+          id="pincode"
+          label="Pincode"
+          register={register}
+          errors={errors}
+          rules={{
+            required: "Pincode is required",
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+              e.target.value = e.target.value.replace(/[^a-zA-Z0-9\s\-]/g, "").slice(0, 12);
+            },
+            validate: (v: string) =>
+              /^[a-zA-Z0-9\s\-]+$/.test(v) ||
+              "Pincode must contain only letters, numbers, spaces, or hyphens",
+
+          }}
+        />
+
+        <AddressTypeRadio register={register} />
+
+        {/* ALT PHONE */}
+        <div className="sm:col-span-4">
+          <label className="block text-sm font-medium">Alt Phone</label>
+          <Controller
+            name="altPhone"
+            control={control}
+            rules={{
+              validate: (value) =>
+                !value || validatePhoneByCountry(value, selectedCountryCode) || "Enter a valid alternate phone number",
+            }}
+            render={({ field }) => (
+              <PhoneNumberInput
+                value={field.value || ""}
+                onChange={(phone) => field.onChange(phone)}
+                onBlur={field.onBlur}
+                defaultCountry={selectedCountryCode}
+                placeholder="Enter alternate phone number"
+                error={!!errors.altPhone}
+                inputClassName="px-4 text-sm"
+              />
+            )}
+          />
+          {errors.altPhone && (
+            <p className="text-sm text-red-600">{errors.altPhone.message}</p>
+          )}
+        </div>
+
       </div>
 
-      <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8">
-        <button
-          type="button"
-          onClick={() => {
-            reset();
-            onCancel?.();
-          }}
-          className="text-sm font-semibold leading-6 text-gray-900"
-        >
+      <div className="flex justify-end gap-4 p-4 border-t">
+        <button type="button" onClick={onCancel}>
           Cancel
         </button>
         <button
           type="submit"
-          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          disabled={addressMutation.isPending}
+          className="bg-indigo-600 text-white px-4 py-2 rounded"
+          disabled={mutation.isPending}
         >
-          {addressMutation.isPending ? "Saving..." : "Save"}
+          {mutation.isPending ? "Saving..." : "Save"}
         </button>
       </div>
     </form>

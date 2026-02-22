@@ -7,11 +7,15 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { Price } from "@/components/common/price";
 import clsx from "clsx";
+import { useQuery } from "@tanstack/react-query";
+import { useShippingCost } from "@/hooks/use-shipping-cost";
 
 export default function Cart() {
   const { cart, isLoading, isError, removeMutation, subTotal } = useCart();
+  const { data: shippingInfo, isLoading: shippingInfoLoading } =
+    useShippingCost({ subTotal });
   const isAnyOfItemsOutOfStock = cart?.items?.some(
-    (item: any) => item.product.stock <= 0
+    (item: any) => item.product.stock <= 0,
   );
 
   if (isLoading) return <Loader fullScreen />;
@@ -44,6 +48,7 @@ export default function Cart() {
             isAnyOfItemsOutOfStock={isAnyOfItemsOutOfStock}
             itemCount={cart.items.length}
             cart={cart}
+            checkoutInfo={shippingInfo}
           />
         </form>
       </div>
@@ -57,26 +62,38 @@ export function OrderSummary({
   isAnyOfItemsOutOfStock = false,
   itemCount = 0,
   cart,
+  checkoutInfo,
+  isCheckoutInfoLoading = false,
 }: {
   subTotal: number;
   isAnyOfItemsOutOfStock?: boolean;
   children?: ReactNode;
   itemCount?: number;
   cart?: any;
+  checkoutInfo?: any;
+  isCheckoutInfoLoading?: boolean;
 }) {
   // Calculate total regular price (sum of all product prices)
-  const totalPrice = cart?.items?.reduce((acc: number, item: any) => {
-    const regularPrice = item.product?.price || 0;
-    const qty = item.quantity || 1;
-    return acc + (regularPrice * qty);
-  }, 0) || subTotal;
+  // 1️⃣ Pure product total
+  const itemsTotal =
+    cart?.items?.reduce((acc: number, item: any) => {
+      const price = Number(item.product?.price || 0);
+      const qty = Number(item.quantity || 1);
+      return acc + price * qty;
+    }, 0) || 0;
 
-  // Calculate total discount
-  const totalDiscount = totalPrice - subTotal;
+  // 2️⃣ Shipping ONLY ONCE
+  const shippingEstimate = Number(checkoutInfo?.shippingAmount) || 100;
+  console.log("shippingEstimatedss", shippingEstimate);
 
-  const shippingEstimate = Number(process.env.shippingesstimate) || 40;
-  const taxAmount = subTotal * 0.05;
-  const orderTotal = Math.ceil(subTotal + taxAmount + shippingEstimate);
+  // 3️⃣ Discount = MRP - selling price
+  const totalDiscount = itemsTotal - subTotal;
+
+  // 4️⃣ Tax
+  // const taxAmount = subTotal * 0.05;
+
+  // 5️⃣ Final payable
+  const orderTotal = Math.ceil(subTotal + shippingEstimate);
 
   return (
     <section className="mt-16 lg:col-span-5 lg:mt-0 lg:sticky top-5">
@@ -88,10 +105,10 @@ export function OrderSummary({
         <div className="flex justify-center items-center w-full space-y-4 flex-col pb-4">
           <div className="flex justify-between items-center w-full">
             <p className="text-base dark:text-white leading-5 text-gray-800">
-              Price ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+              Price ({itemCount} {itemCount === 1 ? "item" : "items"})
             </p>
             <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
-              <Price amount={totalPrice} />
+              <Price amount={itemsTotal} />
             </p>
           </div>
 
@@ -111,18 +128,21 @@ export function OrderSummary({
               Shipping Amount
             </p>
             <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
-              <Price amount={shippingEstimate} />
+              <Price
+                amount={shippingEstimate}
+                isLoadingExternal={isCheckoutInfoLoading}
+              />
             </p>
           </div>
 
-          <div className="flex justify-between items-center w-full">
+          {/* <div className="flex justify-between items-center w-full">
             <p className="text-base dark:text-white leading-5 text-gray-800">
               Tax Amount
             </p>
             <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
               <Price amount={taxAmount} />
             </p>
-          </div>
+          </div> */}
         </div>
 
         <div className="border-t-2 border-gray-200 dark:border-gray-600 pt-4">
@@ -131,7 +151,11 @@ export function OrderSummary({
               Total Amount
             </p>
             <p className="text-lg dark:text-white font-bold leading-5 text-gray-800">
-              <Price amount={orderTotal} />
+              <Price
+                amount={orderTotal}
+                isLoadingExternal={isCheckoutInfoLoading}
+                className=""
+              />
             </p>
           </div>
         </div>
@@ -145,8 +169,16 @@ export function OrderSummary({
         {totalDiscount > 0 && (
           <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <svg
+                className="w-5 h-5 text-green-600 dark:text-green-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
               </svg>
               <p className="text-sm font-medium text-green-700 dark:text-green-300">
                 You&apos;ll save <Price amount={totalDiscount} /> on this order!
@@ -172,7 +204,7 @@ function CheckoutButton({ disabled = false }: { disabled: boolean }) {
           disabled
             ? "cursor-not-allowed bg-gray-400 text-white"
             : "w-full rounded-md border inline-block text-center border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-xs hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50",
-          disabled && "cursor-not-allowed bg-gray-400 hover:bg-gray-400"
+          disabled && "cursor-not-allowed bg-gray-400 hover:bg-gray-400",
         )}
       >
         Checkout

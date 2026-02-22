@@ -10,6 +10,7 @@ import countries from "@/lib/data/db/countries.json";
 import { endpoints } from "@/lib/data/endpoints";
 import api from "@/lib/api/axios.interceptor";
 import { useToast } from "@/hooks/use-toast";
+import PhoneNumberInput, { validatePhoneByCountry } from "@/components/ui/phone-number-input";
 
 // ---- Types ----
 type Country = { code: string; name: string };
@@ -162,10 +163,30 @@ export default function UserProfile() {
     },
   });
 
+  const sanitizers: Record<string, (value: string) => string> = {
+    name: (v) =>
+      v
+        .replace(/[^a-zA-Z\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trimStart(),
+
+  };
+
+
   // ---- Handlers ----
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+  ) => {
+    const { name, value } = e.target;
+
+    const sanitize = sanitizers[name];
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: sanitize ? sanitize(value) : value,
+    }));
+  };
+
 
   const handleCountryChange = (opt: CountryOption | null) => {
     setFormData((p) => ({ ...p, country: opt?.value ?? "" }));
@@ -195,6 +216,15 @@ export default function UserProfile() {
       toast({
         title: "Invalid email",
         description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.phone && !validatePhoneByCountry(formData.phone, "IN")) {
+      toast({
+        title: "Invalid phone",
+        description: "Please enter a valid phone number.",
         variant: "destructive",
       });
       return;
@@ -343,13 +373,18 @@ export default function UserProfile() {
                   <label className="block text-sm font-medium leading-6 text-gray-900">
                     Phone number
                   </label>
-                  <input
-                    type="tel"
+                  <PhoneNumberInput
                     name="phone"
                     value={formData.phone ?? ""}
-                    onChange={handleChange}
+                    onChange={(phone) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        phone,
+                      }))
+                    }
+                    defaultCountry={formData.country || "IN"}
                     placeholder="+91 98765 43210"
-                    className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+                    inputClassName="px-4 sm:text-sm"
                   />
                 </div>
 
@@ -402,7 +437,7 @@ export default function UserProfile() {
                 </div>
 
                 {/* Address */}
-                <div className="col-span-full">
+                {/* <div className="col-span-full">
                   <label className="block text-sm font-medium leading-6 text-gray-900">
                     Address
                   </label>
@@ -414,7 +449,7 @@ export default function UserProfile() {
                     placeholder="Enter your address here…"
                     className="block w-full rounded-md border-0 py-1.5 px-4 text-gray-900 shadow-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 

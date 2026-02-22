@@ -1,7 +1,10 @@
 import { toast } from "./use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 //logout hook
 export const useLogout = () => {
+  const queryClient = useQueryClient();
+
   const logout = async () => {
     toast({
       title: " Logging out",
@@ -16,7 +19,15 @@ export const useLogout = () => {
     });
     const data = await res.json();
     if (res.ok) {
-      window.location.href = "/?from=logout";
+      queryClient.clear();
+
+      if (data.sellerLogoutUrl) {
+        // Redirect through seller logout to clear seller-domain cookies,
+        // then the seller logout will redirect back to buyer
+        window.location.replace(data.sellerLogoutUrl);
+      } else {
+        window.location.replace("/?from=logout");
+      }
       return data;
     } else {
       toast({

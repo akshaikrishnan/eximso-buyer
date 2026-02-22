@@ -42,12 +42,8 @@ function displayGateway(order: any) {
           })
           .then((res) => res.data)
           .then((data) => {
-            const query = new URLSearchParams({
-              orderId: data.orders?.[0]?._id,
-            }).toString();
-            // console.log("query", data);
-            console.log("query", query);
-            window.location.href = `/payment-success?${query}`;
+            console.log("query", data);
+            window.location.href = `/checkout/success?orderId=${data.orders[0]}&items=${data.orders.length}&amount=${data.amount}`;
           })
           .catch((error) => {
             console.error("Error:", error);

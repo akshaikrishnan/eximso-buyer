@@ -61,6 +61,33 @@ export default function AddressList() {
     },
   });
 
+  // Set default address mutation
+  const setDefaultAddressMutation = useMutation({
+    mutationFn: async (addressId: string) => {
+      const response = await api.put(`${endpoints.address}/${addressId}`, {
+        isDefault: true,
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] });
+      toast({
+        title: "Success",
+        description: "Default address updated successfully!",
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to set default address. Please try again.",
+        variant: "default",
+      });
+    },
+  });
+
+  // Fetch address list
   const {
     data: addresses,
     isLoading,
@@ -81,6 +108,10 @@ export default function AddressList() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedAddress(null);
+  };
+
+  const handleSetDefault = (addressId: string) => {
+    setDefaultAddressMutation.mutate(addressId);
   };
 
   if (isLoading) {
@@ -107,7 +138,9 @@ export default function AddressList() {
             onEditClick={handleEditClick}
             onDeleteClick={(addressId) =>
               deleteAddressMutation.mutate(addressId)
-            } // Pass delete function
+            }
+            onSetDefault={handleSetDefault}
+            isSettingDefault={setDefaultAddressMutation.isPending}
           />
         ))}
       </div>
@@ -126,16 +159,20 @@ export function AddressBlock({
   address,
   onEditClick,
   onDeleteClick,
+  onSetDefault,
+  isSettingDefault,
 }: {
   address: Address;
   onEditClick: (address: Address) => void;
   onDeleteClick: (addressId: string) => void;
+  onSetDefault: (addressId: string) => void;
+  isSettingDefault?: boolean;
 }) {
   return (
     <address
       className={clsx(
         "bg-white shadow-xs ring-1 ring-gray-900/5 sm:rounded-xl p-6 relative flex flex-col justify-between",
-        address.isDefault && "border-2 border-indigo-600"
+        address.isDefault && "border-2 border-indigo-600",
       )}
     >
       <div className="grow">
@@ -166,12 +203,16 @@ export function AddressBlock({
             Default
           </span>
         ) : (
-          <button className="text-indigo-600 text-xs font-semibold">
-            Set as Default
+          <button
+            className="text-indigo-600 text-xs font-semibold hover:text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => onSetDefault(address._id)}
+            disabled={isSettingDefault}
+          >
+            {isSettingDefault ? "Setting..." : "Set as Default"}
           </button>
         )}
         <button
-          className="text-indigo-600 text-xs font-semibold"
+          className="text-indigo-600 text-xs font-semibold hover:text-indigo-700"
           onClick={() => onEditClick(address)}
         >
           Edit

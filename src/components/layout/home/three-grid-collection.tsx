@@ -5,28 +5,27 @@ const callouts = [
     imageSrc:
       // "https://tailwindui.com/img/ecommerce-images/home-page-02-edition-01.jpg",
       "/images/products/IMG_9291.JPG",
-    imageAlt:
-      "A premium herbal skincare and haircare",
-    href: "search?category=All+Categories&q=angana",
+    imageAlt: "A premium herbal skincare and haircare",
+    href: "/products/beauty-products",
   },
   {
     name: "ANGANA HERBAL POWDER",
-    description: "Angana herbal powders for natural coloring, cleansing, and dandruff control.",
+    description:
+      "Angana herbal powders for natural coloring, cleansing, and dandruff control.",
     imageSrc:
       // "https://tailwindui.com/img/ecommerce-images/home-page-02-edition-02.jpg",
       "/images/products/power.jpg",
     imageAlt:
       "Angana herbal powders for natural coloring, cleansing, and dandruff control.",
-    href: "search?category=All+Categories&q=angana",
+    href: "/products/beauty-products",
   },
   {
-    name: "NECKLACE",
-    description: "Elegant blue necklace adorned with floral motifs and gemstones.",
-    imageSrc:
-      // "https://tailwindui.com/img/ecommerce-images/home-page-02-edition-03.jpg",
-      "/images/products/jewellery.png",
-    imageAlt: "Collection of four insulated travel bottles on wooden shelf.",
-    href: "necklace",
+    name: "Handcrafted Home Decor Showpiece",
+    description:
+      "Beautiful handmade decor crafted by local artisans perfect for elevating your living room aesthetics.",
+    imageSrc: "/images/products/HomeDecorShowpiece.webp",
+    imageAlt: "Handcrafted home decor showpiece.",
+    href: "/products/home-decor",
   },
 ];
 

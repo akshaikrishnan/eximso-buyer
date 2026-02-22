@@ -100,7 +100,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
         const res = await api.get(
           `${endpoints.order}/${
             connectedOrder.orderNumber || connectedOrder._id
-          }`
+          }`,
         );
         const data = res?.data?.result ?? res?.data;
         return data as OrderRes;
@@ -175,7 +175,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
         }
         return acc;
       },
-      0
+      0,
     );
 
     // Sum up all offer prices from connected orders (only actual offer prices)
@@ -183,7 +183,11 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
       (acc, query) => {
         if (query.data?.items) {
           const orderOfferPrice = query.data.items.reduce((itemAcc, item) => {
-            const offerPrice = item.product?.offerPrice || 0;
+            const regularPrice = item.product?.price || 0;
+            const offerPrice =
+              item.product?.offerPrice && item.product.offerPrice < regularPrice
+                ? item.product.offerPrice
+                : regularPrice;
             const qty = item.quantity || 1;
             return itemAcc + offerPrice * qty;
           }, 0);
@@ -191,7 +195,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
         }
         return acc;
       },
-      0
+      0,
     );
 
     displayPrice = connectedOrdersTotalPrice;
@@ -201,7 +205,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
   const shipping = orderRes.shippingAmount ?? orderRes.shippingPrice ?? 0;
   const tax = orderRes.taxAmount ?? 0;
   const total =
-    orderRes.totalAmount ?? orderRes.orderTotal ?? subtotal + shipping + tax;
+    orderRes.totalAmount ?? orderRes.orderTotal ?? subtotal + shipping;
 
   return (
     <div className="py-14 px-4 md:px-6 2xl:px-6 2xl:container 2xl:mx-auto">
@@ -222,7 +226,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
           const filteredOrders = orderRes.connectedOrders.filter(
             (connectedOrder) =>
               connectedOrder._id !== orderRes._id &&
-              connectedOrder.orderNumber !== orderRes.orderNumber
+              connectedOrder.orderNumber !== orderRes.orderNumber,
           );
 
           return filteredOrders.length > 0 ? (
@@ -244,7 +248,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                       {connectedOrder.createdAt && (
                         <p className="text-xs text-gray-600 dark:text-gray-400">
                           {new Date(
-                            connectedOrder.createdAt
+                            connectedOrder.createdAt,
                           ).toLocaleDateString("en-GB")}
                         </p>
                       )}
@@ -331,9 +335,7 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                         Discount: {p.discountPercentage}%
                       </p>
                     )}
-                    <p className="text-sm dark:text-gray-300">
-                      Qty: {qty}
-                    </p>
+                    <p className="text-sm dark:text-gray-300">Qty: {qty}</p>
                     {p._id && (
                       <div className="mt-3">
                         <ReviewManager
@@ -409,17 +411,6 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                 {shipping > 0 ? <Price amount={shipping} /> : "Free"}
               </p>
             </div>
-
-            {tax > 0 && (
-              <div className="flex justify-between items-center w-full">
-                <p className="text-base dark:text-white leading-5 text-gray-800">
-                  Tax Amount
-                </p>
-                <p className="text-base dark:text-gray-300 leading-5 text-gray-600">
-                  <Price amount={tax} />
-                </p>
-              </div>
-            )}
           </div>
 
           <div className="border-t-2 border-gray-200 dark:border-gray-600 pt-4">
@@ -577,8 +568,8 @@ export default function OrderDetails({ orderNumber }: { orderNumber: string }) {
                           {orderRes.status === "paid"
                             ? "Paid"
                             : orderRes.status === "pending"
-                            ? "Pending"
-                            : orderRes.status || "Unknown"}
+                              ? "Pending"
+                              : orderRes.status || "Unknown"}
                         </span>
                       </p>
                     </div>
