@@ -1,20 +1,30 @@
 import NewsListing from "@/components/news/news-listing";
-import { fetchNewsList, newsQueryKeys, type NewsListParams } from "@/lib/api/news";
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import {
+  fetchNewsList,
+  newsQueryKeys,
+  type NewsListParams,
+} from "@/lib/api/news";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 import type { Metadata } from "next";
 
 export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "News | Eximso",
-  description: "Latest export, import, and policy insights from Eximso newsroom.",
+  description:
+    "Latest export, import, and policy insights from Eximso newsroom.",
   alternates: {
     canonical: "/news",
   },
   openGraph: {
     type: "website",
     title: "News | Eximso",
-    description: "Latest export, import, and policy insights from Eximso newsroom.",
+    description:
+      "Latest export, import, and policy insights from Eximso newsroom.",
     url: "/news",
   },
 };
@@ -28,7 +38,7 @@ export default async function NewsPage({
 
   const params: NewsListParams = {
     page: Number(resolvedSearchParams.page ?? 1),
-    limit: Number(resolvedSearchParams.limit ?? 6),
+    limit: Number(resolvedSearchParams.limit ?? 5),
     search:
       typeof resolvedSearchParams.search === "string"
         ? resolvedSearchParams.search
@@ -39,27 +49,15 @@ export default async function NewsPage({
         : undefined,
   };
 
-  const queryClient = new QueryClient();
-  try {
-    await queryClient.prefetchQuery({
-      queryKey: newsQueryKeys.list(params),
-      queryFn: () => fetchNewsList(params),
-    });
-  } catch {
-    queryClient.setQueryData(newsQueryKeys.list(params), {
-      items: [],
-      meta: {
-        page: params.page ?? 1,
-        limit: params.limit ?? 6,
-        totalItems: 0,
-        totalPages: 1,
-      },
-    });
-  }
+  const newsData = await fetchNewsList(params).catch(() => ({
+    items: [],
+    meta: {
+      page: params.page ?? 1,
+      limit: params.limit ?? 5,
+      totalItems: 0,
+      totalPages: 1,
+    },
+  }));
 
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <NewsListing searchParams={params} />
-    </HydrationBoundary>
-  );
+  return <NewsListing searchParams={params} newsData={newsData} />;
 }
