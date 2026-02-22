@@ -64,8 +64,8 @@ export default function UnauthorizedPage() {
         <div className="space-y-3">
           <h1 className="text-3xl font-bold text-gray-900">Access Denied</h1>
           <p className="text-gray-500">
-            You don't have permission to view this page. You will be redirected
-            to the login page to verify your identity.
+            You don&apos;t have permission to view this page. You will be
+            redirected to the login page to verify your identity.
           </p>
         </div>
 
