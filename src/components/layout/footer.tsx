@@ -16,7 +16,7 @@ import { BuildingStorefrontIcon } from "@heroicons/react/24/outline";
 const footerNavigation = {
   customerService: [
     { name: "Cancellation & Return policy", href: "/cancellation" },
-    { name: "News and updates", href: "#" },
+    { name: "News and updates", href: "/news" },
     { name: "Secure Payments", href: "/secure-payment" },
     { name: "What drives us everyday", href: "/drives-us-everyday" },
     { name: "Why Sell with Eximso", href: "/whysellwitheximso" },

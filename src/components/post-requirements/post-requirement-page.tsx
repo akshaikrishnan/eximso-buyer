@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Loader2, UploadCloud, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { useMutation } from "@tanstack/react-query";
+import PhoneNumberInput, { validatePhoneByCountry } from "@/components/ui/phone-number-input";
 
 interface RequirementFormValues {
   fullName: string;
@@ -73,6 +74,8 @@ export default function PostRequirementPage({
     register,
     handleSubmit,
     setValue,
+    control,
+    watch,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<RequirementFormValues>({
@@ -404,18 +407,25 @@ export default function PostRequirementPage({
                   />
                 </Field>
                 <Field label="Phone number" error={errors.phone?.message}>
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    placeholder="Include country code"
-                    {...register("phone", {
+                  <Controller
+                    name="phone"
+                    control={control}
+                    rules={{
                       required: "Phone number is required.",
-                      minLength: {
-                        value: 8,
-                        message: "Enter a valid phone number.",
-                      },
-                    })}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#8600f0] focus:ring-2 focus:ring-[#8600f0]/20"
+                      validate: (value) =>
+                        validatePhoneByCountry(value, "IN") || "Enter a valid phone number.",
+                    }}
+                    render={({ field }) => (
+                      <PhoneNumberInput
+                        value={field.value || ""}
+                        onChange={(phone) => field.onChange(phone)}
+                        onBlur={field.onBlur}
+                        defaultCountry={watch("country")}
+                        placeholder="Include country code"
+                        inputClassName="px-4 text-sm text-slate-900"
+                        error={!!errors.phone}
+                      />
+                    )}
                   />
                 </Field>
               </div>

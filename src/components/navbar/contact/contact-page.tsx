@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { Controller, useForm, SubmitHandler } from "react-hook-form";
 import {
   HiMail,
   HiPhone,
@@ -12,6 +12,7 @@ import {
   HiExternalLink,
   HiSparkles,
 } from "react-icons/hi";
+import PhoneNumberInput, { validatePhoneByCountry } from "@/components/ui/phone-number-input";
 
 interface FormInputs {
   firstName: string;
@@ -55,6 +56,7 @@ function Contact() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FormInputs>();
 
@@ -142,17 +144,24 @@ function Contact() {
               {/* Phone */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">Phone (optional)</label>
-                <div className="relative flex items-center">
-                  <HiPhone className="absolute left-4 text-gray-400 text-xl" />
-                  <input
-                    type="tel"
-                    {...register("phone", {
-                      pattern: { value: /^[0-9]{10,14}$/, message: "Invalid phone number" },
-                    })}
-                    placeholder="Enter your phone number"
-                    className="w-full rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
+                <Controller
+                  name="phone"
+                  control={control}
+                  rules={{
+                    validate: (value) => !value || validatePhoneByCountry(value, "IN") || "Invalid phone number",
+                  }}
+                  render={({ field }) => (
+                    <PhoneNumberInput
+                      value={field.value || ""}
+                      onChange={(phone) => field.onChange(phone)}
+                      onBlur={field.onBlur}
+                      placeholder="Enter your phone number"
+                      
+                      inputClassName="px-4 text-sm"
+                      error={!!errors.phone}
+                    />
+                  )}
+                />
                 {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
               </div>
 

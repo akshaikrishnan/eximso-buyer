@@ -5,6 +5,7 @@ import Loader from "../common/loader/loader";
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import clsx from "clsx";
+import AddressForm from "../profile/address-form";
 
 const DynamicAddressForm = dynamic(() => import("../profile/address-form"), {
   loading: () => <Loader />,
@@ -68,9 +69,7 @@ export default function AddressBlock({
     queryKey: ["addresses"],
     queryFn: async () => {
       const res = await api.get(endpoints.address);
-      const defaultAddress = res.data.result.find(
-        (a: Address) => a.isDefault
-      );
+      const defaultAddress = res.data.result.find((a: Address) => a.isDefault);
 
       if (defaultAddress && type === "shipping") {
         handleCheckoutData({ [addressKey]: defaultAddress });
@@ -107,6 +106,8 @@ export default function AddressBlock({
 
       {isLoading ? (
         <Loader />
+      ) : addresses?.length === 0 ? (
+        <AddressForm />
       ) : isEdit || !selectedAddress ? (
         <div className="flex flex-col gap-4">
           {addresses?.map((address) => (
@@ -138,9 +139,7 @@ export default function AddressBlock({
               });
             }}
           />
-          <label className="ml-2">
-            Billing address is same as shipping
-          </label>
+          <label className="ml-2">Billing address is same as shipping</label>
         </div>
       )}
     </div>
@@ -223,7 +222,6 @@ function AddressCard({
             onUpdated();
           }}
         />
-
       </DynamicModal>
     </>
   );
@@ -236,10 +234,7 @@ function AddAddress({ onSaved }: { onSaved: () => void }) {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="text-slate-600 text-sm"
-      >
+      <button onClick={() => setOpen(true)} className="text-slate-600 text-sm">
         Add Address
       </button>
 
