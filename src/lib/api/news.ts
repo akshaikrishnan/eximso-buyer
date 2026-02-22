@@ -1,5 +1,10 @@
 import api from "@/lib/api/axios.interceptor";
 
+export interface AdjacentNews {
+  slug: string;
+  title: string;
+}
+
 export interface NewsItem {
   _id: string;
   title: string;
@@ -13,6 +18,8 @@ export interface NewsItem {
   seoDescription?: string;
   publishedAt?: string;
   createdAt?: string;
+  previousNews?: AdjacentNews;
+  nextNews?: AdjacentNews;
 }
 
 export interface NewsListMeta {
@@ -66,7 +73,9 @@ export const fetchNewsList = async (params: NewsListParams = {}) => {
 };
 
 export const fetchNewsDetail = async (slug: string) => {
-  const response = await api.get<ApiResponse<NewsItem>>(`${NEWS_ENDPOINT}/${slug}`);
+  const response = await api.get<ApiResponse<NewsItem>>(
+    `${NEWS_ENDPOINT}/${slug}`,
+  );
   return response.data?.result;
 };
 
