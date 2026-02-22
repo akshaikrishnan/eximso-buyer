@@ -71,7 +71,7 @@ export default function ProfileNavbar() {
               isActive(tab.href)
                 ? "border-indigo-500 text-indigo-600"
                 : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-              "flex items-center border-b-2 py-4 px-6 text-sm font-medium flex-wrap"
+              "flex items-center border-b-2 py-4 px-6 text-sm font-medium flex-wrap",
             )}
             aria-current={tab.current ? "page" : undefined}
           >
@@ -84,7 +84,7 @@ export default function ProfileNavbar() {
           onClick={logout}
           className={classNames(
             "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-            "flex items-center border-b-2 py-4 px-6 text-sm font-medium flex-wrap"
+            "flex items-center border-b-2 py-4 px-6 text-sm font-medium flex-wrap",
           )}
           aria-current={false}
         >
@@ -105,7 +105,7 @@ export default function ProfileNavbar() {
                   isActive(tab.href)
                     ? "border-indigo-500 text-indigo-600"
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                  "group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                  "group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium",
                 )}
                 aria-current={tab.current ? "page" : undefined}
               >
@@ -114,7 +114,7 @@ export default function ProfileNavbar() {
                     isActive(tab.href)
                       ? "text-indigo-500"
                       : "text-gray-400 group-hover:text-gray-500",
-                    "-ml-0.5 mr-2 h-5 w-5"
+                    "-ml-0.5 mr-2 h-5 w-5",
                   )}
                   aria-hidden="true"
                 />
@@ -126,16 +126,16 @@ export default function ProfileNavbar() {
               href={"#"}
               onClick={logout}
               className={classNames(
-                "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                "group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                "border-transparent text-gray-500 hover:border-red-300 hover:text-red-700",
+                "group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium",
               )}
               aria-current={false}
             >
               <LogOutIcon
                 className={classNames(
-                  "hover:text-indigo-500",
-                  "text-gray-400 group-hover:text-gray-500",
-                  "-ml-0.5 mr-2 h-5 w-5"
+                  "hover:text-red-500",
+                  "text-gray-400 group-hover:text-red-500",
+                  "-ml-0.5 mr-2 h-5 w-5",
                 )}
                 aria-hidden="true"
               />

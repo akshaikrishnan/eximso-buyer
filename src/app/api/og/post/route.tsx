@@ -6,12 +6,12 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 
 // Standard OG Image dimensions (1.91:1 aspect ratio)
-export const size = {
+const size = {
   width: 1200,
   height: 630,
 };
 
-export const contentType = "image/png";
+const contentType = "image/png";
 
 const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN;
 // Custom font loading function (you'll need to adjust the path to your actual font file)

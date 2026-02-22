@@ -10,6 +10,9 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig = {
+  experimental: {
+    authInterrupts: true,
+  },
   async rewrites() {
     return [
       {
