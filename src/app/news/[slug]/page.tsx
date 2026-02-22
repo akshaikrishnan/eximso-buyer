@@ -73,13 +73,25 @@ export async function generateMetadata({
       url: canonical,
       publishedTime: news.publishedAt || news.createdAt,
       tags: news.tags,
-      images: news.coverImage ? [news.coverImage] : undefined,
+      images: [
+        {
+          url: `/api/og/post?title=${news.title}&image=${news.coverImage}&author=${news.author}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
     twitter: {
       card: news.coverImage ? "summary_large_image" : "summary",
       title,
       description,
-      images: news.coverImage ? [news.coverImage] : undefined,
+      images: [
+        {
+          url: `/api/og/post?title=${news.title}&image=${news.coverImage}&author=${news.author}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
   };
 }
@@ -92,8 +104,6 @@ export default async function NewsDetailPage({
   const { slug } = await params;
 
   const news = await fetchNewsDetail(slug).catch(() => null);
-
-  console.log("news", news);
 
   if (!news) {
     notFound();
