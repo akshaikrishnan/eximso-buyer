@@ -1,17 +1,12 @@
 import Link from "next/link";
 
-import { formatNewsDate, type NewsItem } from "@/lib/api/news";
+import { AdjacentNews, formatNewsDate, type NewsItem } from "@/lib/api/news";
 import styles from "@/components/news/news-detail-content.module.css";
-
-interface AdjacentNews {
-  slug: string;
-  title: string;
-}
 
 interface NewsDetailProps {
   news: NewsItem;
-  previousNews: AdjacentNews | null;
-  nextNews: AdjacentNews | null;
+  previousNews: AdjacentNews | undefined;
+  nextNews: AdjacentNews | undefined;
 }
 
 export default function NewsDetail({
