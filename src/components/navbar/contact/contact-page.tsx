@@ -12,9 +12,6 @@ import {
   HiExternalLink,
   HiSparkles,
 } from "react-icons/hi";
-import PhoneNumberInput, {
-  validatePhoneByCountry,
-} from "@/components/ui/phone-number-input";
 
 interface FormInputs {
   firstName: string;
@@ -179,26 +176,20 @@ function Contact() {
                 <label className="block text-gray-700 font-medium mb-2">
                   Phone (optional)
                 </label>
-                <Controller
-                  name="phone"
-                  control={control}
-                  rules={{
-                    validate: (value) =>
-                      !value ||
-                      validatePhoneByCountry(value, "IN") ||
-                      "Invalid phone number",
-                  }}
-                  render={({ field }) => (
-                    <PhoneNumberInput
-                      value={field.value || ""}
-                      onChange={(phone) => field.onChange(phone)}
-                      onBlur={field.onBlur}
-                      placeholder="Enter your phone number"
-                      inputClassName="px-4 text-sm"
-                      error={!!errors.phone}
-                    />
-                  )}
-                />
+                <div className="relative flex items-center">
+                  <HiPhone className="absolute left-4 text-gray-400 text-xl" />
+                  <input
+                    type="tel"
+                    {...register("phone", {
+                      pattern: {
+                        value: /^[0-9]{10,14}$/,
+                        message: "Invalid phone number",
+                      },
+                    })}
+                    placeholder="Enter your phone number"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-4 pl-12 shadow-xs focus:border-indigo-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
                 {errors.phone && (
                   <p className="text-red-500 text-sm mt-1">
                     {errors.phone.message}
