@@ -28,6 +28,9 @@ const APP_TITLE_TEMPLATE = "%s - PWA App";
 const APP_DESCRIPTION =
   "India's leading online platform for B2C and B2B needs. Find the widest selection of Mobiles, Fashion, Electronics, Appliances, Books, Homeware, Furniture, Groceries, Jewelry, Sporting Goods, Beauty & Personal Care, and more! We offer the largest brand selection at unbeatable prices in India.";
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://eximso.com",
+  ),
   applicationName: APP_NAME,
   title: {
     default: APP_DEFAULT_TITLE,
