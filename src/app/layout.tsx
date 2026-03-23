@@ -13,6 +13,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import MobileDoc from "@/components/navbar/MobileDoc";
 import PushNotificationHandler from "@/components/PushNotificationHandler";
 import InstallPrompt from "@/components/InstallPromt";
+import NotFoundPage from "@/components/_notFound";
+import dynamic from "next/dynamic";
 
 const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {
@@ -75,8 +77,20 @@ export default function RootLayout({
       <head>
         <meta name="apple-mobile-web-app-title" content="Eximso" />
       </head>
-      <body className={`${inter.className} overflow-x-hidden`}>
-        <Providers>
+      <body
+        className={`${inter.className} overflow-x-hidden`}
+        // style={{
+        //   backgroundColor: "#f8f8f8",
+        //   fontSize: "120px",
+        //   display: "flex",
+        //   justifyContent: "center",
+        //   alignItems: "center",
+        //   height: "100vh",
+        // }}
+      >
+        <NotFoundPage />
+        {/* NOT FOUND */}
+        {/* <Providers>
           <PushNotificationHandler />
           <AppNavBar />
           <Suspense>{children}</Suspense>
@@ -88,7 +102,7 @@ export default function RootLayout({
           <SpeedInsights />
           <ReactQueryDevtools initialIsOpen={false} />
           <MobileDoc />
-        </Providers>
+        </Providers> */}
       </body>
     </html>
   );
