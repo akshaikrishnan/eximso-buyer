@@ -3,6 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import useCountDownTimer from "@/hooks/use-countdown-timer";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { XMarkIcon, MegaphoneIcon } from "@heroicons/react/24/outline";
@@ -24,7 +25,8 @@ function hashString(s: string) {
   return (h >>> 0).toString(36);
 }
 
-export default function AnnouncementBar() {
+export default function AnnouncementBar({ endDate }: { endDate?: Date }) {
+  const countDownText = useCountDownTimer(endDate);
   const { data, isLoading, isError } = useQuery<ApiResponse>({
     queryKey: ["announcements"],
     queryFn: async () => {
@@ -36,18 +38,18 @@ export default function AnnouncementBar() {
 
   const messages = useMemo<Announcement[]>(
     () => (Array.isArray(data) ? data.filter(Boolean) : []),
-    [data]
+    [data],
   );
 
   const contentHash = useMemo(
     () => hashString(JSON.stringify(messages ?? [])),
-    [messages]
+    [messages],
   );
 
   const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
-    if (isLoading) return;
+    // if (isLoading) return;
     const savedHash =
       typeof window !== "undefined"
         ? localStorage.getItem(STORAGE_HASH_KEY)
@@ -73,7 +75,7 @@ export default function AnnouncementBar() {
   const rotateEnabled = messages.length > 1;
 
   useEffect(() => {
-    if (!rotateEnabled) return;
+    // if (!rotateEnabled) return;
 
     const tick = () => {
       setPhase("out"); // trigger exit animation
@@ -89,7 +91,7 @@ export default function AnnouncementBar() {
     };
   }, [messages.length, rotateEnabled]);
 
-  if (hidden || isLoading || isError || messages.length === 0) return null;
+  // if (hidden || isLoading || isError || messages.length === 0) return null;
 
   const msg = messages[index] ?? messages[0];
 
@@ -99,6 +101,34 @@ export default function AnnouncementBar() {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {}
   };
+  if (endDate) {
+    return (
+      <div className="w-full bg-red-700 text-white text-sm">
+        <div className="mx-auto px-3">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 py-2">
+            <div className="flex items-center justify-start pl-0.5">
+              <MegaphoneIcon
+                className="h-5 w-5 opacity-90"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="relative text-center leading-6">
+              <div
+                className={`inline-block backface-hidden will-change-transform
+                ${phase === "in" ? "cube-in" : "cube-out"}
+              `}
+              >
+                This website is going to remove from the github account in{" "}
+                <span className="font-mono font-semibold tabular-nums ml-1">
+                  {countDownText}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

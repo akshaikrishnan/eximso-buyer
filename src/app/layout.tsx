@@ -15,6 +15,7 @@ import PushNotificationHandler from "@/components/PushNotificationHandler";
 import InstallPrompt from "@/components/InstallPromt";
 
 const inter = Inter({ subsets: ["latin"] });
+const END_DATE = new Date("2026-04-30");
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -61,21 +62,38 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
   },
 };
+const lockAfterEndDate = (endDate: Date) => {
+  const now = new Date();
+  const diff = endDate.getTime() - now.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days <= 0) {
+    return true;
+  }
+  return false;
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isLocked = lockAfterEndDate(END_DATE);
+
   return (
     <html lang="en" dir="ltr">
       <head>
         <meta name="apple-mobile-web-app-title" content="Eximso" />
       </head>
       <body className={`${inter.className} overflow-x-hidden`}>
+        {isLocked && (
+          <div
+            className="fixed inset-0 z-[99999] bg-transparent"
+            style={{ cursor: "not-allowed" }}
+          />
+        )}
         <Providers>
           <PushNotificationHandler />
-          <AppNavBar />
+          <AppNavBar endDate={END_DATE} />
           <Suspense>{children}</Suspense>
           <Footer />
           <ManagedDrawer />

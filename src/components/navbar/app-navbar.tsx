@@ -17,7 +17,7 @@ import HeaderMenu from "./header-menu";
 // import { menu } from "@/lib/data/menu";
 import { Bars3BottomRightIcon } from "@heroicons/react/20/solid";
 import { useUI } from "@/contexts/ui.context";
-import { useQuery , useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -28,6 +28,7 @@ import axios from "axios";
 import AnnouncementBar from "./announcement-bar";
 
 const Navbar = (props: any) => {
+  const { endDate } = props;
   const queryClient = useQueryClient();
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
@@ -64,17 +65,17 @@ const Navbar = (props: any) => {
   }, []);
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible") {
         // Invalidate user and cart queries when page becomes visible
-        queryClient.invalidateQueries({ queryKey: ['user'] });
-        queryClient.invalidateQueries({ queryKey: ['cart'] });
+        queryClient.invalidateQueries({ queryKey: ["user"] });
+        queryClient.invalidateQueries({ queryKey: ["cart"] });
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [queryClient]);
 
@@ -126,7 +127,7 @@ const Navbar = (props: any) => {
 
   return (
     <>
-      <AnnouncementBar />
+      <AnnouncementBar endDate={endDate} />
       <TopBar className="px-5 container mx-auto" />
       <nav className="sticky top-0 left-0 right-0 bg-gray-100 text-black z-30 w-full">
         {/* Upper part */}
@@ -137,7 +138,7 @@ const Navbar = (props: any) => {
           <li className="nav-item flex items-center gap-4">
             <button
               className="hamburger cursor-pointer text-2xl md:hidden"
-            // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
+              // onClick={() => setIsNavOpen((initialValue) => !initialValue)}
             >
               <i className="fa-solid fa-bars"></i>
             </button>
@@ -171,7 +172,7 @@ const Navbar = (props: any) => {
                       {user?.name
                         ? user?.name.split(" ").length > 1
                           ? user?.name.split(" ")[0].charAt(0) +
-                          user?.name.split(" ")[1].charAt(0)
+                            user?.name.split(" ")[1].charAt(0)
                           : user?.name.charAt(0) // If there is only one word, take the first letter
                         : ""}
                     </AvatarFallback>
