@@ -79,6 +79,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${inter.className} overflow-x-hidden`}
+        suppressHydrationWarning
         // style={{
         //   backgroundColor: "#f8f8f8",
         //   fontSize: "120px",
