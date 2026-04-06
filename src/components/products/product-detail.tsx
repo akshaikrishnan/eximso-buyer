@@ -1,8 +1,10 @@
 "use client";
 
 import { Disclosure } from "@headlessui/react";
-import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { MinusIcon, PlusIcon, SparklesIcon, CubeIcon, Squares2X2Icon, TagIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import { StarIcon } from "@heroicons/react/20/solid";
+import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api/axios.interceptor";
 import { endpoints } from "@/lib/data/endpoints";
@@ -91,6 +93,47 @@ export default function ProductDetail({ product }: any) {
       data: [product.countryOfOrigin],
     });
   }
+
+  const [shouldClampDescription, setShouldClampDescription] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const descriptionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      setShouldClampDescription(descriptionRef.current.scrollHeight > 512);
+    }
+  }, [product?.shortDescription]);
+
+  const categoryPath = categoryName ? `/category/${toSlug(categoryName)}` : undefined;
+  const subcategoryPath = subcategoryName ? `/category/${toSlug(categoryName)}/${toSlug(subcategoryName)}` : undefined;
+
+  const tagKeywords = Array.isArray(product?.tags) ? product.tags : (typeof product?.tags === 'string' ? product.tags.split(',') : []);
+  
+  const isFlashSale = product?.flashSale?.isActive;
+  const originalPrice = product?.price ?? 0;
+  const displayPrice = isFlashSale ? product?.flashSale?.price : (product?.salePrice ?? originalPrice);
+  const discountPercent = originalPrice > 0 && displayPrice < originalPrice 
+    ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100) 
+    : 0;
+
+  const priceInfo = {
+    isFlashSale,
+    originalPrice,
+    displayPrice,
+    discountPercent
+  };
+
+  const dimensionHighlights: { key: "length" | "width" | "height" | "weight", label: string, unit: string, icon: any }[] = [
+    { key: "length", label: "Length", unit: "cm", icon: CubeIcon },
+    { key: "width", label: "Width", unit: "cm", icon: CubeIcon },
+    { key: "height", label: "Height", unit: "cm", icon: CubeIcon },
+    { key: "weight", label: "Weight", unit: "kg", icon: CubeIcon },
+  ].filter(d => !!product?.dimensions?.[d.key]) as any;
+
+  const quickFacts = [
+    ...(product?.brand ? [{ label: "Brand", value: product.brand, icon: TagIcon }] : []),
+    ...(product?.sku ? [{ label: "SKU", value: product.sku, icon: TagIcon }] : []),
+  ];
 
   // Use category slug for related products fetch
   const catSlug = toSlug(categoryName);
@@ -269,6 +312,7 @@ export default function ProductDetail({ product }: any) {
                     </div>
                   )}
                 </div>
+              </div>
 
               {/* Reviews & Stock Status */}
               <div className="mt-4 flex items-center justify-between border-b pb-4">
@@ -309,7 +353,7 @@ export default function ProductDetail({ product }: any) {
                 <div className="mt-8">
                   <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Tags</h3>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {tagKeywords.map((tag) => (
+                    {tagKeywords.map((tag:any) => (
                       <Link
                         key={tag}
                         href={`/search?q=${encodeURIComponent(tag)}`}
@@ -378,6 +422,26 @@ export default function ProductDetail({ product }: any) {
                       "No short description provided.",
                   }}
                 />
+                {shouldClampDescription && !isDescriptionExpanded && (
+                  <div className="absolute bottom-0 left-0 right-0 flex justify-center bg-gradient-to-t from-white to-transparent pt-20 pb-2">
+                    <button
+                      onClick={() => setIsDescriptionExpanded(true)}
+                      className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                    >
+                      Read more
+                    </button>
+                  </div>
+                )}
+                {shouldClampDescription && isDescriptionExpanded && (
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      onClick={() => setIsDescriptionExpanded(false)}
+                      className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                    >
+                      Show less
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -522,7 +586,7 @@ export default function ProductDetail({ product }: any) {
               )}
             </section>
           )}
-        </div>
+        </section>
       </main>
     </div>
   );
