@@ -20,7 +20,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#521dd3",
+  themeColor: "#521dd4",
   viewportFit: "cover",
 };
 const APP_NAME = "Eximso";
